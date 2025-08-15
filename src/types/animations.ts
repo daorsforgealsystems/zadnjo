@@ -1,12 +1,11 @@
 import { AnimeParams } from 'animejs';
 
-export interface AnimationConfig extends Omit<AnimeParams, 'duration' | 'easing' | 'delay' | 'complete' | 'autoplay'> {
+export interface AnimationConfig extends AnimeParams {
   duration: number;
   easing: string;
   delay?: number;
   complete?: () => void;
   autoplay?: boolean;
-  targets: HTMLElement | HTMLElement[];
 }
 
 export interface NavigationAnimations {
@@ -47,10 +46,10 @@ export interface AnimationContext {
   presets: AnimationPresets;
   intensity: AnimationIntensity;
   reducedMotion: boolean;
-  createAnimation: (config: AnimationConfig) => any;
-  animateEntrance: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => any;
-  animateExit: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => any;
-  createHoverAnimation: (element: HTMLElement, config?: Partial<AnimationConfig>) => any;
+  createAnimation: (config: AnimationConfig) => anime.AnimeInstance;
+  animateEntrance: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => anime.AnimeInstance;
+  animateExit: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => anime.AnimeInstance;
+  createHoverAnimation: (element: HTMLElement, config?: Partial<AnimationConfig>) => () => void;
 }
 
 export interface ScrollAnimationConfig extends AnimationConfig {
