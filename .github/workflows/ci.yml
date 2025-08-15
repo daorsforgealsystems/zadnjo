@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install root
+        run: npm ci --workspaces=false || npm i --workspaces=false
+        working-directory: ./logi-core
+      - name: Install gateway
+        run: npm i
+        working-directory: ./logi-core/apps/api-gateway
+      - name: Typecheck gateway
+        run: npx tsc -p tsconfig.json --noEmit
+        working-directory: ./logi-core/apps/api-gateway
+      - name: Install user-service
+        run: npm i
+        working-directory: ./logi-core/services/user-service
+      - name: Typecheck user-service
+        run: npx tsc -p tsconfig.json --noEmit
+        working-directory: ./logi-core/services/user-service

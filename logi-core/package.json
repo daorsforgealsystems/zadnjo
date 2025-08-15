@@ -1,0 +1,13 @@
+{
+  "name": "logi-core-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "build": "echo Use per-package build scripts",
+    "dev": "echo Start packages individually"
+  }
+}

@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+  api-gateway:
+    build:
+      context: ./apps/api-gateway
+    environment:
+      - PORT=8080
+      - JWT_SECRET=dev-secret
+      - USER_SERVICE_URL=http://user-service:4001
+      - INVENTORY_SERVICE_URL=http://inventory-service:8000
+      - ORDER_SERVICE_URL=http://order-service:4003
+      - ROUTING_SERVICE_URL=http://routing-service:4004
+      - GEO_SERVICE_URL=http://geolocation-service:4005
+      - NOTIFY_SERVICE_URL=http://notification-service:4006
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - inventory-service
+      - order-service
+      - routing-service
+      - geolocation-service
+      - notification-service
+
+  user-service:
+    build:
+      context: ./services/user-service
+    environment:
+      - PORT=4001
+
+  inventory-service:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
+    working_dir: /app
+    volumes:
+      - ./services/inventory-service:/app
+    environment:
+      - PORT=8000
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  order-service:
+    build:
+      context: ./services/order-service
+    environment:
+      - PORT=4003
+
+  routing-service:
+    build:
+      context: ./services/routing-service
+    environment:
+      - PORT=4004
+
+  geolocation-service:
+    build:
+      context: ./services/geolocation-service
+    environment:
+      - PORT=4005
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    environment:
+      - PORT=4006

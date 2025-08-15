@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vehicle {
+  id              String    @id @default(uuid())
+  name            String
+  type            String    // delivery, courier, refrigerated, etc.
+  status          String    // active, idle, maintenance, etc.
+  driverId        String?
+  currentLat      Float?
+  currentLng      Float?
+  speed           Float?
+  heading         Float?
+  fuelLevel       Float?
+  temperature     Float?    // For refrigerated vehicles
+  lastMaintenance DateTime?
+  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime  @default(now())
+  
+  positions       Position[]
+  
+  @@map("vehicles")
+}
+
+model Position {
+  id        String   @id @default(uuid())
+  vehicleId String
+  lat       Float
+  lng       Float
+  speed     Float?
+  heading   Float?
+  timestamp DateTime @default(now())
+  
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  
+  @@index([vehicleId, timestamp])
+  @@map("positions")
+}
+
+model GeoFence {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   // circle, polygon
+  coordinates Json     // For circle: {center: {lat, lng}, radius}. For polygon: [{lat, lng}, ...]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("geofences")
+}
+
+model Alert {
+  id          String   @id @default(uuid())
+  vehicleId   String
+  type        String   // speeding, geofence, maintenance, etc.
+  message     String
+  severity    String   // info, warning, critical
+  isResolved  Boolean  @default(false)
+  timestamp   DateTime @default(now())
+  resolvedAt  DateTime?
+  
+  @@map("alerts")
+}
