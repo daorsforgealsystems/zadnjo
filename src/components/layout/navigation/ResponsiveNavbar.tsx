@@ -3,9 +3,9 @@ import { Search, Bell, Menu, User, Settings, LogOut } from 'lucide-react';
 import { NavigationConfig } from '@/types/navigation';
 import { useAnimationContext } from '@/components/providers/AnimationProvider';
 import { useNavigation } from '@/hooks/useNavigation';
-import { Avatar } from '@/components/Avatar';
-import { GlobalSearch } from '@/components/GlobalSearch';
-import { NotificationCenter } from '@/components/NotificationCenter';
+import { Avatar } from '@/components/ui/avatar';
+import GlobalSearch from '@/components/GlobalSearch';
+import NotificationCenter from '@/components/NotificationCenter';
 import { animateSearchExpansion, animateDropdown } from '@/lib/animations/navigationAnimations';
 
 interface ResponsiveNavbarProps {
@@ -127,15 +127,23 @@ export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
 
             {/* Search suggestions */}
             {config.search.showSuggestions && searchResults.length > 0 && (
-              <GlobalSearch
-                results={searchResults}
-                onResultClick={(result) => {
-                  // Handle result click
-                  console.log('Search result clicked:', result);
-                  clearSearch();
-                }}
-                className="absolute top-full left-0 right-0 mt-1 z-50"
-              />
+              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-background border border-border rounded-md shadow-lg">
+                <div className="p-2 max-h-60 overflow-y-auto">
+                  {searchResults.map((result, index) => (
+                    <div
+                      key={index}
+                      className="p-2 hover:bg-accent cursor-pointer rounded"
+                      onClick={() => {
+                        console.log('Search result clicked:', result);
+                        clearSearch();
+                      }}
+                    >
+                      <div className="text-sm font-medium">{result.title}</div>
+                      <div className="text-xs text-muted-foreground">{result.description}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -169,10 +177,13 @@ export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
             </button>
 
             {notificationsOpen && (
-              <NotificationCenter
-                onClose={() => setNotificationsOpen(false)}
-                className="absolute top-full right-0 mt-2 z-50"
-              />
+              <div className="absolute top-full right-0 mt-2 z-50">
+                <NotificationCenter
+                  notifications={[]}
+                  onMarkAllAsRead={() => {}}
+                  unreadCount={0}
+                />
+              </div>
             )}
           </div>
         )}
@@ -188,10 +199,9 @@ export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
             "
             aria-label="User menu"
           >
-            <Avatar 
-              size="sm" 
-              className="h-6 w-6"
-            />
+            <Avatar className="h-6 w-6">
+              <span className="text-xs">JD</span>
+            </Avatar>
             <span className="hidden md:block text-sm font-medium">
               John Doe
             </span>
