@@ -1,11 +1,12 @@
 import { AnimeParams } from 'animejs';
 
-export interface AnimationConfig extends AnimeParams {
-  duration?: number;
-  easing?: string;
+export interface AnimationConfig extends Omit<AnimeParams, 'duration' | 'easing' | 'delay' | 'complete' | 'autoplay'> {
+  duration: number;
+  easing: string;
   delay?: number;
   complete?: () => void;
   autoplay?: boolean;
+  targets: HTMLElement | HTMLElement[];
 }
 
 export interface NavigationAnimations {

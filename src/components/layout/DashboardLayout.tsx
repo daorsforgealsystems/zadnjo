@@ -94,4 +94,9 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <LayoutProvider>
-      <
+      <DashboardContent>
+        {children}
+      </DashboardContent>
+    </LayoutProvider>
+  );
+};

@@ -8,18 +8,18 @@ import {
   EntranceAnimation,
   AnimationIntensity
 } from '@/types/animations';
-import { 
-  navigationAnimationPresets,
+import {
   animateEntrance,
   animateStaggeredEntrance,
   createRippleEffect,
+  interactionAnimationPresets
 } from '@/lib/animations/interactionAnimations';
 import {
   layoutAnimationPresets
 } from '@/lib/animations/layoutAnimations';
 import {
-  interactionAnimationPresets
-} from '@/lib/animations/interactionAnimations';
+  navigationAnimationPresets
+} from '@/lib/animations/navigationAnimations';
 
 export const useAnimations = (intensity: AnimationIntensity = 'medium') => {
   const activeAnimations = useRef<anime.AnimeInstance[]>([]);
