@@ -182,25 +182,25 @@ const AppContent = () => {
                 { path: '/order-management', element: <OrderManagement /> },
                 { path: '/shipment-tracking', element: <ShipmentTracking /> },
                 { path: '/vehicle-tracking', element: <VehicleTracking /> },
-                { path: '/invoice-generation', element: <InvoiceGeneration /> },
-                { path: '/payment-processing', element: <PaymentProcessing /> },
-                { path: '/document-management', element: <DocumentManagement /> },
-                { path: '/report-generation', element: <ReportGeneration /> },
-                { path: '/chatbot', element: <Chatbot /> },
-                { path: '/fleet-tracking', element: <FleetTracking /> },
-                { path: '/layout-demo', element: <IntegratedLayoutDemo /> },
-              ].map(({ path, element }) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={
-                    <ErrorBoundary>
-                      <DashboardLayout>
-                        <motion.div
-                          key={location.pathname}
-                          initial={{ opacity: 0, x: 24 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -24 }}
+
+const App: React.FC = () => {
+  // Log when App component is rendered
+  useEffect(() => {
+    debug('App component mounted', 'info');
+    return () => {
+      debug('App component unmounted', 'info');
+    };
+  }, []);
+
+  return (
+    <ErrorBoundary>
+      <Router>
+        <AppContent />
+        {/* Debug overlay - press Ctrl+Shift+D to show/hide */}
+        <DebugOverlay enabled={true} />
+      </Router>
+    </ErrorBoundary>
+  );
                           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                           className="min-h-screen"
                         >
