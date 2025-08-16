@@ -4,7 +4,6 @@ import { NavigationConfig } from '@/types/navigation';
 import { useAnimationContext } from '@/components/providers/AnimationProvider';
 import { useNavigation } from '@/hooks/useNavigation';
 import { Avatar } from '@/components/ui/avatar';
-import GlobalSearch from '@/components/GlobalSearch';
 import NotificationCenter from '@/components/NotificationCenter';
 import { animateSearchExpansion, animateDropdown } from '@/lib/animations/navigationAnimations';
 
@@ -138,8 +137,10 @@ export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
                         clearSearch();
                       }}
                     >
-                      <div className="text-sm font-medium">{result.title}</div>
-                      <div className="text-xs text-muted-foreground">{result.description}</div>
+                      <div className="text-sm font-medium">{result.label}</div>
+                      {result.href && (
+                        <div className="text-xs text-muted-foreground">{result.href}</div>
+                      )}
                     </div>
                   ))}
                 </div>
