@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import {
   Table,
   TableBody,
@@ -16,10 +16,56 @@ import { useQuery } from "@tanstack/react-query";
 import { getItems } from "@/lib/api";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+// Memoized table row component to prevent unnecessary re-renders
+const ItemTableRow = memo(({
+  item,
+  onClick
+}: {
+  item: Item;
+  onClick: (item: Item) => void;
+}) => {
+  const { t } = useTranslation();
+  
+  return (
+    <TableRow
+      onClick={() => onClick(item)}
+      className="cursor-pointer hover:bg-muted/50"
+    >
+      <TableCell>{item.id}</TableCell>
+      <TableCell>{item.name}</TableCell>
+      <TableCell>
+        <Badge>{item.status}</Badge>
+      </TableCell>
+      <TableCell>{item.location}</TableCell>
+      <TableCell>
+        {item.predictedEta ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>{item.predictedEta.time}</TooltipTrigger>
+              <TooltipContent>
+                <p>Confidence: {item.predictedEta.confidence}%</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          "—"
+        )}
+      </TableCell>
+    </TableRow>
+  );
+});
+
+ItemTableRow.displayName = 'ItemTableRow';
+
 const ItemsTable = () => {
   const { t } = useTranslation();
   const { user, hasRole } = useAuth();
-  const { data: initialItems = [] } = useQuery({ queryKey: ['items'], queryFn: getItems });
+  const { data: initialItems = [] } = useQuery({
+    queryKey: ['items'],
+    queryFn: getItems,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   const filteredItems = useMemo(() => {
     if (!user || hasRole([ROLES.ADMIN, ROLES.MANAGER])) {
@@ -31,24 +77,25 @@ const ItemsTable = () => {
   const [items, setItems] = useState<Item[]>(filteredItems);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-  useState(() => {
+  // Update items when filteredItems change
+  useMemo(() => {
     setItems(filteredItems);
   }, [filteredItems]);
 
-  const handleRowClick = (item: Item) => {
+  const handleRowClick = useCallback((item: Item) => {
     setSelectedItem(item);
-  };
+  }, []);
 
-  const handleCloseDetails = () => {
+  const handleCloseDetails = useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
-  const handleItemChange = (updatedItem: Item) => {
+  const handleItemChange = useCallback((updatedItem: Item) => {
     setItems(currentItems =>
       currentItems.map(item => (item.id === updatedItem.id ? updatedItem : item))
     );
     setSelectedItem(updatedItem);
-  };
+  }, []);
 
   return (
     <>
@@ -64,28 +111,11 @@ const ItemsTable = () => {
         </TableHeader>
         <TableBody>
           {items.map((item) => (
-            <TableRow key={item.id} onClick={() => handleRowClick(item)} className="cursor-pointer hover:bg-muted/50">
-              <TableCell>{item.id}</TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>
-                <Badge>{item.status}</Badge>
-              </TableCell>
-              <TableCell>{item.location}</TableCell>
-              <TableCell>
-                {item.predictedEta ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>{item.predictedEta.time}</TooltipTrigger>
-                      <TooltipContent>
-                        <p>Confidence: {item.predictedEta.confidence}%</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  "—"
-                )}
-              </TableCell>
-            </TableRow>
+            <ItemTableRow
+              key={item.id}
+              item={item}
+              onClick={handleRowClick}
+            />
           ))}
         </TableBody>
       </Table>

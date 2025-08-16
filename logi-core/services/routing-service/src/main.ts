@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import { CacheManager, CacheKeys } from './lib/redis-client';
 
 const app = express();
 app.use(cors());
@@ -65,6 +66,16 @@ app.post('/routes/optimize', async (req: Request, res: Response) => {
       });
     }
 
+    // Create a hash of the request parameters for caching
+    const requestHash = Buffer.from(JSON.stringify({ stops, vehicles, depot })).toString('base64');
+    const cacheKey = CacheKeys.optimizedRoute(requestHash);
+    
+    // Try to get from cache first
+    const cachedRoute = await CacheManager.get<OptimizeResponse>(cacheKey);
+    if (cachedRoute) {
+      return res.json({ success: true, data: cachedRoute });
+    }
+
     // Simple route optimization using nearest neighbor algorithm
     const optimizedRoutes = optimizeRoutes(stops, vehicles, depot);
     
@@ -76,6 +87,9 @@ app.post('/routes/optimize', async (req: Request, res: Response) => {
       routes: optimizedRoutes,
       eta: new Date(Date.now() + Math.max(...optimizedRoutes.map(route => route.time)) * 60000).toISOString(),
     };
+    
+    // Cache the result for 1 hour (route optimizations can be reused)
+    await CacheManager.set(cacheKey, result, CacheManager.TTL.DEFAULT);
     
     res.json({ success: true, data: result });
   } catch (error) {

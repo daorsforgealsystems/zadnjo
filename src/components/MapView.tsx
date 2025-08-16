@@ -1,9 +1,10 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import L, { Icon } from 'leaflet';
+import { useMemo, memo } from 'react';
 
 // Fix for default icon issue with webpack
-delete L.Icon.Default.prototype._getIconUrl;
+delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -11,21 +12,23 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Define a custom icon for vehicles
-const vehicleIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png', // A truck icon
-    iconSize: [35, 35],
-    iconAnchor: [17, 35],
-    popupAnchor: [0, -35]
-});
-
-const anomalyVehicleIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/10464/10464243.png', // A red truck icon
-    iconSize: [35, 35],
-    iconAnchor: [17, 35],
-    popupAnchor: [0, -35]
-});
-
+// Memoize icon creation to prevent recreation on each render
+const useVehicleIcons = () => {
+  return useMemo(() => ({
+    vehicle: new Icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
+      iconSize: [35, 35],
+      iconAnchor: [17, 35],
+      popupAnchor: [0, -35]
+    }),
+    anomaly: new Icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/10464/10464243.png',
+      iconSize: [35, 35],
+      iconAnchor: [17, 35],
+      popupAnchor: [0, -35]
+    })
+  }), []);
+};
 
 export interface Vehicle {
   id: string;
@@ -46,29 +49,86 @@ interface MapViewProps {
   zoom?: number;
 }
 
-const MapView = ({ coordinates, vehicles, routes, center, zoom = 13 }: MapViewProps) => {
+// Memoized VehicleMarker component to prevent unnecessary re-renders
+const VehicleMarker = memo(({
+  vehicle,
+  icons
+}: {
+  vehicle: Vehicle;
+  icons: { vehicle: Icon; anomaly: Icon };
+}) => (
+  <Marker
+    position={vehicle.position}
+    icon={vehicle.hasAnomaly ? icons.anomaly : icons.vehicle}
+  >
+    <Popup>
+      <b>Driver:</b> {vehicle.driver}<br/>
+      <b>Status:</b> {vehicle.status}<br/>
+      {vehicle.popupInfo && Object.entries(vehicle.popupInfo).map(([key, value]) => (
+        <div key={key}><b>{key}:</b> {value}</div>
+      ))}
+    </Popup>
+  </Marker>
+));
+
+VehicleMarker.displayName = 'VehicleMarker';
+
+// Memoized RoutePolyline component to prevent unnecessary re-renders
+const RoutePolyline = memo(({ route }: { route: { id: string; path: [number, number][] } }) => (
+  <Polyline key={route.id} positions={route.path} color="blue" />
+));
+
+RoutePolyline.displayName = 'RoutePolyline';
+
+const MapView = memo(({
+  coordinates,
+  vehicles,
+  routes,
+  center,
+  zoom = 13
+}: MapViewProps) => {
+  const icons = useVehicleIcons();
+
+  // Memoize map center calculation
+  const mapCenter = useMemo(() => {
+    if (coordinates) {
+      return [coordinates.lat, coordinates.lng] as [number, number];
+    }
+    return center || (vehicles && vehicles.length > 0 ? vehicles[0].position : [44.7866, 20.4489] as [number, number]);
+  }, [coordinates, center, vehicles]);
+
+  // Memoize zoom level calculation
+  const mapZoom = useMemo(() => {
+    return coordinates ? zoom : (center ? zoom : 7);
+  }, [coordinates, center, zoom]);
 
   // Handle single coordinate display
   if (coordinates) {
     return (
-      <MapContainer center={[coordinates.lat, coordinates.lng]} zoom={zoom} style={{ height: '100%', width: '100%' }}>
+      <MapContainer
+        center={mapCenter}
+        zoom={mapZoom}
+        style={{ height: '100%', width: '100%' }}
+        zoomControl={true}
+      >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        <Marker position={[coordinates.lat, coordinates.lng]}>
+        <Marker position={mapCenter}>
           <Popup>Item's current location.</Popup>
         </Marker>
       </MapContainer>
     );
   }
 
-  // Handle multi-vehicle display
-  const mapCenter = center || (vehicles && vehicles.length > 0 ? vehicles[0].position : [44.7866, 20.4489]); // Default to Belgrade if no center/vehicles
-  const mapZoom = center ? zoom : 7; // Zoom out if showing all vehicles without a specific center
-
   return (
-    <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }}>
+    <MapContainer
+      center={mapCenter}
+      zoom={mapZoom}
+      style={{ height: '100%', width: '100%' }}
+      zoomControl={true}
+    >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -76,23 +136,17 @@ const MapView = ({ coordinates, vehicles, routes, center, zoom = 13 }: MapViewPr
 
       {/* Draw routes */}
       {routes?.map(route => (
-        <Polyline key={route.id} positions={route.path} color="blue" />
+        <RoutePolyline key={route.id} route={route} />
       ))}
 
       {/* Draw vehicle markers */}
       {vehicles?.map(vehicle => (
-        <Marker key={vehicle.id} position={vehicle.position} icon={vehicle.hasAnomaly ? anomalyVehicleIcon : vehicleIcon}>
-          <Popup>
-            <b>Driver:</b> {vehicle.driver}<br/>
-            <b>Status:</b> {vehicle.status}<br/>
-            {vehicle.popupInfo && Object.entries(vehicle.popupInfo).map(([key, value]) => (
-              <div key={key}><b>{key}:</b> {value}</div>
-            ))}
-          </Popup>
-        </Marker>
+        <VehicleMarker key={vehicle.id} vehicle={vehicle} icons={icons} />
       ))}
     </MapContainer>
   );
-};
+});
+
+MapView.displayName = 'MapView';
 
 export default MapView;
