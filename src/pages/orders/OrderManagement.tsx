@@ -20,7 +20,7 @@ const OrderManagement: React.FC = () => {
             <CardTitle>Order Management</CardTitle>
           </CardHeader>
           <CardContent>
-            <EnhancedTable data={data as any} columns={columns as any} pagination={{ pageSize: 10 }} />
+            <EnhancedTable data={data as any} columns={columns as any} itemsPerPage={10} />
           </CardContent>
         </Card>
       </div>
