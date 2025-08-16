@@ -8,10 +8,16 @@ export const config = {
     retryDelay: 1000, // 1 second
   },
 
-  // Supabase Configuration
+  // Supabase Configuration - prefer NEXT_PUBLIC_* (Next.js) but keep VITE_* for backward compatibility
   supabase: {
-    url: import.meta.env.VITE_SUPABASE_URL || 'https://aysikssfvptxeclfymlk.supabase.co',
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2lrc3NmdnB0eGVjbGZ5bWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0ODUwODcsImV4cCI6MjA3MDA2MTA4N30.MlhXvs_XZgSJxltCwMxn50FP0hZgOZDR8Jtl4SEDkOI',
+    url:
+      (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) ||
+      (import.meta.env.VITE_SUPABASE_URL as string) ||
+      'https://aysikssfvptxeclfymlk.supabase.co',
+    anonKey:
+      (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) ||
+      (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2lrc3NmdnB0eGVjbGZ5bWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0ODUwODcsImV4cCI6MjA3MDA2MTA4N30.MlhXvs_XZgSJxltCwMxn50FP0hZgOZDR8Jtl4SEDkOI',
   },
 
   // Application Settings
@@ -82,7 +88,10 @@ export const getEnvVar = (key: string, defaultValue?: string): string => {
 
 // Validate required environment variables
 export const validateConfig = (): void => {
+  // Accept either NEXT_PUBLIC_* (Next.js) or VITE_* (Vite)
   const requiredVars = [
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     'VITE_SUPABASE_URL',
     'VITE_SUPABASE_ANON_KEY',
   ];
