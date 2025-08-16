@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+    environment:
+      - NODE_ENV=production
+    networks:
+      - logi-core-network
+
+  # Backend Services
+  api-gateway:
+    build:
+      context: ./logi-core/apps/api-gateway
+    environment:
+      - PORT=8080
+      - JWT_SECRET=${JWT_SECRET:-dev-secret}
+      - USER_SERVICE_URL=http://user-service:4001
+      - INVENTORY_SERVICE_URL=http://inventory-service:8000
+      - ORDER_SERVICE_URL=http://order-service:4003
+      - ROUTING_SERVICE_URL=http://routing-service:4004
+      - GEO_SERVICE_URL=http://geolocation-service:4005
+      - NOTIFY_SERVICE_URL=http://notification-service:4006
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - inventory-service
+      - order-service
+      - routing-service
+      - geolocation-service
+      - notification-service
+    networks:
+      - logi-core-network
+
+  user-service:
+    build:
+      context: ./logi-core/services/user-service
+    environment:
+      - PORT=4001
+      - NODE_ENV=production
+    ports:
+      - "4001:4001"
+    networks:
+      - logi-core-network
+
+  inventory-service:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
+    working_dir: /app
+    volumes:
+      - ./logi-core/services/inventory-service:/app
+    environment:
+      - PORT=8000
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    networks:
+      - logi-core-network
+
+  order-service:
+    build:
+      context: ./logi-core/services/order-service
+    environment:
+      - PORT=4003
+      - NODE_ENV=production
+    ports:
+      - "4003:4003"
+    networks:
+      - logi-core-network
+
+  routing-service:
+    build:
+      context: ./logi-core/services/routing-service
+    environment:
+      - PORT=4004
+      - NODE_ENV=production
+    ports:
+      - "4004:4004"
+    networks:
+      - logi-core-network
+
+  geolocation-service:
+    build:
+      context: ./logi-core/services/geolocation-service
+    environment:
+      - PORT=4005
+      - NODE_ENV=production
+    ports:
+      - "4005:4005"
+    networks:
+      - logi-core-network
+
+  notification-service:
+    build:
+      context: ./logi-core/services/notification-service
+    environment:
+      - PORT=4006
+      - NODE_ENV=production
+    ports:
+      - "4006:4006"
+    networks:
+      - logi-core-network
+
+  # Database (PostgreSQL)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=logistics
+      - POSTGRES_USER=logistics
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-logistics123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - logi-core-network
+
+volumes:
+  postgres_data:
+
+networks:
+  logi-core-network:
+    driver: bridge
