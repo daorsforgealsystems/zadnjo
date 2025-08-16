@@ -1,9 +1,37 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import http from 'http';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
+
+// Type definitions
+interface Position {
+  lat: number;
+  lng: number;
+  speed?: number;
+  ts: string;
+}
+
+interface PositionHistory {
+  [key: string]: Position[];
+}
+
+interface Vehicle {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  driverId?: string;
+  lat: number;
+  lng: number;
+  speed: number;
+  heading: number;
+  fuelLevel: number;
+  temperature?: number;
+  lastMaintenance: string;
+  updatedAt: string;
+}
 
 // Initialize Express app
 const app = express();
@@ -23,25 +51,19 @@ const io = new Server(server, {
 // Initialize Prisma client for database operations with optimized connection pool
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
-  connectionLimit: 20, // Optimize connection pool size
-  pool: {
-    min: 2,
-    max: 20,
-  },
-});
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+  errorFormat: 'pretty',
+  connectionPool: {
+    minConnections: 2,
+    maxConnections: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
   }
 });
-
-// Initialize Prisma client for database operations
-const prisma = new PrismaClient();
 
 const port = process.env.PORT || 4005;
 
 // Health check endpoint
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
 
 // In-memory store for active vehicles (would be DB in production)
 const vehicles = [
@@ -93,7 +115,7 @@ const vehicles = [
 ];
 
 // Historical position data (would be DB in production)
-const positionHistory = {};
+const positionHistory: PositionHistory = {};
 vehicles.forEach(vehicle => {
   positionHistory[vehicle.id] = Array.from({ length: 20 }).map((_, i) => ({
     lat: vehicle.lat - i * 0.005 * Math.cos(vehicle.heading * Math.PI / 180),
@@ -104,66 +126,42 @@ vehicles.forEach(vehicle => {
 });
 
 // REST API endpoints
-app.get('/tracking/vehicles', async (req, res) => {
+app.get('/tracking/vehicles', async (_req: Request, res: Response) => {
   try {
-    const { status, type, limit = 50, offset = 0 } = req.query;
-    
-    // Build query with filters
-    const where: any = {};
-    if (status) where.status = status;
-    if (type) where.type = type;
-    
-    // Fetch from database with pagination and filtering
-    const [vehicles, totalCount] = await Promise.all([
-      prisma.vehicle.findMany({
-        where,
-        take: Number(limit),
-        skip: Number(offset),
-        orderBy: { updatedAt: 'desc' },
-        include: {
-          positions: {
-            take: 1,
-            orderBy: { timestamp: 'desc' }
-          }
-        }
-      }),
-      prisma.vehicle.count({ where })
-    ]);
-    
-    res.json({
-      success: true,
-      data: vehicles,
-      pagination: {
-        total: totalCount,
-        limit: Number(limit),
-        offset: Number(offset),
-        hasMore: Number(offset) + Number(limit) < totalCount
+    // In production, this would fetch from database with optimized query
+    const dbVehicles = await prisma.vehicle.findMany({
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        status: true,
+        driverId: true,
+        currentLat: true,
+        currentLng: true,
+        speed: true,
+        heading: true,
+        fuelLevel: true,
+        temperature: true,
+        updatedAt: true
+      },
+      where: {
+        status: 'active'
+      },
+      orderBy: {
+        updatedAt: 'desc'
       }
     });
+    res.json({ success: true, data: dbVehicles });
   } catch (error) {
     console.error('Error fetching vehicles:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch vehicles' });
   }
 });
 
-app.get('/tracking/vehicles/:vehicleId', async (req, res) => {
+app.get('/tracking/vehicles/:vehicleId', async (req: Request, res: Response) => {
   try {
     const { vehicleId } = req.params;
-    const { includeHistory = false } = req.query;
-    
-    const vehicle = await prisma.vehicle.findUnique({
-      where: { id: vehicleId },
-      include: {
-        positions: includeHistory ? {
-          take: 10,
-          orderBy: { timestamp: 'desc' }
-        } : false,
-        alerts: {
-          where: { isResolved: false },
-          orderBy: { timestamp: 'desc' }
-        }
-      }
-    });
+    const vehicle = vehicles.find(v => v.id === vehicleId);
     
     if (!vehicle) {
       return res.status(404).json({ success: false, error: 'Vehicle not found' });
@@ -176,43 +174,48 @@ app.get('/tracking/vehicles/:vehicleId', async (req, res) => {
   }
 });
 
-app.get('/tracking/positions/:vehicleId', async (req, res) => {
+app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) => {
   try {
     const { vehicleId } = req.params;
-    const { limit = 100, from, to } = req.query;
+    const { limit = 10, from, to } = req.query;
     
-    // Verify vehicle exists
-    const vehicle = await prisma.vehicle.findUnique({
-      where: { id: vehicleId }
-    });
-    
-    if (!vehicle) {
-      return res.status(404).json({ success: false, error: 'Vehicle not found' });
+    // Build where clause for date filtering
+    const whereClause: { vehicleId: string; timestamp?: { gte?: Date; lte?: Date } } = { vehicleId };
+    if (from || to) {
+      whereClause.timestamp = {};
+      if (from) whereClause.timestamp.gte = new Date(from as string);
+      if (to) whereClause.timestamp.lte = new Date(to as string);
     }
     
-    // Build query with date filters
-    const where: any = { vehicleId };
-    if (from) where.timestamp = { gte: new Date(from as string) };
-    if (to) {
-      where.timestamp = {
-        ...where.timestamp,
-        lte: new Date(to as string)
-      };
-    }
-    
-    // Query database with optimized index usage
+    // Query database with optimized query
     const positions = await prisma.position.findMany({
-      where,
-      take: Number(limit),
-      orderBy: { timestamp: 'desc' }
+      where: whereClause,
+      select: {
+        lat: true,
+        lng: true,
+        speed: true,
+        heading: true,
+        timestamp: true
+      },
+      orderBy: {
+        timestamp: 'desc'
+      },
+      take: Number(limit)
     });
+    
+    // Transform to match expected format
+    const track = positions.map((pos: { lat: number; lng: number; speed?: number; timestamp: Date }) => ({
+      lat: pos.lat,
+      lng: pos.lng,
+      speed: pos.speed,
+      ts: pos.timestamp.toISOString()
+    }));
     
     res.json({
       success: true,
       data: {
         vehicleId,
-        track: positions,
-        count: positions.length
+        track
       }
     });
   } catch (error) {
@@ -222,48 +225,51 @@ app.get('/tracking/positions/:vehicleId', async (req, res) => {
 });
 
 // POST endpoint to update vehicle position (for testing)
-app.post('/tracking/update', async (req, res) => {
+app.post('/tracking/update', (req: Request, res: Response) => {
   try {
-    const { vehicleId, lat, lng, speed, heading, fuelLevel } = req.body;
+    const { vehicleId, lat, lng, speed, heading } = req.body;
     
     if (!vehicleId || lat === undefined || lng === undefined) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
     
-    // Use transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx) => {
-      // Update vehicle position
-      const updatedVehicle = await tx.vehicle.update({
-        where: { id: vehicleId },
-        data: {
-          currentLat: lat,
-          currentLng: lng,
-          speed: speed !== undefined ? speed : undefined,
-          heading: heading !== undefined ? heading : undefined,
-          fuelLevel: fuelLevel !== undefined ? fuelLevel : undefined,
-          updatedAt: new Date()
-        }
-      });
-      
-      // Add to position history
-      await tx.position.create({
-        data: {
-          vehicleId,
-          lat,
-          lng,
-          speed: speed !== undefined ? speed : null,
-          heading: heading !== undefined ? heading : null,
-          timestamp: new Date()
-        }
-      });
-      
-      return updatedVehicle;
+    const vehicleIndex = vehicles.findIndex(v => v.id === vehicleId);
+    if (vehicleIndex === -1) {
+      return res.status(404).json({ success: false, error: 'Vehicle not found' });
+    }
+    
+    // Update vehicle position
+    const updatedAt = new Date().toISOString();
+    vehicles[vehicleIndex] = {
+      ...vehicles[vehicleIndex],
+      lat,
+      lng,
+      speed: speed !== undefined ? speed : vehicles[vehicleIndex].speed,
+      heading: heading !== undefined ? heading : vehicles[vehicleIndex].heading,
+      updatedAt
+    };
+    
+    // Add to position history
+    if (!positionHistory[vehicleId]) {
+      positionHistory[vehicleId] = [];
+    }
+    
+    positionHistory[vehicleId].unshift({
+      lat,
+      lng,
+      speed: vehicles[vehicleIndex].speed,
+      ts: updatedAt
     });
     
-    // Emit update via WebSocket
-    io.emit('vehicle:update', result);
+    // Limit history size
+    if (positionHistory[vehicleId].length > 100) {
+      positionHistory[vehicleId] = positionHistory[vehicleId].slice(0, 100);
+    }
     
-    res.json({ success: true, data: result });
+    // Emit update via WebSocket
+    io.emit('vehicle:update', vehicles[vehicleIndex]);
+    
+    res.json({ success: true, data: vehicles[vehicleIndex] });
   } catch (error) {
     console.error('Error updating vehicle position:', error);
     res.status(500).json({ success: false, error: 'Failed to update vehicle position' });
@@ -271,20 +277,20 @@ app.post('/tracking/update', async (req, res) => {
 });
 
 // Socket.IO event handlers
-io.on('connection', (socket) => {
+io.on('connection', (socket: Socket) => {
   console.log(`Client connected: ${socket.id}`);
   
   // Send initial vehicle data to new client
   socket.emit('vehicles:initial', vehicles);
   
   // Handle client subscribing to specific vehicle updates
-  socket.on('subscribe:vehicle', (vehicleId) => {
+  socket.on('subscribe:vehicle', (vehicleId: string) => {
     console.log(`Client ${socket.id} subscribed to vehicle ${vehicleId}`);
     socket.join(`vehicle:${vehicleId}`);
   });
   
   // Handle client unsubscribing from vehicle updates
-  socket.on('unsubscribe:vehicle', (vehicleId) => {
+  socket.on('unsubscribe:vehicle', (vehicleId: string) => {
     console.log(`Client ${socket.id} unsubscribed from vehicle ${vehicleId}`);
     socket.leave(`vehicle:${vehicleId}`);
   });
