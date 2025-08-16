@@ -1,33 +1,68 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L, { Icon } from 'leaflet';
-import { useMemo, memo } from 'react';
+import { useMemo, memo, useState, useEffect, Suspense } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
-// Fix for default icon issue with webpack
-delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
+// Types for dynamic imports
+type LeafletComponents = {
+  MapContainer: any;
+  TileLayer: any;
+  Marker: any;
+  Popup: any;
+  Polyline: any;
+  L: any;
+  Icon: any;
+};
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+// Dynamic imports for Leaflet
+const loadLeafletComponents = async (): Promise<LeafletComponents> => {
+  const [reactLeaflet, leaflet] = await Promise.all([
+    import('react-leaflet'),
+    import('leaflet')
+  ]);
 
-// Memoize icon creation to prevent recreation on each render
-const useVehicleIcons = () => {
-  return useMemo(() => ({
-    vehicle: new Icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
-      iconSize: [35, 35],
-      iconAnchor: [17, 35],
-      popupAnchor: [0, -35]
-    }),
-    anomaly: new Icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/10464/10464243.png',
-      iconSize: [35, 35],
-      iconAnchor: [17, 35],
-      popupAnchor: [0, -35]
-    })
-  }), []);
+  // Load CSS dynamically
+  await import('leaflet/dist/leaflet.css');
+
+  const { L, Icon } = leaflet;
+
+  // Fix for default icon issue with webpack
+  delete ((L as any).Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
+
+  (L as any).Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  });
+
+  return {
+    MapContainer: reactLeaflet.MapContainer,
+    TileLayer: reactLeaflet.TileLayer,
+    Marker: reactLeaflet.Marker,
+    Popup: reactLeaflet.Popup,
+    Polyline: reactLeaflet.Polyline,
+    L,
+    Icon
+  };
+};
+
+// Hook for creating vehicle icons
+const useVehicleIcons = (Icon: any) => {
+  return useMemo(() => {
+    if (!Icon) return null;
+    return {
+      vehicle: new Icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
+        iconSize: [35, 35],
+        iconAnchor: [17, 35],
+        popupAnchor: [0, -35]
+      }),
+      anomaly: new Icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/10464/10464243.png',
+        iconSize: [35, 35],
+        iconAnchor: [17, 35],
+        popupAnchor: [0, -35]
+      })
+    };
+  }, [Icon]);
 };
 
 export interface Vehicle {
@@ -52,10 +87,14 @@ interface MapViewProps {
 // Memoized VehicleMarker component to prevent unnecessary re-renders
 const VehicleMarker = memo(({
   vehicle,
-  icons
+  icons,
+  Marker,
+  Popup
 }: {
   vehicle: Vehicle;
-  icons: { vehicle: Icon; anomaly: Icon };
+  icons: { vehicle: any; anomaly: any };
+  Marker: any;
+  Popup: any;
 }) => (
   <Marker
     position={vehicle.position}
@@ -74,20 +113,29 @@ const VehicleMarker = memo(({
 VehicleMarker.displayName = 'VehicleMarker';
 
 // Memoized RoutePolyline component to prevent unnecessary re-renders
-const RoutePolyline = memo(({ route }: { route: { id: string; path: [number, number][] } }) => (
+const RoutePolyline = memo(({ 
+  route, 
+  Polyline 
+}: { 
+  route: { id: string; path: [number, number][] };
+  Polyline: any;
+}) => (
   <Polyline key={route.id} positions={route.path} color="blue" />
 ));
 
 RoutePolyline.displayName = 'RoutePolyline';
 
-const MapView = memo(({
+// Internal map component that uses loaded Leaflet components
+const LeafletMapView = memo(({
   coordinates,
   vehicles,
   routes,
   center,
-  zoom = 13
-}: MapViewProps) => {
-  const icons = useVehicleIcons();
+  zoom = 13,
+  components
+}: MapViewProps & { components: LeafletComponents }) => {
+  const { MapContainer, TileLayer, Marker, Popup } = components;
+  const icons = useVehicleIcons(components.Icon);
 
   // Memoize map center calculation
   const mapCenter = useMemo(() => {
@@ -122,6 +170,10 @@ const MapView = memo(({
     );
   }
 
+  if (!icons) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <MapContainer
       center={mapCenter}
@@ -136,17 +188,97 @@ const MapView = memo(({
 
       {/* Draw routes */}
       {routes?.map(route => (
-        <RoutePolyline key={route.id} route={route} />
+        <RoutePolyline key={route.id} route={route} Polyline={components.Polyline} />
       ))}
 
       {/* Draw vehicle markers */}
       {vehicles?.map(vehicle => (
-        <VehicleMarker key={vehicle.id} vehicle={vehicle} icons={icons} />
+        <VehicleMarker 
+          key={vehicle.id} 
+          vehicle={vehicle} 
+          icons={icons}
+          Marker={Marker}
+          Popup={Popup}
+        />
       ))}
     </MapContainer>
   );
 });
 
+LeafletMapView.displayName = 'LeafletMapView';
+
+// Main MapView component with dynamic loading
+const MapView = memo((props: MapViewProps) => {
+  const [components, setComponents] = useState<LeafletComponents | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadComponents = async () => {
+      try {
+        const leafletComponents = await loadLeafletComponents();
+        if (isMounted) {
+          setComponents(leafletComponents);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Failed to load map components');
+          setLoading(false);
+        }
+      }
+    };
+
+    loadComponents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div 
+        style={{ height: '100%', width: '100%' }} 
+        className="flex items-center justify-center bg-gray-100"
+      >
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div 
+        style={{ height: '100%', width: '100%' }} 
+        className="flex items-center justify-center bg-red-50 text-red-600"
+      >
+        <p>Error loading map: {error}</p>
+      </div>
+    );
+  }
+
+  if (!components) {
+    return (
+      <div 
+        style={{ height: '100%', width: '100%' }} 
+        className="flex items-center justify-center bg-gray-100"
+      >
+        <p>Map components not loaded</p>
+      </div>
+    );
+  }
+
+  return <LeafletMapView {...props} components={components} />;
+});
+
 MapView.displayName = 'MapView';
+
+// Preload function for hover prefetching
+export const preloadMapComponents = () => {
+  void loadLeafletComponents();
+};
 
 export default MapView;

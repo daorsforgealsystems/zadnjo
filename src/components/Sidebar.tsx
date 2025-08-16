@@ -32,6 +32,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { ROLES, Role } from "@/lib/types";
+import { preloadMapComponents } from "@/components/MapView";
 
 // Import the new advanced sidebar component
 import { CollapsibleSidebar } from "@/components/layout/navigation/CollapsibleSidebar";
@@ -164,8 +165,15 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
           <CollapsibleContent className="pl-6 space-y-1 mt-1">
             {item.subItems.map(subItem => {
               const isSubActive = location.pathname === subItem.href;
+              // Map-related sub-routes that should prefetch map components
+              const mapRoutes = ['/live-map', '/route-optimization', '/item-tracking'];
+              const shouldPrefetchMap = subItem.href && mapRoutes.includes(subItem.href);
               return (
-                <Link to={subItem.href} key={subItem.id}>
+                <Link 
+                  to={subItem.href} 
+                  key={subItem.id}
+                  onMouseEnter={shouldPrefetchMap ? preloadMapComponents : undefined}
+                >
                     <Button
                     variant="ghost"
                     className={cn("w-full justify-start gap-3 text-left transition-all duration-200", isSubActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}
@@ -181,8 +189,16 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
       );
     }
 
+    // Map-related routes that should prefetch map components
+    const mapRoutes = ['/live-map', '/route-optimization', '/item-tracking'];
+    const shouldPrefetchMap = item.href && mapRoutes.includes(item.href);
+
     return (
-        <Link to={item.href || "#"} key={item.id}>
+        <Link 
+          to={item.href || "#"} 
+          key={item.id}
+          onMouseEnter={shouldPrefetchMap ? preloadMapComponents : undefined}
+        >
             <Button
                 variant="ghost"
                 className={cn("w-full justify-start gap-3 text-left transition-all duration-200 hover-lift", isActive ? "bg-primary/20 text-primary border border-primary/30 shadow-glow" : "hover:bg-secondary/50 text-muted-foreground hover:text-foreground", !isOpen && "justify-center px-2")}
@@ -218,8 +234,15 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
         <div className="space-y-2 pt-4 border-t border-border/50">
           {filteredBottomItems.map((item) => {
             const isActive = location.pathname === item.href;
+            // Map-related routes that should prefetch map components
+            const mapRoutes = ['/live-map', '/route-optimization', '/item-tracking'];
+            const shouldPrefetchMap = item.href && mapRoutes.includes(item.href);
             return (
-                <Link to={item.href || "#"} key={item.id}>
+                <Link 
+                  to={item.href || "#"} 
+                  key={item.id}
+                  onMouseEnter={shouldPrefetchMap ? preloadMapComponents : undefined}
+                >
                     <Button
                         variant="ghost"
                         className={cn("w-full justify-start gap-3 text-left transition-all duration-200", isActive ? "bg-primary/20 text-primary" : "hover:bg-secondary/50 text-muted-foreground hover:text-foreground", !isOpen && "justify-center px-2")}

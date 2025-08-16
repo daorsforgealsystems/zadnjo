@@ -1,19 +1,3 @@
-import {
-  Bar,
-  BarChart,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-  PieLabelRenderProps
-} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -32,9 +16,10 @@ interface AnimatedChartProps {
   delay?: number;
 }
 
-import { TooltipProps } from "recharts";
+// Tooltip props type without importing runtime from recharts
+type TooltipPropsLike = { active?: boolean; payload?: any[]; label?: string };
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload, label }: TooltipPropsLike) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-lg border bg-background p-2 shadow-sm">
@@ -56,29 +41,28 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 const resolveColor = (color: string): string => {
-    const colorName = color.replace('bg-', '');
-    switch (colorName) {
-        case 'primary':
-            return 'hsl(189 75% 55%)';
-        case 'success':
-            return 'hsl(142 76% 36%)';
-        case 'warning':
-            return 'hsl(45 93% 47%)';
-        case 'destructive':
-            return 'hsl(0 75% 60%)';
-        case 'blue-500':
-            return '#3b82f6';
-        case 'green-500':
-            return '#22c55e';
-        case 'purple-500':
-            return '#8b5cf6';
-        case 'orange-500':
-            return '#f97316';
-        default:
-            return color;
-    }
+  const colorName = color.replace('bg-', '');
+  switch (colorName) {
+    case 'primary':
+      return 'hsl(189 75% 55%)';
+    case 'success':
+      return 'hsl(142 76% 36%)';
+    case 'warning':
+      return 'hsl(45 93% 47%)';
+    case 'destructive':
+      return 'hsl(0 75% 60%)';
+    case 'blue-500':
+      return '#3b82f6';
+    case 'green-500':
+      return '#22c55e';
+    case 'purple-500':
+      return '#8b5cf6';
+    case 'orange-500':
+      return '#f97316';
+    default:
+      return color;
+  }
 };
-
 
 const AnimatedChart = ({
   title,
@@ -88,83 +72,96 @@ const AnimatedChart = ({
   delay = 0,
 }: AnimatedChartProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [R, setR] = useState<any>(null); // dynamically loaded recharts
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, delay);
-
+    const timer = setTimeout(() => setIsVisible(true), delay);
     return () => clearTimeout(timer);
   }, [delay]);
 
+  useEffect(() => {
+    let mounted = true;
+    import('recharts').then((mod) => {
+      if (mounted) setR(mod);
+    }).catch((e) => console.error('Failed to load charts', e));
+    return () => { mounted = false; };
+  }, []);
+
+  const loadingSkeleton = (
+    <div className="w-full h-[200px] animate-pulse rounded-md bg-muted" />
+  );
+
   const renderBarChart = () => (
-    <ResponsiveContainer width="100%" height={200}>
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
-        <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--primary)/.1)' }} />
-        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={resolveColor(entry.color)} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    R ? (
+      <R.ResponsiveContainer width="100%" height={200}>
+        <R.BarChart data={data}>
+          <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
+          <R.XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+          <R.YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+          <R.Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--primary)/.1)' }} />
+          <R.Bar dataKey="value" radius={[4, 4, 0, 0]}>
+            {data.map((entry, index) => (
+              <R.Cell key={`cell-${index}`} fill={resolveColor(entry.color)} />
+            ))}
+          </R.Bar>
+        </R.BarChart>
+      </R.ResponsiveContainer>
+    ) : loadingSkeleton
   );
 
   const renderLineChart = () => (
-    <ResponsiveContainer width="100%" height={200}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
-        <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-        <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--primary)/.1)', strokeWidth: 2 }} />
-        <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6, fill: 'hsl(var(--primary))' }} />
-      </LineChart>
-    </ResponsiveContainer>
+    R ? (
+      <R.ResponsiveContainer width="100%" height={200}>
+        <R.LineChart data={data}>
+          <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
+          <R.XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+          <R.YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+          <R.Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--primary)/.1)', strokeWidth: 2 }} />
+          <R.Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6, fill: 'hsl(var(--primary))' }} />
+        </R.LineChart>
+      </R.ResponsiveContainer>
+    ) : loadingSkeleton
   );
 
   const renderDonutChart = () => {
     const RADIAN = Math.PI / 180;
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: PieLabelRenderProps) => {
-        if (innerRadius === undefined || outerRadius === undefined || cx === undefined || cy === undefined || midAngle === undefined || percent === undefined) return null;
-        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-        const x = cx + radius * Math.cos(-midAngle * RADIAN);
-        const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-        return (
-            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
-                {`${(percent * 100).toFixed(0)}%`}
-            </text>
-        );
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+      if (innerRadius === undefined || outerRadius === undefined || cx === undefined || cy === undefined || midAngle === undefined || percent === undefined) return null;
+      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+      return (
+        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+          {`${(percent * 100).toFixed(0)}%`}
+        </text>
+      );
     };
-    return (
-        <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-                <Tooltip content={<CustomTooltip />} />
-                <Pie
-                    data={data}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={renderCustomizedLabel}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    isAnimationActive={true}
-                    animationDuration={800}
-                >
-                    {data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={resolveColor(entry.color)} />
-                    ))}
-                </Pie>
-                <Legend iconSize={10} layout="vertical" verticalAlign="middle" align="right" />
-            </PieChart>
-        </ResponsiveContainer>
-    );
-};
 
+    return R ? (
+      <R.ResponsiveContainer width="100%" height={200}>
+        <R.PieChart>
+          <R.Tooltip content={<CustomTooltip />} />
+          <R.Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={renderCustomizedLabel}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+            isAnimationActive={true}
+            animationDuration={800}
+          >
+            {data.map((entry, index) => (
+              <R.Cell key={`cell-${index}`} fill={resolveColor(entry.color)} />
+            ))}
+          </R.Pie>
+          <R.Legend iconSize={10} layout="vertical" verticalAlign="middle" align="right" />
+        </R.PieChart>
+      </R.ResponsiveContainer>
+    ) : loadingSkeleton;
+  };
 
   return (
     <Card
