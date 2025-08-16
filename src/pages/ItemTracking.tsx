@@ -1,4 +1,11 @@
 import { useState } from "react";
+
+interface Item {
+  id: string;
+  name: string;
+  status: string;
+  location: string;
+}
 import { Package, Search, MapPin, Clock, Truck, CheckCircle, AlertTriangle, Filter, Eye } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import ItemsTable from "@/components/ItemsTable";
@@ -17,7 +24,7 @@ import { getItems } from "@/lib/api";
 const ItemTracking = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [isTrackingDialogOpen, setIsTrackingDialogOpen] = useState(false);
 
   const { data: items = [], isLoading } = useQuery({
@@ -245,24 +252,24 @@ const ItemTracking = () => {
                     <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Package ID</p>
-                        <p className="font-mono">{selectedItem.id}</p>
+                        <p className="font-mono">{selectedItem?.id}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Package Name</p>
-                        <p>{selectedItem.name}</p>
+                        <p>{selectedItem?.name}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Current Status</p>
                         <div className="flex items-center gap-2">
-                          {getStatusIcon(selectedItem.status)}
-                          <Badge variant="outline">{selectedItem.status}</Badge>
+                          {getStatusIcon(selectedItem?.status)}
+                          <Badge variant="outline">{selectedItem?.status}</Badge>
                         </div>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Current Location</p>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <p>{selectedItem.location}</p>
+                          <p>{selectedItem?.location}</p>
                         </div>
                       </div>
                     </div>
@@ -271,11 +278,11 @@ const ItemTracking = () => {
                     <div>
                       <h4 className="font-semibold mb-4">Tracking History</h4>
                       <div className="space-y-4">
-                        {getTrackingHistory(selectedItem).map((event, index) => (
+                        {selectedItem && getTrackingHistory(selectedItem).map((event, index) => (
                           <div key={index} className="flex gap-4">
                             <div className="flex flex-col items-center">
                               <div className={`w-3 h-3 rounded-full ${getStatusColor(event.status)}`} />
-                              {index < getTrackingHistory(selectedItem).length - 1 && (
+                              {selectedItem && index < getTrackingHistory(selectedItem).length - 1 && (
                                 <div className="w-px h-8 bg-border mt-2" />
                               )}
                             </div>

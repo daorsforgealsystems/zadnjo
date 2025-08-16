@@ -288,7 +288,7 @@ const VehicleTracking: React.FC = () => {
         type: 'spring',
         stiffness: 100,
         damping: 15
-      }
+      } as any // Fix type error for Variant
     }
   };
 
