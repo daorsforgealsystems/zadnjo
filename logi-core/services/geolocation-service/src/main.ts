@@ -6,6 +6,14 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
 import { CacheManager, CacheKeys } from './lib/redis-client';
+import {
+  metricsMiddleware,
+  healthCheck,
+  createDatabaseCheck,
+  createRedisCheck,
+  getMetrics,
+  getPrometheusMetrics
+} from '../../shared/monitoring';
 
 // Type definitions
 interface Position {
@@ -41,6 +49,7 @@ app.use(cors());
 app.use(express.json());
 app.use(compression()); // Add response compression
 app.use(morgan('dev'));
+app.use(metricsMiddleware('geolocation-service')); // Add metrics collection
 
 // Pagination utility function
 const getPagination = (query: any) => {
