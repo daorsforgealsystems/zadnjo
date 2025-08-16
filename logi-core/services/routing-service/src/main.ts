@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import compression from 'compression';
 import { CacheManager, CacheKeys } from './lib/redis-client';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(compression()); // Add response compression
 app.use(morgan('dev'));
 
 const port = process.env.PORT || 4004;

@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import compression from 'compression';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
@@ -38,7 +39,36 @@ interface Vehicle {
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(compression()); // Add response compression
 app.use(morgan('dev'));
+
+// Pagination utility function
+const getPagination = (query: any) => {
+  const page = parseInt(query.page as string) || 1;
+  const limit = parseInt(query.limit as string) || 10;
+  const offset = (page - 1) * limit;
+  
+  return {
+    page,
+    limit,
+    offset,
+    totalPages: (total: number) => Math.ceil(total / limit)
+  };
+};
+
+// Format paginated response
+const formatPaginatedResponse = (data: any[], total: number, pagination: any) => ({
+  success: true,
+  data,
+  pagination: {
+    page: pagination.page,
+    limit: pagination.limit,
+    total,
+    totalPages: pagination.totalPages(total),
+    hasNext: pagination.page < pagination.totalPages(total),
+    hasPrev: pagination.page > 1
+  }
+});
 
 // Create HTTP server and Socket.io instance
 const server = http.createServer(app);
@@ -127,15 +157,31 @@ vehicles.forEach(vehicle => {
 });
 
 // REST API endpoints
-app.get('/tracking/vehicles', async (_req: Request, res: Response) => {
+app.get('/tracking/vehicles', async (req: Request, res: Response) => {
   try {
-    const cacheKey = CacheKeys.vehicles('active');
+    const pagination = getPagination(req.query);
+    const { status, type } = req.query;
+    
+    // Create cache key based on filters and pagination
+    const cacheKey = CacheKeys.vehicles(`${status || 'all'}-${type || 'all'}-page-${pagination.page}-limit-${pagination.limit}`);
     
     // Try to get from cache first
-    const cachedVehicles = await CacheManager.get(cacheKey);
-    if (cachedVehicles) {
-      return res.json({ success: true, data: cachedVehicles });
+    const cachedResponse = await CacheManager.get(cacheKey);
+    if (cachedResponse) {
+      return res.json(cachedResponse);
     }
+    
+    // Build where clause
+    const whereClause: any = {};
+    if (status && status !== 'all') {
+      whereClause.status = status;
+    }
+    if (type && type !== 'all') {
+      whereClause.type = type;
+    }
+    
+    // Get total count for pagination
+    const total = await prisma.vehicle.count({ where: whereClause });
     
     // If not in cache, fetch from database with optimized query
     const dbVehicles = await prisma.vehicle.findMany({
@@ -153,18 +199,20 @@ app.get('/tracking/vehicles', async (_req: Request, res: Response) => {
         temperature: true,
         updatedAt: true
       },
-      where: {
-        status: 'active'
-      },
+      where: whereClause,
       orderBy: {
         updatedAt: 'desc'
-      }
+      },
+      skip: pagination.offset,
+      take: pagination.limit
     });
     
-    // Cache the result for 5 minutes (short TTL for real-time data)
-    await CacheManager.set(cacheKey, dbVehicles, CacheManager.TTL.SHORT);
+    const response = formatPaginatedResponse(dbVehicles, total, pagination);
     
-    res.json({ success: true, data: dbVehicles });
+    // Cache the result for 2 minutes (short TTL for real-time data)
+    await CacheManager.set(cacheKey, response, CacheManager.TTL.SHORT);
+    
+    res.json(response);
   } catch (error) {
     console.error('Error fetching vehicles:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch vehicles' });
@@ -190,10 +238,12 @@ app.get('/tracking/vehicles/:vehicleId', async (req: Request, res: Response) => 
 app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) => {
   try {
     const { vehicleId } = req.params;
-    const { limit = 10, from, to } = req.query;
+    const { limit = 10, from, to, page = 1 } = req.query;
+    
+    const pagination = getPagination({ page, limit });
     
     // Create cache key based on parameters
-    const cacheParams = `${limit}-${from || 'all'}-${to || 'all'}`;
+    const cacheParams = `${limit}-${from || 'all'}-${to || 'all'}-page-${page}`;
     const cacheKey = CacheKeys.vehiclePositions(`${vehicleId}:${cacheParams}`);
     
     // Try to get from cache first
@@ -210,6 +260,9 @@ app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) =>
       if (to) whereClause.timestamp.lte = new Date(to as string);
     }
     
+    // Get total count for pagination
+    const total = await prisma.position.count({ where: whereClause });
+    
     // Query database with optimized query
     const positions = await prisma.position.findMany({
       where: whereClause,
@@ -223,7 +276,8 @@ app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) =>
       orderBy: {
         timestamp: 'desc'
       },
-      take: Number(limit)
+      skip: pagination.offset,
+      take: pagination.limit
     });
     
     // Transform to match expected format
@@ -236,7 +290,15 @@ app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) =>
     
     const result = {
       vehicleId,
-      track
+      track,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        total,
+        totalPages: pagination.totalPages(total),
+        hasNext: pagination.page < pagination.totalPages(total),
+        hasPrev: pagination.page > 1
+      }
     };
     
     // Cache the result for 2 minutes (position data changes frequently)
