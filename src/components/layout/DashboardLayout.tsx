@@ -7,7 +7,7 @@ import { StickyHeader } from '@/components/layout/headers/StickyHeader';
 import { ResponsiveGrid } from '@/components/layout/grid/ResponsiveGrid';
 import { InteractiveBackground } from '@/components/ui/react-bits/InteractiveBackground';
 import { useLayout } from '@/components/providers/LayoutProvider';
-import { generateLayoutTemplate } from '@/lib/layout/layoutUtils';
+import { generateTemplate } from '@/lib/layout/layoutUtils';
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -17,11 +17,11 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
   const { state, actions } = useLayout();
   const [alertsCount] = useState(3);
 
-  const handleNavClick = (item: any) => {
+  const handleNavClick = (item: unknown) => {
     console.log('Navigation clicked:', item);
   };
 
-  const components = generateLayoutTemplate(state.currentTemplate);
+  const components = generateTemplate('dashboard');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -61,7 +61,7 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
 
       {/* Sidebar */}
       <CollapsibleSidebar
-        isOpen={state.isSidebarOpen}
+        isOpen={state.sidebarOpen}
         onToggle={actions.toggleSidebar}
         onAlertsClick={() => console.log('Alerts clicked')}
         alertsCount={alertsCount}
@@ -70,7 +70,7 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
       {/* Main Content */}
       <main
         className={`transition-all duration-300 ${
-          state.isSidebarOpen ? 'ml-64' : 'ml-16'
+          state.sidebarOpen ? 'ml-64' : 'ml-16'
         } pt-16 pb-16 md:pb-0`}
       >
         <div className="p-6">
