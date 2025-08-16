@@ -35,6 +35,8 @@ VITE_API_BASE_URL=http://localhost:3000
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
+Note: The project also accepts NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY for environments that use Next.js-style public env variables. These are optional if VITE_* variables are set.
+
 # Feature Flags
 VITE_ENABLE_ANALYTICS=false
 VITE_ENABLE_MOCK_DATA=false

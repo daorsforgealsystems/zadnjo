@@ -37,6 +37,8 @@ In the "Environment variables" section, add the following:
 ```
 VITE_SUPABASE_URL = https://aysikssfvptxeclfymlk.supabase.co
 VITE_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2lrc3NmdnB0eGVjbGZ5bWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0ODUwODcsImV4cCI6MjA3MDA2MTA4N30.MlhXvs_XZgSJxltCwMxn50FP0hZgOZDR8Jtl4SEDkOI
+
+Note: this project also accepts NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (Next.js-style public env vars). If you're deploying a Next.js environment or using tools that expect NEXT_PUBLIC_ variables, set those too.
 VITE_API_BASE_URL = /api
 VITE_ENABLE_ANALYTICS = true
 VITE_ENABLE_MOCK_DATA = false
