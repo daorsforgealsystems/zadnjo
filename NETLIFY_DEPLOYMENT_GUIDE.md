@@ -66,6 +66,12 @@ Click "Deploy site" to start the deployment process. Netlify will automatically 
 
 ## Method 2: Deploy via Netlify CLI
 
+### Site ID Information
+
+Your Netlify site ID is: `ecde7505-1be4-4e1d-b477-3a48a2518e6a`
+
+This ID is used to ensure deployments are targeted to the correct Netlify site. It's automatically included in the deployment scripts provided with this project.
+
 ### Step 1: Install Netlify CLI
 
 ```bash
@@ -96,7 +102,7 @@ Follow the prompts to:
 npm run build:netlify
 
 # Deploy to Netlify
-netlify deploy --prod --dir=dist
+netlify deploy --prod --dir=dist --site=ecde7505-1be4-4e1d-b477-3a48a2518e6a
 ```
 
 ## Method 3: Deploy via Git (Continuous Deployment)

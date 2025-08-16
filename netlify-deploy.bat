@@ -21,7 +21,7 @@ npm run build:netlify
 
 REM Deploy to Netlify
 echo 📤 Deploying to Netlify...
-netlify deploy --prod --dir=dist
+netlify deploy --prod --dir=dist --site=ecde7505-1be4-4e1d-b477-3a48a2518e6a
 
 echo ✅ Deployment completed successfully!
 echo 🌐 Your application is now live at: https://daorsflow.netlify.app
