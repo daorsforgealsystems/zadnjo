@@ -20,8 +20,15 @@ const io = new Server(server, {
   }
 });
 
-// Initialize Prisma client for database operations
-const prisma = new PrismaClient();
+// Initialize Prisma client for database operations with optimized connection pool
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+  connectionLimit: 20, // Optimize connection pool size
+  pool: {
+    min: 2,
+    max: 20,
+  },
+});
   cors: {
     origin: '*',
     methods: ['GET', 'POST']
@@ -97,11 +104,42 @@ vehicles.forEach(vehicle => {
 });
 
 // REST API endpoints
-app.get('/tracking/vehicles', async (_req, res) => {
+app.get('/tracking/vehicles', async (req, res) => {
   try {
-    // In production, this would fetch from database
-    // const dbVehicles = await prisma.vehicle.findMany();
-    res.json({ success: true, data: vehicles });
+    const { status, type, limit = 50, offset = 0 } = req.query;
+    
+    // Build query with filters
+    const where: any = {};
+    if (status) where.status = status;
+    if (type) where.type = type;
+    
+    // Fetch from database with pagination and filtering
+    const [vehicles, totalCount] = await Promise.all([
+      prisma.vehicle.findMany({
+        where,
+        take: Number(limit),
+        skip: Number(offset),
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          positions: {
+            take: 1,
+            orderBy: { timestamp: 'desc' }
+          }
+        }
+      }),
+      prisma.vehicle.count({ where })
+    ]);
+    
+    res.json({
+      success: true,
+      data: vehicles,
+      pagination: {
+        total: totalCount,
+        limit: Number(limit),
+        offset: Number(offset),
+        hasMore: Number(offset) + Number(limit) < totalCount
+      }
+    });
   } catch (error) {
     console.error('Error fetching vehicles:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch vehicles' });
@@ -111,7 +149,21 @@ app.get('/tracking/vehicles', async (_req, res) => {
 app.get('/tracking/vehicles/:vehicleId', async (req, res) => {
   try {
     const { vehicleId } = req.params;
-    const vehicle = vehicles.find(v => v.id === vehicleId);
+    const { includeHistory = false } = req.query;
+    
+    const vehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+      include: {
+        positions: includeHistory ? {
+          take: 10,
+          orderBy: { timestamp: 'desc' }
+        } : false,
+        alerts: {
+          where: { isResolved: false },
+          orderBy: { timestamp: 'desc' }
+        }
+      }
+    });
     
     if (!vehicle) {
       return res.status(404).json({ success: false, error: 'Vehicle not found' });
@@ -127,28 +179,41 @@ app.get('/tracking/vehicles/:vehicleId', async (req, res) => {
 app.get('/tracking/positions/:vehicleId', async (req, res) => {
   try {
     const { vehicleId } = req.params;
-    const { limit = 10, from, to } = req.query;
+    const { limit = 100, from, to } = req.query;
     
-    // In production, this would query the database with filters
-    const history = positionHistory[vehicleId] || [];
-    let filteredHistory = [...history];
+    // Verify vehicle exists
+    const vehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId }
+    });
     
-    if (from) {
-      filteredHistory = filteredHistory.filter(pos => new Date(pos.ts) >= new Date(from as string));
+    if (!vehicle) {
+      return res.status(404).json({ success: false, error: 'Vehicle not found' });
     }
     
+    // Build query with date filters
+    const where: any = { vehicleId };
+    if (from) where.timestamp = { gte: new Date(from as string) };
     if (to) {
-      filteredHistory = filteredHistory.filter(pos => new Date(pos.ts) <= new Date(to as string));
+      where.timestamp = {
+        ...where.timestamp,
+        lte: new Date(to as string)
+      };
     }
     
-    const limitedHistory = filteredHistory.slice(0, Number(limit));
+    // Query database with optimized index usage
+    const positions = await prisma.position.findMany({
+      where,
+      take: Number(limit),
+      orderBy: { timestamp: 'desc' }
+    });
     
-    res.json({ 
-      success: true, 
-      data: { 
-        vehicleId, 
-        track: limitedHistory 
-      } 
+    res.json({
+      success: true,
+      data: {
+        vehicleId,
+        track: positions,
+        count: positions.length
+      }
     });
   } catch (error) {
     console.error(`Error fetching positions for vehicle ${req.params.vehicleId}:`, error);
@@ -157,51 +222,48 @@ app.get('/tracking/positions/:vehicleId', async (req, res) => {
 });
 
 // POST endpoint to update vehicle position (for testing)
-app.post('/tracking/update', (req, res) => {
+app.post('/tracking/update', async (req, res) => {
   try {
-    const { vehicleId, lat, lng, speed, heading } = req.body;
+    const { vehicleId, lat, lng, speed, heading, fuelLevel } = req.body;
     
     if (!vehicleId || lat === undefined || lng === undefined) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
     
-    const vehicleIndex = vehicles.findIndex(v => v.id === vehicleId);
-    if (vehicleIndex === -1) {
-      return res.status(404).json({ success: false, error: 'Vehicle not found' });
-    }
-    
-    // Update vehicle position
-    const updatedAt = new Date().toISOString();
-    vehicles[vehicleIndex] = {
-      ...vehicles[vehicleIndex],
-      lat,
-      lng,
-      speed: speed !== undefined ? speed : vehicles[vehicleIndex].speed,
-      heading: heading !== undefined ? heading : vehicles[vehicleIndex].heading,
-      updatedAt
-    };
-    
-    // Add to position history
-    if (!positionHistory[vehicleId]) {
-      positionHistory[vehicleId] = [];
-    }
-    
-    positionHistory[vehicleId].unshift({
-      lat,
-      lng,
-      speed: vehicles[vehicleIndex].speed,
-      ts: updatedAt
+    // Use transaction to ensure data consistency
+    const result = await prisma.$transaction(async (tx) => {
+      // Update vehicle position
+      const updatedVehicle = await tx.vehicle.update({
+        where: { id: vehicleId },
+        data: {
+          currentLat: lat,
+          currentLng: lng,
+          speed: speed !== undefined ? speed : undefined,
+          heading: heading !== undefined ? heading : undefined,
+          fuelLevel: fuelLevel !== undefined ? fuelLevel : undefined,
+          updatedAt: new Date()
+        }
+      });
+      
+      // Add to position history
+      await tx.position.create({
+        data: {
+          vehicleId,
+          lat,
+          lng,
+          speed: speed !== undefined ? speed : null,
+          heading: heading !== undefined ? heading : null,
+          timestamp: new Date()
+        }
+      });
+      
+      return updatedVehicle;
     });
     
-    // Limit history size
-    if (positionHistory[vehicleId].length > 100) {
-      positionHistory[vehicleId] = positionHistory[vehicleId].slice(0, 100);
-    }
-    
     // Emit update via WebSocket
-    io.emit('vehicle:update', vehicles[vehicleIndex]);
+    io.emit('vehicle:update', result);
     
-    res.json({ success: true, data: vehicles[vehicleIndex] });
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error('Error updating vehicle position:', error);
     res.status(500).json({ success: false, error: 'Failed to update vehicle position' });
