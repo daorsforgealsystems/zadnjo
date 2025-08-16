@@ -71,7 +71,7 @@ const ResponsiveLayout = lazyWithErrorHandling(() => import('./components/Respon
 const DemoPage = lazyWithErrorHandling(() => import('./pages/DemoPage'));
 const ModernFooter = lazyWithErrorHandling(() => import('./components/ModernFooter'));
 const ProfilePage = lazyWithErrorHandling(() => import('./pages/ProfilePage'));
-const DashboardLayout = lazyWithErrorHandling(() => import('./components/layout/DashboardLayout'));
+const DashboardLayout = lazyWithErrorHandling(() => import('./components/layout/DashboardLayout').then(m => ({ default: m.DashboardLayout })));
 
 // New Dashboard Pages
 const MainDashboard = lazyWithErrorHandling(() => import('./pages/dashboard/MainDashboard'));
