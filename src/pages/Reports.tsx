@@ -5,9 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download } from 'lucide-react';
-import Papa from 'papaparse';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import type { jsPDF as JsPdfType } from 'jspdf';
 
 // Extend jsPDF with autoTable
 interface AutoTableOptions {
@@ -53,7 +51,8 @@ const Reports: React.FC = () => {
   const inventoryStatuses = ['all', ...Array.from(new Set(inventory.map(item => item.status)))];
   const shipmentStatuses = ['all', ...Array.from(new Set(shipments.map(route => route.status)))];
 
-  const generateCsv = () => {
+  const generateCsv = async () => {
+    const Papa = (await import('papaparse')).default;
     if (reportType === 'inventory') {
       const csv = Papa.unparse(filteredInventory);
       downloadFile(csv, 'inventory_report.csv', 'text/csv');
@@ -63,8 +62,10 @@ const Reports: React.FC = () => {
     }
   };
 
-  const generatePdf = () => {
-    const doc = new jsPDF() as jsPDFWithAutoTable;
+  const generatePdf = async () => {
+    const { default: jsPDF } = await import('jspdf');
+    await import('jspdf-autotable');
+    const doc = new jsPDF() as unknown as jsPDFWithAutoTable;
     if (reportType === 'inventory') {
       doc.text('Inventory Report', 14, 16);
       doc.autoTable({
