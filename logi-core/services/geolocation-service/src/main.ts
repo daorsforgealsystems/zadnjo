@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
+import { CacheManager, CacheKeys } from './lib/redis-client';
 
 // Type definitions
 interface Position {
@@ -128,7 +129,15 @@ vehicles.forEach(vehicle => {
 // REST API endpoints
 app.get('/tracking/vehicles', async (_req: Request, res: Response) => {
   try {
-    // In production, this would fetch from database with optimized query
+    const cacheKey = CacheKeys.vehicles('active');
+    
+    // Try to get from cache first
+    const cachedVehicles = await CacheManager.get(cacheKey);
+    if (cachedVehicles) {
+      return res.json({ success: true, data: cachedVehicles });
+    }
+    
+    // If not in cache, fetch from database with optimized query
     const dbVehicles = await prisma.vehicle.findMany({
       select: {
         id: true,
@@ -151,6 +160,10 @@ app.get('/tracking/vehicles', async (_req: Request, res: Response) => {
         updatedAt: 'desc'
       }
     });
+    
+    // Cache the result for 5 minutes (short TTL for real-time data)
+    await CacheManager.set(cacheKey, dbVehicles, CacheManager.TTL.SHORT);
+    
     res.json({ success: true, data: dbVehicles });
   } catch (error) {
     console.error('Error fetching vehicles:', error);
@@ -178,6 +191,16 @@ app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) =>
   try {
     const { vehicleId } = req.params;
     const { limit = 10, from, to } = req.query;
+    
+    // Create cache key based on parameters
+    const cacheParams = `${limit}-${from || 'all'}-${to || 'all'}`;
+    const cacheKey = CacheKeys.vehiclePositions(`${vehicleId}:${cacheParams}`);
+    
+    // Try to get from cache first
+    const cachedPositions = await CacheManager.get(cacheKey);
+    if (cachedPositions) {
+      return res.json({ success: true, data: cachedPositions });
+    }
     
     // Build where clause for date filtering
     const whereClause: { vehicleId: string; timestamp?: { gte?: Date; lte?: Date } } = { vehicleId };
@@ -211,12 +234,17 @@ app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) =>
       ts: pos.timestamp.toISOString()
     }));
     
+    const result = {
+      vehicleId,
+      track
+    };
+    
+    // Cache the result for 2 minutes (position data changes frequently)
+    await CacheManager.set(cacheKey, result, 120);
+    
     res.json({
       success: true,
-      data: {
-        vehicleId,
-        track
-      }
+      data: result
     });
   } catch (error) {
     console.error(`Error fetching positions for vehicle ${req.params.vehicleId}:`, error);
@@ -225,7 +253,7 @@ app.get('/tracking/positions/:vehicleId', async (req: Request, res: Response) =>
 });
 
 // POST endpoint to update vehicle position (for testing)
-app.post('/tracking/update', (req: Request, res: Response) => {
+app.post('/tracking/update', async (req: Request, res: Response) => {
   try {
     const { vehicleId, lat, lng, speed, heading } = req.body;
     
@@ -233,43 +261,54 @@ app.post('/tracking/update', (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
     
-    const vehicleIndex = vehicles.findIndex(v => v.id === vehicleId);
-    if (vehicleIndex === -1) {
-      return res.status(404).json({ success: false, error: 'Vehicle not found' });
-    }
-    
-    // Update vehicle position
-    const updatedAt = new Date().toISOString();
-    vehicles[vehicleIndex] = {
-      ...vehicles[vehicleIndex],
-      lat,
-      lng,
-      speed: speed !== undefined ? speed : vehicles[vehicleIndex].speed,
-      heading: heading !== undefined ? heading : vehicles[vehicleIndex].heading,
-      updatedAt
-    };
-    
-    // Add to position history
-    if (!positionHistory[vehicleId]) {
-      positionHistory[vehicleId] = [];
-    }
-    
-    positionHistory[vehicleId].unshift({
-      lat,
-      lng,
-      speed: vehicles[vehicleIndex].speed,
-      ts: updatedAt
+    // Update vehicle in database
+    const updatedAt = new Date();
+    const updatedVehicle = await prisma.vehicle.update({
+      where: { id: vehicleId },
+      data: {
+        currentLat: lat,
+        currentLng: lng,
+        speed: speed,
+        heading: heading,
+        updatedAt
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        status: true,
+        driverId: true,
+        currentLat: true,
+        currentLng: true,
+        speed: true,
+        heading: true,
+        fuelLevel: true,
+        temperature: true,
+        updatedAt: true
+      }
     });
     
-    // Limit history size
-    if (positionHistory[vehicleId].length > 100) {
-      positionHistory[vehicleId] = positionHistory[vehicleId].slice(0, 100);
-    }
+    // Add position to history
+    await prisma.position.create({
+      data: {
+        vehicleId,
+        lat,
+        lng,
+        speed: speed || 0,
+        heading: heading || 0,
+        timestamp: updatedAt
+      }
+    });
+    
+    // Clear cache for this vehicle and vehicles list
+    await CacheManager.del(CacheKeys.vehicle(vehicleId));
+    await CacheManager.del(CacheKeys.vehicles('active'));
+    await CacheManager.clearPattern(CacheKeys.vehiclePositions(`${vehicleId}:*`));
     
     // Emit update via WebSocket
-    io.emit('vehicle:update', vehicles[vehicleIndex]);
+    io.emit('vehicle:update', updatedVehicle);
     
-    res.json({ success: true, data: vehicles[vehicleIndex] });
+    res.json({ success: true, data: updatedVehicle });
   } catch (error) {
     console.error('Error updating vehicle position:', error);
     res.status(500).json({ success: false, error: 'Failed to update vehicle position' });
