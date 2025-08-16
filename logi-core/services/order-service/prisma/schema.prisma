@@ -57,6 +57,9 @@ model Order {
   @@index([customerId])
   @@index([status])
   @@index([placedAt])
+  @@index([paymentStatus])
+  @@index([priority])
+  @@index([updatedAt])
   @@map("orders")
 }
 
@@ -95,6 +98,11 @@ model Shipment {
   packages        Package[]
   
   @@index([orderId])
+  @@index([trackingNumber])
+  @@index([status])
+  @@index([carrier])
+  @@index([estimatedDelivery])
+  @@index([shippedAt])
   @@map("shipments")
 }
 
@@ -123,6 +131,7 @@ model OrderEvent {
   order           Order     @relation(fields: [orderId], references: [id])
   
   @@index([orderId])
+  @@index([type])
   @@index([createdAt])
   @@map("order_events")
 }
@@ -144,6 +153,11 @@ model Product {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
+  @@index([sku])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([inventoryLevel])
+  @@index([reorderLevel])
   @@map("products")
 }
 

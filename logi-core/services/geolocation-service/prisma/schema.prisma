@@ -29,6 +29,11 @@ model Vehicle {
   positions       Position[]
   
   @@map("vehicles")
+  @@index([status])
+  @@index([type])
+  @@index([driverId])
+  @@index([currentLat, currentLng])
+  @@index([updatedAt])
 }
 
 model Position {
@@ -43,6 +48,7 @@ model Position {
   vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
   
   @@index([vehicleId, timestamp])
+  @@index([timestamp])
   @@map("positions")
 }
 
@@ -70,4 +76,9 @@ model Alert {
   resolvedAt  DateTime?
   
   @@map("alerts")
+  @@index([vehicleId])
+  @@index([type])
+  @@index([severity])
+  @@index([isResolved])
+  @@index([timestamp])
 }
