@@ -88,20 +88,18 @@ export const getEnvVar = (key: string, defaultValue?: string): string => {
 
 // Validate required environment variables
 export const validateConfig = (): void => {
-  // Accept either NEXT_PUBLIC_* (Next.js) or VITE_* (Vite)
-  const requiredVars = [
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-    'VITE_SUPABASE_URL',
-    'VITE_SUPABASE_ANON_KEY',
-  ];
+  // Accept either NEXT_PUBLIC_* (Next.js) or VITE_* (Vite).
+  // Only require that a Supabase URL and an ANON key exist (each may be provided under either prefix).
+  const url = (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) || (import.meta.env.VITE_SUPABASE_URL as string);
+  const anonKey = (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) || (import.meta.env.VITE_SUPABASE_ANON_KEY as string);
 
-  const missing = requiredVars.filter(key => !import.meta.env[key]);
-  
+  const missing: string[] = [];
+  if (!url) missing.push('SUPABASE_URL (NEXT_PUBLIC_* or VITE_*)');
+  if (!anonKey) missing.push('SUPABASE_ANON_KEY (NEXT_PUBLIC_* or VITE_*)');
+
   if (missing.length > 0) {
     console.warn('Missing environment variables:', missing);
-    // In development, we can continue with defaults
-    // In production, you might want to throw an error
+    // In production we should fail fast; in development continue using the defaults defined above.
     if (import.meta.env.PROD) {
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
     }
