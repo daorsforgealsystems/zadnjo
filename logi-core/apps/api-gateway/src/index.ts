@@ -53,7 +53,7 @@ const withIdentity = (target: string) =>
   createProxyMiddleware({
     target,
     changeOrigin: true,
-    onProxyReq: (proxyReq, req) => {
+    onProxyReq: (proxyReq: any, req: express.Request) => {
       const user = (req as any).user;
       if (user) {
         proxyReq.setHeader('x-user-id', user.sub || user.id || 'unknown');
