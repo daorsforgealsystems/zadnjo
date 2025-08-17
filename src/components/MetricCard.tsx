@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { cardHover } from "@/lib/motion-variants";
 
 interface MetricCardProps {
   title: string;
@@ -88,40 +90,47 @@ const MetricCard = ({
   };
 
   return (
-    <Card 
-      className={cn(
-        "glass hover-lift transition-all duration-300 group relative overflow-hidden",
-        isVisible && "animate-slide-up-fade",
-        className
-      )}
+    <motion.div
+      variants={cardHover}
+      initial="rest"
+      whileHover="hover"
+      animate="rest"
     >
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <Icon className={cn("h-5 w-5 transition-colors duration-200", getIconColor())} />
-      </CardHeader>
-      
-      <CardContent className="relative z-10">
-        <div className="text-2xl font-bold animate-counter">
-          {isVisible ? formatDisplayValue() : (typeof value === "number" ? "0" : value)}
-        </div>
-        
-        {change && (
-          <p className={cn("text-xs transition-colors duration-200", getChangeColor())}>
-            {change}
-          </p>
+      <Card 
+        className={cn(
+          "glass hover-lift transition-all duration-300 group relative overflow-hidden",
+          isVisible && "animate-slide-up-fade",
+          className
         )}
-      </CardContent>
-      
-      {/* Hover glow effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-pulse" />
-      </div>
-    </Card>
+      >
+        {/* Animated background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            {title}
+          </CardTitle>
+          <Icon className={cn("h-5 w-5 transition-colors duration-200", getIconColor())} />
+        </CardHeader>
+        
+        <CardContent className="relative z-10">
+          <div className="text-2xl font-bold animate-counter">
+            {isVisible ? formatDisplayValue() : (typeof value === "number" ? "0" : value)}
+          </div>
+          
+          {change && (
+            <p className={cn("text-xs transition-colors duration-200", getChangeColor())}>
+              {change}
+            </p>
+          )}
+        </CardContent>
+        
+        {/* Hover glow effect */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-pulse" />
+        </div>
+      </Card>
+    </motion.div>
   );
 };
 

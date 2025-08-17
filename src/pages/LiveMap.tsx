@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { pageTransition } from "@/lib/motion-variants";
 import { useTranslation } from "react-i18next";
 import { Map } from "lucide-react";
 import MapView, { Vehicle } from "@/components/MapView";
@@ -78,7 +80,13 @@ const LiveMap = () => {
   }));
 
   return (
-    <div className="flex flex-col h-screen">
+    <motion.div
+      className="flex flex-col h-screen"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <header className="bg-background/80 backdrop-blur-sm border-b p-4 z-10">
         <h1 className="text-2xl font-bold flex items-center gradient-text">
           <Map className="mr-2" />
@@ -91,7 +99,7 @@ const LiveMap = () => {
           routes={routes}
         />
       </main>
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { pageTransition, listItem } from "@/lib/motion-variants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -68,7 +70,13 @@ const RouteOptimization = () => {
   const mapCenter = origin ? [origin.coordinates.lat, origin.coordinates.lng] as [number, number] : undefined;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+    <motion.div
+      className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="lg:col-span-1 flex flex-col gap-6">
         <Card>
           <CardHeader>
@@ -179,9 +187,13 @@ const RouteOptimization = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {routes.map((route) => (
-                    <TableRow 
-                      key={route.name} 
+                  {routes.map((route, i) => (
+                    <motion.tr 
+                      key={route.name}
+                      variants={listItem(i)}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                       onClick={() => setSelectedRoute(route)} 
                       className={`cursor-pointer ${selectedRoute?.name === route.name ? "bg-secondary" : ""}`}
                     >
@@ -190,7 +202,7 @@ const RouteOptimization = () => {
                       <TableCell>{(route.distance / 1000).toFixed(1)} km</TableCell>
                       <TableCell>${route.cost.toFixed(2)}</TableCell>
                       <TableCell>{route.carbonEmissions.toFixed(1)} kg</TableCell>
-                    </TableRow>
+                    </motion.tr>
                   ))}
                 </TableBody>
               </Table>
@@ -212,7 +224,7 @@ const RouteOptimization = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

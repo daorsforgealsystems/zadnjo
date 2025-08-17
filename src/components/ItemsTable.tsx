@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback, memo } from "react";
+import { motion } from "framer-motion";
+import { listItem } from "@/lib/motion-variants";
 import {
   Table,
   TableBody,
@@ -27,7 +29,11 @@ const ItemTableRow = memo(({
   const { t } = useTranslation();
   
   return (
-    <TableRow
+    <motion.tr
+      variants={listItem(0)}
+      initial="initial"
+      animate="animate"
+      exit="exit"
       onClick={() => onClick(item)}
       className="cursor-pointer hover:bg-muted/50"
     >
@@ -51,7 +57,7 @@ const ItemTableRow = memo(({
           "—"
         )}
       </TableCell>
-    </TableRow>
+    </motion.tr>
   );
 });
 

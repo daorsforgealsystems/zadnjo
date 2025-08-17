@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { pageTransition, cardHover } from "@/lib/motion-variants";
 import { useTranslation } from "react-i18next";
 import { User, Shield, Bell, Palette, Save } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
@@ -23,7 +25,13 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <motion.div
+      className="min-h-screen bg-background relative overflow-hidden"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <ParticleBackground />
       <div className="relative z-20">
         <Sidebar isOpen={sidebarOpen} onAlertsClick={() => {}} />
@@ -177,7 +185,7 @@ const Settings = () => {
           </div>
         </main>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

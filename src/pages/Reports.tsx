@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { pageTransition, listItem } from '@/lib/motion-variants';
 import { Item, LiveRoute } from '@/lib/types';
 import { getItems, getLiveRoutes } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -98,7 +100,13 @@ const Reports: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
+    <motion.div
+      className="p-4 md:p-8 space-y-6"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <h1 className="text-3xl font-bold tracking-tight">Generate Reports</h1>
       <p className="text-muted-foreground">
         Select a report type, apply filters, and download the data in CSV or PDF format.
@@ -186,13 +194,13 @@ const Reports: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredInventory.slice(0, 10).map((item) => (
-                      <tr key={item.id} className="border-b">
+                    {filteredInventory.slice(0, 10).map((item, i) => (
+                      <motion.tr key={item.id} variants={listItem(i)} initial="initial" animate="animate" exit="exit" className="border-b">
                         <td className="p-4">{item.id}</td>
                         <td className="p-4">{item.name}</td>
                         <td className="p-4">{item.status}</td>
                         <td className="p-4">{item.location}</td>
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
@@ -209,15 +217,15 @@ const Reports: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredShipments.slice(0, 10).map((route) => (
-                      <tr key={route.id} className="border-b">
+                    {filteredShipments.slice(0, 10).map((route, i) => (
+                      <motion.tr key={route.id} variants={listItem(i)} initial="initial" animate="animate" exit="exit" className="border-b">
                         <td className="p-4">{route.id}</td>
                         <td className="p-4">{route.from}</td>
                         <td className="p-4">{route.to}</td>
                         <td className="p-4">{route.status}</td>
                         <td className="p-4">{route.driver}</td>
-                        <td className="p_4">{route.eta}</td>
-                      </tr>
+                        <td className="p-4">{route.eta}</td>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
@@ -232,7 +240,7 @@ const Reports: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

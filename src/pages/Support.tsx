@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { pageTransition, cardHover, listItem } from "@/lib/motion-variants";
 import { HelpCircle, Mail, BarChart, CheckCircle } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -39,7 +41,13 @@ const Support = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <motion.div
+      className="min-h-screen bg-background relative overflow-hidden"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
         <ParticleBackground />
         <div className="relative z-20">
             <Sidebar isOpen={sidebarOpen} onAlertsClick={() => {}} />
@@ -137,7 +145,7 @@ const Support = () => {
                 </div>
             </main>
         </div>
-    </div>
+    </motion.div>
   );
 };
 
