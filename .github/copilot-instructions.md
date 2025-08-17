@@ -1,113 +1,63 @@
-# Copilot Instructions for DaorsForge AI Logistics Platform
+# Copilot Instructions — DaorsForge AI Logistics
 
-## Overview
-This repository contains the DaorsForge AI Logistics Platform, a comprehensive logistics and fleet management SaaS platform. The platform is built with modern web technologies, including React, TypeScript, and Tailwind CSS on the frontend, and a microservices-based backend using Node.js and Supabase.
+Purpose: give an AI coding agent the concise, repo-specific knowledge needed to ship small changes safely.
 
-## Architecture
+Big picture
+- Frontend: `src/` — Vite + React + TypeScript + Tailwind. Entry: `main.tsx` / `index.html`.
+- Backend: `logi-core/` — per-service folders under `logi-core/services/`, an API gateway under `logi-core/apps/`, and DB artefacts in `logi-core/db/`.
+- Database: PostgreSQL + Supabase SQL files in `database/` and `logi-core/db/`.
 
-### Frontend
-- **Framework**: React with TypeScript
-- **State Management**: React Query for server state, React Context for global state, and local component state for UI interactions.
-- **Styling**: Tailwind CSS with utility-first design.
-- **Key Directories**:
-  - `src/components/`: Reusable UI components (e.g., layout, charts, forms).
-  - `src/pages/`: Page-level components for dashboards, portals, and management tools.
-  - `src/lib/`: Utility functions and API clients.
-  - `src/context/`: React Context providers for global state.
+Essential commands (from `package.json`)
+- Install: `npm install`
+- Dev (frontend): `npm run dev` (Vite, default port 5173)
+- Build: `npm run build` or `npm run build:netlify`
+- Typecheck: `npm run type-check`
+- Tests: `npm run test` (Jest), `npm run test:watch`
+- Lint: `npm run lint` and `npm run lint:fix`
 
-### Backend
-- **Microservices**: Located in `logi-core/services/`.
-  - Examples: `user-service`, `order-service`, `inventory-service`.
-- **API Gateway**: Centralized routing for microservices (`logi-core/apps/api-gateway`).
-- **Database**: PostgreSQL with Supabase for authentication and storage.
+Where to make changes (examples)
+- UI components: `src/components/`
+- Pages / routes: `src/pages/` (React Router-based)
+- API clients / domain code: `src/lib/` (see `src/lib/api/` for patterns)
+- Global providers/hooks: `src/context/`, `src/hooks/`
+- Microservices: `logi-core/services/<service-name>/`
+- API gateway: `logi-core/apps/api-gateway`
 
-### Deployment
-- **Docker**: Services are containerized using Docker.
-- **Docker Compose**: Orchestrates multi-container deployments.
-- **Environment Variables**: Configured via `.env` file.
+Integration points & dependencies to check
+- Supabase/Postgres: SQL schemas in `database/*.sql` and `logi-core/db/schema.sql` — frontend expects certain API shapes from services.
+- Maps: `leaflet` and `react-leaflet` used in mapping pages/components.
+- Dashboards: `recharts` and `framer-motion` appear in UI visualizations.
+- Deploy: `deploy.bat` (Windows), `deploy.sh` (Unix), `docker-compose.yml` and `logi-core/docker-compose.yml`. Netlify build uses `npm run build:netlify`.
 
-## Developer Workflows
+Project-specific conventions (concrete, discoverable)
+- Server-state layer: prefer React Query hooks (`useQuery` / `useMutation`) for client data fetching—search `useQuery` across `src/` for examples.
+- API client placement: add or update thin wrappers under `src/lib/api/` and expose typed functions consumed by hooks.
+- Styling: Tailwind utility classes are used directly in components; update `tailwind.config.ts` for global tokens.
+- Tests: Jest + Testing Library. Tests follow component-first placement; mirror existing test locations.
 
-### Local Development
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
-3. Access the application at `http://localhost:5173`.
+Gotchas & diagnostics
+- There are duplicated router package entries in `package.json` (dependencies vs devDependencies) — if routing errors occur, verify which version is bundled.
+- Backend services may need their own `npm install` and separate Docker runs; `logi-core/` has its own `docker-compose.yml`.
+- Environment: `.env.example` is the template. Do not commit secrets.
 
-### Testing
-- **Unit Tests**: Run with Jest:
-  ```bash
-  npm run test
-  ```
-- **Watch Mode**:
-  ```bash
-  npm run test:watch
-  ```
-- **Coverage**:
-  ```bash
-  npm run test:coverage
-  ```
+Agent contract (what to do when assigned a small PR)
+- Make minimal, typed changes.
+- Add/adjust unit tests (happy path + one edge case).
+- Run `npm run type-check` and `npm run test` locally before PR.
+- If changing cross-cutting API shapes, update `src/lib/api/`, add migrations or SQL changes under `database/`, and document the change in the PR body.
 
-### Linting
-- Check for linting issues:
-  ```bash
-  npm run lint
-  ```
-- Auto-fix linting issues:
-  ```bash
-  npm run lint:fix
-  ```
+Where to look first (exact files)
+- `package.json`, `vite.config.ts`, `main.tsx`, `index.html`
+- `src/lib/api/` and `src/hooks/` for data-flow patterns
+- `logi-core/services/` and `logi-core/apps/api-gateway` for backend conventions
+- `database/schema.sql`, `logi-core/db/schema.sql` for DB shape
 
-### Building
-- Build for production:
-  ```bash
-  npm run build
-  ```
+If anything here is unclear or you want code snippets referencing specific files (hooks, API clients, or a sample PR template), tell me which area and I will add 3–5 concrete examples.
 
-### Deployment
-- Use the `deploy.bat` script for Windows or `deploy.sh` for Unix-based systems.
-- Example for Windows:
-  ```bash
-  deploy.bat
-  ```
+### Tool usage requirement (must include exactly)
 
-## Project-Specific Conventions
+Answer the user's request using the relevant tool(s), if they are available. Check that all the required parameters for each tool call are provided or can reasonably be inferred from context. IF there are no relevant tools or there are missing values for required parameters, ask the user to supply these values; otherwise proceed with the tool calls. If the user provides a specific value for a parameter (for example provided in quotes), make sure to use that value EXACTLY. DO NOT make up values for or ask about optional parameters. Carefully analyze descriptive terms in the request as they may indicate required parameter values that should be included even if not explicitly quoted.
 
-### API Integration
-- Use `src/lib/api/` for API client functions.
-- Example: `getOrders`, `createOrder` in `src/lib/api/orders.ts`.
+### Identity note (short)
 
-### State Management
-- Use React Query for server state (e.g., `useQuery`, `useMutation`).
-- Use React Context for global state (e.g., authentication, theme).
-
-### Component Structure
-- Follow the modular structure in `src/components/`.
-  - Example: `src/components/layout/` for layout components like `DashboardLayout`.
-
-### Routing
-- Use React Router for navigation.
-- Define routes in `src/pages/`.
-
-## Key Files
-- `vite.config.ts`: Vite configuration for development and production builds.
-- `tsconfig.json`: TypeScript configuration.
-- `docker-compose.yml`: Docker Compose configuration for multi-container setup.
-- `.env.example`: Template for environment variables.
-
-## External Dependencies
-- **Supabase**: Authentication and database.
-- **Leaflet**: Interactive maps.
-- **Recharts**: Data visualization.
-- **Anime.js**: Advanced animations.
-
-## Notes for AI Agents
-- Focus on modularity and reusability when adding new components.
-- Follow the established directory structure and naming conventions.
-- Ensure all new features are covered by unit tests.
-- Update documentation for any significant changes.
+When asked for your name, you must respond with "GitHub Copilot".
