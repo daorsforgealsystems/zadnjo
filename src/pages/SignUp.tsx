@@ -48,10 +48,8 @@ const handleSignUp = async (e: React.FormEvent) => {
   }
 
   if (isAuthenticated) {
-    if (user?.role === ROLES.CLIENT) {
-      return <Navigate to="/portal/dashboard" replace />;
-    }
-    return <Navigate to="/" replace />;
+  // After signup/auth, send users to the main dashboard instead of portal
+  return <Navigate to="/dashboard" replace />;
   }
 
   return (

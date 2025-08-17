@@ -59,11 +59,8 @@ const Login = () => {
   }
 
   if (isAuthenticated) {
-    // Redirect based on role
-    if (user?.role === ROLES.CLIENT || user?.role === ROLES.GUEST) { // Check for GUEST role as well
-      return <Navigate to="/portal" replace />;
-    }
-    return <Navigate to="/" replace />;
+  // Redirect all authenticated users to the main dashboard for now
+  return <Navigate to="/dashboard" replace />;
   }
 
   return (

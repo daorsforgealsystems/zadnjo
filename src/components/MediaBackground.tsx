@@ -7,7 +7,7 @@ interface MediaBackgroundProps {
 
 const MediaBackground: React.FC<MediaBackgroundProps> = ({ 
   mediaSrc, 
-  type = 'video' 
+  type = 'image' /* default to image for hero backgrounds to avoid heavy video loads */
 }) => {
   const mediaRef = useRef<HTMLVideoElement | HTMLImageElement>(null);
   const [mediaError, setMediaError] = useState(false);
@@ -54,11 +54,13 @@ const MediaBackground: React.FC<MediaBackgroundProps> = ({
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
+      {/* Use native lazy loading and a descriptive alt for accessibility */}
       <img
         ref={mediaRef as React.RefObject<HTMLImageElement>}
         className="w-full h-full object-cover"
         src={mediaSrc}
-        alt="Background"
+        alt="Logistics hero background showing transport vehicles and routes"
+        loading="lazy"
         onError={handleMediaError}
       />
       <div className="absolute inset-0 bg-background/70" />

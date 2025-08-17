@@ -76,10 +76,11 @@ const AuthPage = () => {
   }
 
   if (isAuthenticated) {
+    // After login, send users to the main dashboard instead of the customer portal
     if (user?.role === ROLES.CLIENT) {
-      return <Navigate to="/portal" replace />;
+      return <Navigate to="/dashboard" replace />;
     }
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (

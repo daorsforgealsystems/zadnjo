@@ -88,7 +88,8 @@ const LandingPage = () => {
             className="max-w-4xl mx-auto"
           >
             <motion.h1 
-              className="text-4xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-700"
+              aria-label={t('landing.hero.title', 'Revolutionizing Logistics with AI')}
+              className="text-4xl md:text-7xl font-bold mb-6 gradient-text"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -111,7 +112,7 @@ const LandingPage = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              <Button asChild size="lg" className="group text-xl px-10 py-7 bg-gradient-to-r from-primary to-blue-700 hover:from-primary/90 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full">
+              <Button asChild size="lg" className="group text-xl px-10 py-7 bg-gradient-primary hover:from-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full" aria-label={t('landing.cta.getStarted','Get Started') }>
                 <Link to="/signup">
                   {t('landing.cta.getStarted', 'Get Started')}
                   <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />

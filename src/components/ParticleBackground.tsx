@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 const ParticleBackground = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -10,51 +10,61 @@ const ParticleBackground = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let animationId: number | null = null;
+
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      // keep local copies for inner closures to avoid nullable canvas access
+      canvasW = canvas.width;
+      canvasH = canvas.height;
     };
+
+    // local width/height used inside Particle to avoid referencing nullable `canvas` directly
+    let canvasW = canvas.width;
+    let canvasH = canvas.height;
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Particle system
-    class Particle {
+    // Respect reduced motion preference
+    const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  class Particle {
       x: number;
       y: number;
       vx: number;
       vy: number;
       size: number;
       opacity: number;
-      color: string;
 
       constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 2 + 1;
-        this.opacity = Math.random() * 0.5 + 0.2;
-        this.color = `hsla(189, 75%, 55%, ${this.opacity})`;
+    this.x = Math.random() * canvasW;
+    this.y = Math.random() * canvasH;
+        this.vx = (Math.random() - 0.5) * 0.3;
+        this.vy = (Math.random() - 0.5) * 0.3;
+        this.size = Math.random() * 2 + 0.5;
+        this.opacity = Math.random() * 0.5 + 0.15;
       }
 
       update() {
         this.x += this.vx;
         this.y += this.vy;
 
-        // Wrap around edges
-        if (this.x < 0) this.x = canvas.width;
-        if (this.x > canvas.width) this.x = 0;
-        if (this.y < 0) this.y = canvas.height;
-        if (this.y > canvas.height) this.y = 0;
+    if (this.x < 0) this.x = canvasW;
+    if (this.x > canvasW) this.x = 0;
+    if (this.y < 0) this.y = canvasH;
+    if (this.y > canvasH) this.y = 0;
       }
 
-      draw() {
-        if (!ctx) return;
-        
+      draw(ctx: CanvasRenderingContext2D, primaryHsl: string | null) {
         ctx.save();
         ctx.globalAlpha = this.opacity;
-        ctx.fillStyle = this.color;
+        if (primaryHsl) {
+          ctx.fillStyle = `hsla(${primaryHsl}, ${this.opacity})`;
+        } else {
+          ctx.fillStyle = `hsla(210, 90%, 48%, ${this.opacity})`;
+        }
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -62,53 +72,78 @@ const ParticleBackground = () => {
       }
     }
 
-    // Create particles
+    // Lower particle count for mobile and when reduced motion is set
+    const baseCount = prefersReduced ? 8 : Math.max(8, Math.min(28, Math.floor(window.innerWidth / 60)));
+
     const particles: Particle[] = [];
-    const particleCount = Math.min(50, Math.floor(window.innerWidth / 30));
+    for (let i = 0; i < baseCount; i++) particles.push(new Particle());
 
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
+    // Read CSS variable once per frame
+    const getPrimaryToken = () => {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--primary');
+      return raw ? raw.trim() : null;
+    };
 
-    // Animation loop
-    const animate = () => {
+    // Pause animation when page is not visible
+    let isVisible = true;
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+      if (isVisible) {
+        // kick off animation again
+        loop();
+      } else if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    const loop = () => {
+      if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw connections between nearby particles
+      const primaryHsl = getPrimaryToken();
+
+      // Draw connecting lines with subtle opacity
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
-            const opacity = (100 - distance) / 100 * 0.1;
+          const a = particles[i];
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
             ctx.save();
-            ctx.globalAlpha = opacity;
-            ctx.strokeStyle = "hsl(189, 75%, 55%)";
+            ctx.globalAlpha = ((100 - dist) / 100) * 0.06;
+            ctx.strokeStyle = primaryHsl ? `hsl(${primaryHsl})` : 'hsl(210,90%,48%)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
             ctx.stroke();
             ctx.restore();
           }
         }
       }
 
-      // Update and draw particles
-      particles.forEach(particle => {
-        particle.update();
-        particle.draw();
+      particles.forEach(p => {
+        p.update();
+        p.draw(ctx, getPrimaryToken());
       });
 
-      requestAnimationFrame(animate);
+      if (!prefersReduced) {
+        animationId = requestAnimationFrame(loop);
+      }
     };
 
-    animate();
+    // Start animation only if not reduced motion
+    if (!prefersReduced) loop();
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (animationId) cancelAnimationFrame(animationId);
     };
   }, []);
 
