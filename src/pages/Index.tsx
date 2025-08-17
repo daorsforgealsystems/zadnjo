@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { pageTransition } from "@/lib/motion-variants";
 import { 
   Truck, 
   DollarSign, 
@@ -112,7 +114,13 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <motion.div
+      className="min-h-screen bg-background relative overflow-hidden"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <MediaBackground mediaSrc="/src/assets/hero-logistics.jpg" type="image" />
       <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/80 to-background/90 z-10" />
       
@@ -205,7 +213,7 @@ const Index = () => {
         </main>
         <Chatbot />
       </div>
-    </div>
+    </motion.div>
   );
 };
 

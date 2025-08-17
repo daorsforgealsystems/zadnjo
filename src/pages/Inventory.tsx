@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { pageTransition } from '@/lib/motion-variants';
 import {
   Table,
   TableBody,
@@ -130,7 +132,13 @@ const Inventory: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <motion.div
+      className="p-6"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Inventory Management</h1>
@@ -211,7 +219,7 @@ const Inventory: React.FC = () => {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </motion.div>
   );
 };
 
