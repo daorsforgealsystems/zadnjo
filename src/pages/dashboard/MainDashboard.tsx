@@ -168,23 +168,31 @@ const MainDashboard: React.FC = () => {
   ];
 
   // Table columns for recent shipments
+  // EnhancedTable expects columns with key, title, and optional render
+  interface Shipment {
+    id: string;
+    name: string;
+    status: string;
+    location: string;
+    history: { timestamp: string }[];
+  }
   const shipmentColumns = [
-    { header: 'ID', accessorKey: 'id' },
-    { header: 'Name', accessorKey: 'name' },
-    { header: 'Status', accessorKey: 'status' },
-    { header: 'Location', accessorKey: 'location' },
-    { 
-      header: 'Last Updated', 
-      accessorKey: 'history',
-      cell: ({ row }: any) => {
-        const history = row.original.history;
+    { key: 'id', title: 'ID' },
+    { key: 'name', title: 'Name' },
+    { key: 'status', title: 'Status' },
+    { key: 'location', title: 'Location' },
+    {
+      key: 'history',
+      title: 'Last Updated',
+      render: (_: unknown, row: Shipment) => {
+        const history = row.history;
         if (history && history.length > 0) {
           const lastUpdate = new Date(history[history.length - 1].timestamp);
           return lastUpdate.toLocaleString();
         }
         return 'N/A';
-      }
-    }
+      },
+    },
   ];
 
   return (
@@ -205,38 +213,38 @@ const MainDashboard: React.FC = () => {
           variants={itemVariants}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
         >
-          <MetricCard 
-            title="Active Shipments" 
-            value={metrics?.activeShipments.value || 0} 
-            change={metrics?.activeShipments.change || ''}
+          <MetricCard
+            title="Active Shipments"
+            value={metrics?.activeShipments.value || 0}
+            change={metrics?.activeShipments.change?.toString() || ''}
             changeType={metrics?.activeShipments.changeType || 'neutral'}
-            icon={<Package className="h-5 w-5" />}
+            icon={Package}
             isLoading={isLoadingMetrics}
           />
-          <MetricCard 
-            title="Total Revenue" 
-            value={metrics?.totalRevenue.value || 0} 
-            change={metrics?.totalRevenue.change || ''}
+          <MetricCard
+            title="Total Revenue"
+            value={metrics?.totalRevenue.value || 0}
+            change={metrics?.totalRevenue.change?.toString() || ''}
             changeType={metrics?.totalRevenue.changeType || 'neutral'}
-            icon={<DollarSign className="h-5 w-5" />}
-            formatter={(val) => `$${val.toLocaleString()}`}
+            icon={DollarSign}
+            formatter={(val: number) => `$${val.toLocaleString()}`}
             isLoading={isLoadingMetrics}
           />
-          <MetricCard 
-            title="On-Time Delivery" 
-            value={metrics?.onTimeDelivery.value || 0} 
-            change={metrics?.onTimeDelivery.change || ''}
+          <MetricCard
+            title="On-Time Delivery"
+            value={metrics?.onTimeDelivery.value || 0}
+            change={metrics?.onTimeDelivery.change?.toString() || ''}
             changeType={metrics?.onTimeDelivery.changeType || 'neutral'}
-            icon={<Clock className="h-5 w-5" />}
-            formatter={(val) => `${val}%`}
+            icon={Clock}
+            formatter={(val: number) => `${val}%`}
             isLoading={isLoadingMetrics}
           />
-          <MetricCard 
-            title="Border Crossings" 
-            value={metrics?.borderCrossings.value || 0} 
-            change={metrics?.borderCrossings.change || ''}
+          <MetricCard
+            title="Border Crossings"
+            value={metrics?.borderCrossings.value || 0}
+            change={metrics?.borderCrossings.change?.toString() || ''}
             changeType={metrics?.borderCrossings.changeType || 'neutral'}
-            icon={<Globe className="h-5 w-5" />}
+            icon={Globe}
             isLoading={isLoadingMetrics}
           />
         </motion.div>
@@ -248,19 +256,17 @@ const MainDashboard: React.FC = () => {
         >
           <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Shipment Status</h2>
-            <AnimatedChart 
-              type="pie"
+            <AnimatedChart
+              type="donut"
               data={shipmentData || []}
-              isLoading={isLoadingShipments}
               height={300}
             />
           </div>
           <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Revenue Trend</h2>
-            <AnimatedChart 
+            <AnimatedChart
               type="bar"
               data={revenueData || []}
-              isLoading={isLoadingRevenue}
               height={300}
             />
           </div>
@@ -274,15 +280,22 @@ const MainDashboard: React.FC = () => {
           <div className="lg:col-span-2 bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Active Routes</h2>
             <div className="h-[400px]">
-              <MapView 
-                routes={activeRoutes}
+              <MapView
+                routes={activeRoutes?.map((r: { id: string; path: [number, number][] }) => ({ id: r.id, path: r.path }))}
                 shipments={recentShipments}
               />
             </div>
           </div>
           <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Alerts</h2>
-            <AlertsPanel />
+            {/* You must provide all required props for AlertsPanel. Replace the following with your actual state/handlers. */}
+            <AlertsPanel
+              isOpen={alertsOpen}
+              onOpenChange={setAlertsOpen}
+              alerts={alerts}
+              onClearAlerts={handleClearAlerts}
+              onRemoveAlert={handleRemoveAlert}
+            />
           </div>
         </motion.div>
 
@@ -290,10 +303,10 @@ const MainDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Recent Shipments</h2>
-            <EnhancedTable 
+            <EnhancedTable
               data={recentShipments}
               columns={shipmentColumns}
-              pagination={{ pageSize: 5 }}
+              itemsPerPage={5}
             />
           </div>
         </motion.div>
@@ -302,10 +315,9 @@ const MainDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Popular Routes</h2>
-            <AnimatedChart 
-              type="horizontalBar"
+            <AnimatedChart
+              type="bar"
               data={routeData || []}
-              isLoading={isLoadingRoutes}
               height={250}
             />
           </div>
