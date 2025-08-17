@@ -49,24 +49,19 @@ const targets = {
 };
 
 // Basic proxy routes with identity propagation
-import type { Request as ExpressRequest, Response as ExpressResponse, NextFunction } from 'express';
-import type { ProxyReqCallback, Options as ProxyOptions } from 'http-proxy-middleware';
-
 function withIdentity(target: string) {
-  const options: ProxyOptions = {
+  const proxy = createProxyMiddleware({
     target,
     changeOrigin: true,
-    onProxyReq: ((proxyReq, req, res) => {
-      // Type guard for ExpressRequest
-      const expressReq = req as ExpressRequest;
-      const user = (expressReq as any).user;
-      if (user) {
-        proxyReq.setHeader('x-user-id', user.sub || user.id || 'unknown');
-        proxyReq.setHeader('x-user-roles', Array.isArray(user.roles) ? user.roles.join(',') : '');
-      }
-    }) as ProxyReqCallback,
-  };
-  return createProxyMiddleware(options);
+  });
+  proxy.on('proxyReq', (proxyReq: any, req: express.Request) => {
+    const user = (req as any).user;
+    if (user) {
+      proxyReq.setHeader('x-user-id', user.sub || user.id || 'unknown');
+      proxyReq.setHeader('x-user-roles', Array.isArray(user.roles) ? user.roles.join(',') : '');
+    }
+  });
+  return proxy;
 }
 
 app.use('/api/v1/users', withIdentity(targets.user));
