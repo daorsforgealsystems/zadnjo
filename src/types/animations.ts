@@ -1,4 +1,4 @@
-import { AnimeParams } from 'animejs';
+import { AnimeParams, AnimeInstance } from 'animejs';
 
 export interface AnimationConfig extends AnimeParams {
   duration: number;
@@ -46,9 +46,9 @@ export interface AnimationContext {
   presets: AnimationPresets;
   intensity: AnimationIntensity;
   reducedMotion: boolean;
-  createAnimation: (config: AnimationConfig) => anime.AnimeInstance;
-  animateEntrance: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => anime.AnimeInstance;
-  animateExit: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => anime.AnimeInstance;
+  createAnimation: (config: AnimationConfig) => AnimeInstance;
+  animateEntrance: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => AnimeInstance;
+  animateExit: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => AnimeInstance;
   createHoverAnimation: (element: HTMLElement, config?: Partial<AnimationConfig>) => () => void;
 }
 
