@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import DebugOverlay from './components/DebugOverlay';
 import { AppProviders } from './components/providers/AppProviders';
 import { debug } from './lib/debug';
+import { pageTransition, authFade, nestedFadeSlide } from './lib/motion-variants';
 
 // Simple fallback component for lazy loading errors
 const LazyLoadingErrorFallback = () => (
@@ -151,10 +152,10 @@ const AppContent = () => {
                 element={
                   <motion.div
                     key={location.pathname}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -16 }}
-                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    variants={pageTransition}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
                     className="min-h-screen bg-gradient-to-b from-background via-background to-background"
                   >
                     <LandingPage />
@@ -204,10 +205,10 @@ const AppContent = () => {
                       <DashboardLayout>
                         <motion.div
                           key={location.pathname}
-                          initial={{ opacity: 0, y: 16 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -16 }}
-                          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                          variants={pageTransition}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
                           className="min-h-screen"
                         >
                           {element}
@@ -225,10 +226,10 @@ const AppContent = () => {
                   <ErrorBoundary>
                     <motion.div
                       key={location.pathname}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
+                      variants={authFade}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                       className="min-h-screen"
                     >
                       <AuthPage />
@@ -242,10 +243,10 @@ const AppContent = () => {
                   <ErrorBoundary>
                     <motion.div
                       key={location.pathname}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
+                      variants={authFade}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                       className="min-h-screen"
                     >
                       <AuthPage />
@@ -276,10 +277,10 @@ const AppContent = () => {
                       <ErrorBoundary>
                         <motion.div
                           key={location.pathname}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.3 }}
+                          variants={nestedFadeSlide}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
                         >
                           <PortalDashboard />
                         </motion.div>
@@ -292,10 +293,10 @@ const AppContent = () => {
                       <ErrorBoundary>
                         <motion.div
                           key={location.pathname}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.3 }}
+                          variants={nestedFadeSlide}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
                         >
                           <PortalDashboard />
                         </motion.div>
@@ -308,10 +309,10 @@ const AppContent = () => {
                       <ErrorBoundary>
                         <motion.div
                           key={location.pathname}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.3 }}
+                          variants={nestedFadeSlide}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
                         >
                           <PortalProfile />
                         </motion.div>
@@ -324,10 +325,10 @@ const AppContent = () => {
                       <ErrorBoundary>
                         <motion.div
                           key={location.pathname}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.3 }}
+                          variants={nestedFadeSlide}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
                         >
                           <PortalShipments />
                         </motion.div>
@@ -343,10 +344,10 @@ const AppContent = () => {
                   <ErrorBoundary>
                     <motion.div
                       key={location.pathname}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25 }}
+                      variants={authFade}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                     >
                       <NotFound />
                     </motion.div>
@@ -376,6 +377,37 @@ const App = () => {
     debug('App component mounted', 'info');
     return () => {
       debug('App component unmounted', 'info');
+    };
+  }, []);
+
+  // Prefetch critical routes/modules to speed up first navigation
+  useEffect(() => {
+    const prefetch = () => {
+      debug('Prefetching critical routes', 'info');
+      // Trigger dynamic imports for commonly visited routes
+      // These match lazy-loaded modules above
+      import('./pages/Index');
+      import('./pages/Inventory');
+      import('./pages/LiveMap');
+      import('./components/layout/DashboardLayout');
+    };
+
+    const idle = (window as any).requestIdleCallback as undefined | ((cb: () => void) => number);
+    let handle: number | undefined;
+    if (typeof idle === 'function') {
+      handle = idle(prefetch);
+    } else {
+      handle = window.setTimeout(prefetch, 800);
+    }
+
+    return () => {
+      // @ts-ignore - cancelIdleCallback may not exist
+      if (typeof (window as any).cancelIdleCallback === 'function' && handle) {
+        // @ts-ignore
+        (window as any).cancelIdleCallback(handle);
+      } else if (handle) {
+        clearTimeout(handle);
+      }
     };
   }, []);
 
