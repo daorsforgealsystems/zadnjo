@@ -1,5 +1,5 @@
 import { Route, Routes, useLocation, BrowserRouter as Router } from 'react-router-dom';
-import { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingScreen from './components/LoadingScreen';
 import LanguageChangeNotification from './components/LanguageChangeNotification';
@@ -32,20 +32,26 @@ const LazyLoadingErrorFallback = () => (
 );
 
 // Wrapper for lazy loaded components with error handling
-const lazyWithErrorHandling = (importFn) => {
-  const LazyComponent = lazy(() => 
-    importFn().catch(error => {
-      console.error("Error loading component:", error);
-      return { default: LazyLoadingErrorFallback };
-    })
+function lazyWithErrorHandling(importFn: () => Promise<any>) {
+  const LazyComponent = lazy(() =>
+    importFn()
+      .then((mod: any) => {
+        // prefer default export
+        const resolved = mod && (mod.default ?? mod);
+        return { default: resolved };
+      })
+      .catch((error: any) => {
+        console.error('Error loading component:', error);
+        return { default: LazyLoadingErrorFallback };
+      })
   );
-  
-  return (props) => (
+
+  return (props: any) => (
     <ErrorBoundary fallback={<LazyLoadingErrorFallback />}>
       <LazyComponent {...props} />
     </ErrorBoundary>
   );
-};
+}
 
 // Lazy load components to improve initial load time
 const CustomerDashboard = lazyWithErrorHandling(() => import('./pages/CustomerDashboard'));
