@@ -29,7 +29,7 @@ app.use((req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
     // Attach roles/claims
-    (req as any).user = decoded;
+  (req as { user: unknown }).user = decoded;
     return next();
   } catch {
     return res.status(401).json({ error: 'Invalid token' });
