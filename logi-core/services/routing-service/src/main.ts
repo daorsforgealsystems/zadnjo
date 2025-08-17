@@ -104,36 +104,51 @@ app.post('/routes/optimize', async (req: Request, res: Response) => {
 });
 
 // Simple route optimization function
-function optimizeRoutes(stops: Stop[], numVehicles: number, depot: { lat: number; lng: number }) {
-  const routes = [];
-  const unassigned = [...stops];
-  
-  // Simple assignment: distribute stops evenly among vehicles
-  for (let i = 0; i < numVehicles; i++) {
-    const routeStops = [];
-    const stopsPerVehicle = Math.ceil(unassigned.length / (numVehicles - i));
-    
-    for (let j = 0; j < stopsPerVehicle && unassigned.length > 0; j++) {
-      routeStops.push(unassigned.shift()!);
-    }
-    
-    if (routeStops.length > 0) {
-      routes.push({
-        vehicleId: i + 1,
-        stops: routeStops.map((stop, idx) => ({
-          ...stop,
-          sequence: idx + 1,
-          estimatedArrival: new Date(Date.now() + (idx + 1) * 15 * 60000).toISOString(),
-          estimatedDeparture: new Date(Date.now() + (idx + 1) * 15 * 60000 + 5 * 60000).toISOString(),
-        })),
-        distance: calculateRouteDistance([depot, ...routeStops.map(s => ({ lat: s.lat, lng: s.lng })), depot]),
-        time: routeStops.length * 20, // 20 minutes per stop
-      });
-    }
-  }
-  
-  return routes;
-}
+ // Improved route optimization: assign stops to vehicles using nearest neighbor clustering
+ function optimizeRoutes(stops: Stop[], numVehicles: number, depot: { lat: number; lng: number }) {
+   // Cluster stops by proximity to depot using a greedy nearest neighbor approach
+   const clusters: Stop[][] = Array.from({ length: numVehicles }, () => []);
+   const assigned = new Set<string>();
+  const remaining = [...stops];
+   for (let v = 0; v < numVehicles; v++) {
+     let current = depot;
+     while (remaining.length > 0 && clusters[v].length < Math.ceil(stops.length / numVehicles)) {
+       // Find nearest unassigned stop
+       let nearestIdx = -1;
+       let nearestDist = Infinity;
+       for (let i = 0; i < remaining.length; i++) {
+         const dist = calculateDistance(current.lat, current.lng, remaining[i].lat, remaining[i].lng);
+         if (dist < nearestDist) {
+           nearestDist = dist;
+           nearestIdx = i;
+         }
+       }
+       if (nearestIdx !== -1) {
+         const stop = remaining.splice(nearestIdx, 1)[0];
+         clusters[v].push(stop);
+         current = { lat: stop.lat, lng: stop.lng };
+       } else {
+         break;
+       }
+     }
+   }
+
+   // Build routes for each vehicle
+   const routes = clusters.map((routeStops, i) => {
+     return {
+       vehicleId: i + 1,
+       stops: routeStops.map((stop, idx) => ({
+         ...stop,
+         sequence: idx + 1,
+         estimatedArrival: new Date(Date.now() + (idx + 1) * 15 * 60000).toISOString(),
+         estimatedDeparture: new Date(Date.now() + (idx + 1) * 15 * 60000 + 5 * 60000).toISOString(),
+       })),
+       distance: calculateRouteDistance([depot, ...routeStops.map(s => ({ lat: s.lat, lng: s.lng })), depot]),
+       time: routeStops.length * 20, // 20 minutes per stop
+     };
+   });
+   return routes;
+ }
 
 // Calculate distance between two points using Haversine formula
 function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
