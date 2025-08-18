@@ -120,6 +120,47 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     if (!user?.id) return;
 
     dispatch({ type: 'SET_LOADING', payload: true });
+    
+    // Check if user is a guest user
+    if (user.id === 'no-session-guest' || user.id === 'error-guest') {
+      // Provide default preferences for guest users
+      const defaultPreferences: LayoutPreferences = {
+        id: 'guest-default',
+        userId: user.id,
+        theme: 'light',
+        primaryColor: '#3b82f6', // Default blue
+        sidebarWidth: 240,
+        sidebarCollapsed: false,
+        gridGap: 16,
+        animationsEnabled: true,
+        compactMode: false,
+        customCss: '',
+        components: [],
+        breakpoints: {
+          mobile: 640,
+          tablet: 768,
+          desktop: 1024,
+        },
+        headerConfig: {
+          height: 64,
+          sticky: true,
+          showSearch: true,
+          showNotifications: true,
+          showUserMenu: true,
+          variant: 'default',
+        },
+        footerConfig: {
+          visible: true,
+          sticky: false,
+          variant: 'default',
+        },
+        updatedAt: new Date(),
+      };
+      
+      dispatch({ type: 'SET_PREFERENCES', payload: defaultPreferences });
+      return;
+    }
+    
     try {
       const preferences = await PreferencesAPI.getLayoutPreferences(user.id);
       dispatch({ type: 'SET_PREFERENCES', payload: preferences });
@@ -136,6 +177,13 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const savePreferences = useCallback(async () => {
     if (!user?.id || !state.preferences) return;
 
+    // For guest users, just update the local state without API call
+    if (user.id === 'no-session-guest' || user.id === 'error-guest') {
+      dispatch({ type: 'SET_PREFERENCES', payload: { ...state.preferences, updatedAt: new Date() } });
+      toast.success('Layout preferences saved locally');
+      return;
+    }
+
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const updated = await PreferencesAPI.updateLayoutPreferences(user.id, state.preferences);
@@ -150,6 +198,13 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
   const resetPreferences = useCallback(async () => {
     if (!user?.id) return;
+
+    // For guest users, just reload default preferences
+    if (user.id === 'no-session-guest' || user.id === 'error-guest') {
+      await loadPreferences();
+      toast.success('Layout preferences reset to defaults');
+      return;
+    }
 
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
@@ -255,6 +310,11 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const exportPreferences = useCallback(async () => {
     if (!user?.id) return null;
 
+    // For guest users, return current preferences directly
+    if (user.id === 'no-session-guest' || user.id === 'error-guest') {
+      return state.preferences;
+    }
+
     try {
       return await PreferencesAPI.exportPreferences(user.id);
     } catch (error) {
@@ -262,10 +322,17 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
       console.error('Error exporting preferences:', error);
       return null;
     }
-  }, [user?.id]);
+  }, [user?.id, state.preferences]);
 
   const importPreferences = useCallback(async (data: any) => {
     if (!user?.id) return;
+
+    // For guest users, directly update preferences
+    if (user.id === 'no-session-guest' || user.id === 'error-guest') {
+      dispatch({ type: 'SET_PREFERENCES', payload: { ...data, userId: user.id, updatedAt: new Date() } });
+      toast.success('Preferences imported successfully');
+      return;
+    }
 
     dispatch({ type: 'SET_LOADING', payload: true });
     try {

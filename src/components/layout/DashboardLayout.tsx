@@ -43,6 +43,9 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
       
       // Use the user's role if available, otherwise default to GUEST
       const role = (user as any)?.roles?.[0] || user.role || 'GUEST';
+      
+      // For guest users, we'll use the local breadcrumbs generation in the thunk
+      // For authenticated users, the API call will be made
       dispatch(updateBreadcrumbsThunk({ route: location.pathname, role }));
     }
   }, [location.pathname, user?.id, (user as any)?.roles, user?.role, dispatch]);

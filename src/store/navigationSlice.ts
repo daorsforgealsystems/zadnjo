@@ -132,7 +132,8 @@ export const updateBreadcrumbsThunk = createAsyncThunk(
     { dispatch }
   ) => {
     try {
-      // For guest users or error cases, generate simple breadcrumbs
+      // For guest users or error cases, generate simple breadcrumbs locally
+      // without making API calls
       if (role === 'GUEST') {
         const simpleBreadcrumbs = [
           { label: 'Home', href: '/' }
@@ -151,6 +152,7 @@ export const updateBreadcrumbsThunk = createAsyncThunk(
         return simpleBreadcrumbs;
       }
       
+      // For authenticated users, use the API (which now also handles guest users as a fallback)
       const result = await NavigationAPI.getBreadcrumbs(route, role);
       dispatch(setBreadcrumbs(result.breadcrumbs));
       return result.breadcrumbs;

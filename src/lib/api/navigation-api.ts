@@ -154,6 +154,12 @@ export class NavigationAPI {
     route: string,
     role: UserRole
   ): Promise<{ route: string; breadcrumbs: Array<{ label: string; href: string }> }> {
+    // For guest users, directly use fallback breadcrumbs without API call
+    if (role === 'GUEST') {
+      const fallbackBreadcrumbs = this.generateFallbackBreadcrumbs(route, role);
+      return { route, breadcrumbs: fallbackBreadcrumbs };
+    }
+    
     try {
       const response = await apiClient.get<{ route: string; breadcrumbs: Array<{ label: string; href: string }> }>(
         '/navigation/breadcrumbs',
@@ -277,6 +283,32 @@ export class NavigationAPI {
     customization: Record<string, unknown>;
     analytics: NavigationAnalytics;
   }> {
+    // For guest users, return default navigation state without API calls
+    if (userId.includes('guest') || role === 'GUEST') {
+      return {
+        menu: this.getDefaultGuestMenu(),
+        permissions: {
+          role: 'GUEST',
+          permissions: {
+            actions: [],
+            restrictedComponents: [],
+            landingPage: '/',
+            menuStructure: this.getDefaultGuestMenu()
+          }
+        },
+        customization: {},
+        analytics: {
+          userId,
+          mostUsedRoutes: [],
+          searchQueries: [],
+          componentInteractions: [],
+          timeSpentByPage: {},
+          deviceUsage: { mobile: 0, tablet: 0, desktop: 0 },
+          generatedAt: new Date()
+        }
+      };
+    }
+    
     const [menu, permissions, customization, analytics] = await Promise.all([
       this.getNavigationMenu(role),
       this.getNavigationPermissions(role),
@@ -290,6 +322,30 @@ export class NavigationAPI {
       customization,
       analytics
     };
+  }
+  
+  // Helper method to provide default menu for guest users
+  private static getDefaultGuestMenu(): NavigationItem[] {
+    return [
+      {
+        id: 'home',
+        label: 'Home',
+        icon: 'home',
+        href: '/'
+      },
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        icon: 'layout-dashboard',
+        href: '/dashboard'
+      },
+      {
+        id: 'login',
+        label: 'Login',
+        icon: 'log-in',
+        href: '/login'
+      }
+    ];
   }
 
   // Route Guards Helper
