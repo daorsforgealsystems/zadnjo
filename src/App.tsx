@@ -96,6 +96,10 @@ const ReportGeneration = lazyWithErrorHandling(() => import('./pages/reports/Rep
 const Chatbot = lazyWithErrorHandling(() => import('./pages/chatbot/Chatbot'));
 const FleetTracking = lazyWithErrorHandling(() => import('./pages/FleetTracking'));
 
+// Tracking Pages
+const LiveTracking = lazyWithErrorHandling(() => import('./pages/tracking/LiveTracking'));
+const ShipmentHistory = lazyWithErrorHandling(() => import('./pages/tracking/ShipmentHistory'));
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -196,6 +200,10 @@ const AppContent = () => {
                 { path: '/report-generation', element: <ReportGeneration /> },
                 { path: '/chatbot', element: <Chatbot /> },
                 { path: '/fleet-tracking', element: <FleetTracking /> },
+                
+                // Tracking routes
+                { path: '/tracking/live', element: <LiveTracking /> },
+                { path: '/tracking/history', element: <ShipmentHistory /> },
 
               ].map(({ path, element }) => (
                 <Route
@@ -390,6 +398,8 @@ const App = () => {
       import('./pages/Index');
       import('./pages/Inventory');
       import('./pages/LiveMap');
+      import('./pages/tracking/LiveTracking');
+      import('./pages/tracking/ShipmentHistory');
       import('./components/layout/DashboardLayout');
     };
 

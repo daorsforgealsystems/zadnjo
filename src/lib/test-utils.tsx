@@ -26,7 +26,7 @@ interface AllTheProvidersProps {
 const AllTheProviders = ({ children }: AllTheProvidersProps) => {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <QueryClientProvider client={mockQueryClient}>
           <ThemeProvider defaultTheme="light" storageKey="test-theme">
             <AuthProvider>
