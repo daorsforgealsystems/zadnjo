@@ -19,11 +19,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlobalFilterBar } from "@/components/filters/GlobalFilterBar";
-import { MetricCard } from "@/components/MetricCard";
-import { ChartWidget } from "@/components/ChartWidget";
-import { ActivityFeed, mockActivities } from "@/components/ActivityFeed";
-import { Sidebar } from "@/components/Sidebar";
-
+import MetricCard from "@/components/MetricCard";
+import ChartWidget from "@/components/widgets/ChartWidget";
+import ActivityFeed from "@/components/widgets/ActivityFeed";
+import Sidebar from "@/components/Sidebar";
 const EnhancedDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -61,6 +60,24 @@ const EnhancedDashboard = () => {
   const deliveredToday = 25; 
   const totalRevenue = 125000;
   const avgDeliveryTime = 2.4;
+  const mockActivities = [
+    {
+      id: '1',
+      type: 'package_delivered',
+      title: 'Package #123 delivered',
+      description: 'Delivered to client at Main St.',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
+      user: { name: 'Driver A', avatar: '' },
+      metadata: { packageId: 'PKG-123', status: 'delivered' }
+    },
+    {
+      id: '2',
+      type: 'route_optimized',
+      title: 'Route optimization completed',
+      description: 'Optimized 5 routes for today',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6),
+    }
+  ];
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
