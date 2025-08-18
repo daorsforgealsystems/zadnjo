@@ -73,13 +73,51 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
   className,
 }) => {
   const location = useLocation();
-  const breadcrumbsRef = useRef<HTMLNavElement>(null);
-  const { createAnimation } = useAnimations();
+import React, { memo } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 
-  // Generate breadcrumbs from current route if not provided
-  const breadcrumbItems = items || routeToBreadcrumb[location.pathname] || [
-    { label: 'Dashboard', href: '/', isActive: location.pathname === '/' },
-  ];
+interface BreadcrumbItem {
+  name: string;
+  path: string;
+}
+
+function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
+  const segments = pathname.split('/').filter(Boolean);
+  let path = '';
+  return segments.map((segment, idx) => {
+    path += `/${segment}`;
+    return {
+      name: decodeURIComponent(segment.charAt(0).toUpperCase() + segment.slice(1)),
+      path,
+    };
+  });
+}
+
+const Breadcrumbs: React.FC = () => {
+  const location = useLocation();
+  const breadcrumbs = generateBreadcrumbs(location.pathname);
+  return (
+    <nav aria-label="Breadcrumb">
+      <ol className="flex space-x-2 text-sm text-gray-500">
+        <li>
+          <Link to="/" className="hover:underline">Home</Link>
+        </li>
+        {breadcrumbs.map((crumb, idx) => (
+          <li key={crumb.path} aria-current={idx === breadcrumbs.length - 1 ? 'page' : undefined}>
+            <span className="mx-1">/</span>
+            {idx === breadcrumbs.length - 1 ? (
+              <span className="font-semibold text-gray-700">{crumb.name}</span>
+            ) : (
+              <Link to={crumb.path} className="hover:underline">{crumb.name}</Link>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+};
+
+export default memo(Breadcrumbs);
 
   // Add home breadcrumb if requested and not already present
   const finalItems = showHome && breadcrumbItems[0]?.href !== '/'

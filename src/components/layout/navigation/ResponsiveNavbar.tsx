@@ -13,11 +13,16 @@ interface ResponsiveNavbarProps {
   className?: string;
 }
 
-export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
   config,
   onMenuToggle,
   className = '',
 }) => {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -63,26 +68,26 @@ export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
   }, []);
 
   return (
-    <nav className={`
-      flex items-center justify-between px-6 py-3 
-      bg-background/95 backdrop-blur-sm border-b border-border
-      transition-all duration-200
-      ${config.sticky ? 'sticky top-0 z-50' : ''}
-      ${className}
-    `}>
+    <nav
+      className={`flex items-center justify-between px-6 py-3 bg-background/95 backdrop-blur-sm border-b border-border transition-all duration-200 ${config.sticky ? 'sticky top-0 z-50' : ''} ${className}`}
+      aria-label="Main navigation"
+      role="navigation"
+    >
       {/* Left section */}
       <div className="flex items-center space-x-4">
         {/* Menu toggle for mobile */}
-        <button
-          onClick={onMenuToggle}
-          className="lg:hidden p-2 rounded-md hover:bg-accent transition-colors"
-          aria-label="Toggle menu"
-        >
-          <Menu size={20} />
-        </button>
+        {isMobile && (
+          <button
+            onClick={onMenuToggle}
+            className="lg:hidden p-2 rounded-md hover:bg-accent transition-colors"
+            aria-label="Toggle menu"
+          >
+            <Menu size={20} />
+          </button>
+        )}
 
         {/* Title and subtitle */}
-        <div className="hidden sm:block">
+  <div className={isMobile ? 'hidden' : 'block'}>
           {config.title && (
             <h1 className="text-lg font-semibold text-foreground">
               {config.title}
@@ -97,7 +102,7 @@ export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
       </div>
 
       {/* Center section - Search */}
-      {config.search?.enabled && (
+      {config.search?.enabled && !isMobile && (
         <div className="flex-1 max-w-md mx-4">
           <div
             ref={searchRef}

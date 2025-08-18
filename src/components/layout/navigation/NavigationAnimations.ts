@@ -55,19 +55,21 @@ export const animateSidebarToggle = (
   return anime({
     targets: element,
     width: isExpanded ? '256px' : '64px',
-    duration: config.duration,
-    easing: config.easing,
+    duration: config.duration ?? 300,
+    easing: config.easing ?? 'easeOutQuad',
     complete: () => {
       // Animate child elements
-      const children = element.querySelectorAll('[data-animate-child]');
+      const children = Array.from(element.querySelectorAll('[data-animate-child]')) as HTMLElement[];
       if (children.length > 0) {
-        anime({
-          targets: children,
-          opacity: isExpanded ? [0, 1] : [1, 0],
-          translateX: isExpanded ? [-20, 0] : [0, -20],
-          duration: config.duration ? config.duration * 0.6 : 180,
-          delay: anime.stagger(30),
-          easing: 'easeOutQuad',
+        children.forEach((child, idx) => {
+          anime({
+            targets: child,
+            opacity: isExpanded ? [0, 1] : [1, 0],
+            translateX: isExpanded ? [-20, 0] : [0, -20],
+            duration: (config.duration ?? 300) * 0.6,
+            delay: idx * 30,
+            easing: 'easeOutQuad',
+          });
         });
       }
     },
@@ -125,13 +127,15 @@ export const animateBreadcrumbsReveal = (
   elements: HTMLElement[],
   config: NavigationAnimationConfig = navigationAnimationPresets.breadcrumbsReveal
 ) => {
-  return anime({
-    targets: elements,
-    opacity: [0, 1],
-    translateX: [-20, 0],
-    duration: config.duration,
-    delay: anime.stagger(100),
-    easing: config.easing,
+  return elements.forEach((el, idx) => {
+    anime({
+      targets: el,
+      opacity: [0, 1],
+      translateX: [-20, 0],
+      duration: config.duration ?? 400,
+      delay: idx * 100,
+      easing: config.easing ?? 'easeOutExpo',
+    });
   });
 };
 
@@ -151,13 +155,15 @@ export const animateMobileMenuSlide = (
   });
 
   if (isOpen && menuItems.length > 0) {
-    anime({
-      targets: menuItems,
-      opacity: [0, 1],
-      translateX: [-30, 0],
-      duration: config.duration ? config.duration * 0.8 : 280,
-      delay: anime.stagger(50, {start: 100}),
-      easing: 'easeOutQuad',
+    Array.from(menuItems).forEach((item, idx) => {
+      anime({
+        targets: item,
+        opacity: [0, 1],
+        translateX: [-30, 0],
+        duration: (config.duration ?? 350) * 0.8,
+        delay: 100 + idx * 50,
+        easing: 'easeOutQuad',
+      });
     });
   }
 };
@@ -200,13 +206,15 @@ export const animateDropdownReveal = (
   });
 
   if (isVisible && items.length > 0) {
-    anime({
-      targets: items,
-      opacity: [0, 1],
-      translateY: [-10, 0],
-      duration: config.duration ? config.duration * 0.8 : 160,
-      delay: anime.stagger(30),
-      easing: config.easing,
+    Array.from(items).forEach((item, idx) => {
+      anime({
+        targets: item,
+        opacity: [0, 1],
+        translateY: [-10, 0],
+        duration: (config.duration ?? 200) * 0.8,
+        delay: idx * 30,
+        easing: config.easing ?? 'easeOutQuart',
+      });
     });
   }
 };
