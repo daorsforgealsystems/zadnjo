@@ -110,7 +110,47 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   // Load user preferences on mount or user change
   useEffect(() => {
     if (user?.id) {
-      loadPreferences();
+      // Check if user is a guest user before loading preferences
+      if (user.id === 'no-session-guest' || user.id === 'error-guest' || user.id === 'guest' || user.id === 'timeout-guest') {
+        // Provide default preferences for guest users directly
+        const defaultPreferences: LayoutPreferences = {
+          id: 'guest-default',
+          userId: user.id,
+          theme: 'light',
+          primaryColor: '#3b82f6', // Default blue
+          sidebarWidth: 240,
+          sidebarCollapsed: false,
+          gridGap: 16,
+          animationsEnabled: true,
+          compactMode: false,
+          customCss: '',
+          components: [],
+          breakpoints: {
+            mobile: 640,
+            tablet: 768,
+            desktop: 1024,
+          },
+          headerConfig: {
+            height: 64,
+            sticky: true,
+            showSearch: true,
+            showNotifications: true,
+            showUserMenu: true,
+            variant: 'default',
+          },
+          footerConfig: {
+            visible: true,
+            sticky: false,
+            variant: 'default',
+          },
+          updatedAt: new Date().toISOString(), // Serialize date as ISO string
+        };
+        
+        dispatch({ type: 'SET_PREFERENCES', payload: defaultPreferences });
+      } else {
+        // Only load preferences from API for non-guest users
+        loadPreferences();
+      }
     } else {
       dispatch({ type: 'RESET_STATE' });
     }
@@ -122,7 +162,7 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     
     // Check if user is a guest user
-    if (user.id === 'no-session-guest' || user.id === 'error-guest') {
+    if (user.id === 'no-session-guest' || user.id === 'error-guest' || user.id === 'guest' || user.id === 'timeout-guest') {
       // Provide default preferences for guest users
       const defaultPreferences: LayoutPreferences = {
         id: 'guest-default',
@@ -165,8 +205,44 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
       const preferences = await PreferencesAPI.getLayoutPreferences(user.id);
       dispatch({ type: 'SET_PREFERENCES', payload: preferences });
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load layout preferences' });
+      // If API call fails, fall back to default preferences
       console.error('Error loading preferences:', error);
+      
+      // Provide default preferences as fallback
+      const defaultPreferences: LayoutPreferences = {
+        id: 'default-fallback',
+        userId: user.id,
+        theme: 'light',
+        primaryColor: '#3b82f6',
+        sidebarWidth: 240,
+        sidebarCollapsed: false,
+        gridGap: 16,
+        animationsEnabled: true,
+        compactMode: false,
+        customCss: '',
+        components: [],
+        breakpoints: {
+          mobile: 640,
+          tablet: 768,
+          desktop: 1024,
+        },
+        headerConfig: {
+          height: 64,
+          sticky: true,
+          showSearch: true,
+          showNotifications: true,
+          showUserMenu: true,
+          variant: 'default',
+        },
+        footerConfig: {
+          visible: true,
+          sticky: false,
+          variant: 'default',
+        },
+        updatedAt: new Date().toISOString(),
+      };
+      
+      dispatch({ type: 'SET_PREFERENCES', payload: defaultPreferences });
     }
   }, [user?.id]);
 
