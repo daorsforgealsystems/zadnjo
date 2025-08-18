@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
@@ -27,10 +27,9 @@ app.use((req, res, next) => {
   if (!auth) return res.status(401).json({ error: 'Missing Authorization header' });
   const token = auth.replace('Bearer ', '');
   try {
-    // Use the UserInfo interface we defined
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as UserInfo;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
     // Attach roles/claims
-    req.user = decoded;
+  (req as { user: unknown }).user = decoded;
     return next();
   } catch {
     return res.status(401).json({ error: 'Invalid token' });
@@ -49,63 +48,20 @@ const targets = {
   notify: process.env.NOTIFY_SERVICE_URL || 'http://localhost:4006'
 };
 
-// Define interfaces for type safety
-interface UserInfo {
-  sub?: string;
-  id?: string;
-  roles?: string[];
-  [key: string]: any;
-}
-
-// Extend Express Request to include user property
-declare global {
-  namespace Express {
-    interface Request {
-      user?: UserInfo;
-    }
-  }
-}
-
-// Define ProxyRequest interface for the proxy request object
-interface ProxyRequest {
-  setHeader(name: string, value: string): void;
-  getHeader(name: string): string | undefined;
-  removeHeader(name: string): void;
-  // Add other properties as needed
-}
-
-// Define options interface for proxy middleware
-interface ProxyOptions {
-  target: string;
-  changeOrigin?: boolean;
-  pathRewrite?: Record<string, string>;
-  [key: string]: any;
-}
-
 // Basic proxy routes with identity propagation
 function withIdentity(target: string) {
   const proxy = createProxyMiddleware({
     target,
     changeOrigin: true,
   });
-  
-  // Use the correct type for the proxy object
-  if (typeof proxy === 'function') {
-    const handler = proxy as RequestHandler & {
-      on(event: string, callback: (proxyReq: ProxyRequest, req: express.Request, res: express.Response, options: ProxyOptions) => void): void;
-    };
-    
-    handler.on('proxyReq', (proxyReq: ProxyRequest, req: express.Request) => {
-      if (req.user) {
-        proxyReq.setHeader('x-user-id', req.user.sub || req.user.id || 'unknown');
-        proxyReq.setHeader('x-user-roles', Array.isArray(req.user.roles) ? req.user.roles.join(',') : '');
-      }
-    });
-    
-    return handler;
-  }
-  
-  return proxy as RequestHandler;
+  proxy.on('proxyReq', (proxyReq: any, req: express.Request) => {
+    const user = (req as any).user;
+    if (user) {
+      proxyReq.setHeader('x-user-id', user.sub || user.id || 'unknown');
+      proxyReq.setHeader('x-user-roles', Array.isArray(user.roles) ? user.roles.join(',') : '');
+    }
+  });
+  return proxy;
 }
 
 app.use('/api/v1/users', withIdentity(targets.user));
