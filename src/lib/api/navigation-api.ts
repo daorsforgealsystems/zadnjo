@@ -41,7 +41,7 @@ export type UserRole = 'ADMIN' | 'MANAGER' | 'USER' | 'DRIVER' | 'CUSTOMER';
 export class NavigationAPI {
   // Navigation Menu
   static async getNavigationMenu(role: UserRole): Promise<NavigationItem[]> {
-    const response = await apiClient.get(`/navigation/menu/${role}`);
+    const response = await apiClient.get<NavigationItem[]>(`/navigation/menu/${role}`);
     return response.data;
   }
 
@@ -51,9 +51,10 @@ export class NavigationAPI {
     route: string,
     role: UserRole
   ): Promise<{ hasAccess: boolean; route: string; userId: string; role: UserRole }> {
-    const response = await apiClient.get('/navigation/access-check', {
-      params: { userId, route, role }
-    });
+    const response = await apiClient.get<{ hasAccess: boolean; route: string; userId: string; role: UserRole }>(
+      '/navigation/access-check',
+      { params: { userId, route, role } }
+    );
     return response.data;
   }
 
@@ -66,7 +67,11 @@ export class NavigationAPI {
     role: UserRole;
     results: Array<{ route: string; hasAccess: boolean }>;
   }> {
-    const response = await apiClient.post('/navigation/bulk-access-check', {
+    const response = await apiClient.post<{
+      userId: string;
+      role: UserRole;
+      results: Array<{ route: string; hasAccess: boolean }>;
+    }>('/navigation/bulk-access-check', {
       userId,
       role,
       routes
@@ -76,12 +81,12 @@ export class NavigationAPI {
 
   // Permissions and Actions
   static async getAvailableActions(role: UserRole): Promise<{ role: UserRole; actions: string[] }> {
-    const response = await apiClient.get(`/navigation/actions/${role}`);
+    const response = await apiClient.get<{ role: UserRole; actions: string[] }>(`/navigation/actions/${role}`);
     return response.data;
   }
 
   static async getRestrictedComponents(role: UserRole): Promise<{ role: UserRole; restrictedComponents: string[] }> {
-    const response = await apiClient.get(`/navigation/restricted-components/${role}`);
+    const response = await apiClient.get<{ role: UserRole; restrictedComponents: string[] }>(`/navigation/restricted-components/${role}`);
     return response.data;
   }
 
@@ -94,13 +99,21 @@ export class NavigationAPI {
       menuStructure: NavigationItem[];
     };
   }> {
-    const response = await apiClient.get(`/navigation/permissions/${role}`);
+    const response = await apiClient.get<{
+      role: UserRole;
+      permissions: {
+        actions: string[];
+        restrictedComponents: string[];
+        landingPage: string;
+        menuStructure: NavigationItem[];
+      };
+    }>(`/navigation/permissions/${role}`);
     return response.data;
   }
 
   // Landing Page
   static async getDefaultLandingPage(role: UserRole): Promise<{ role: UserRole; landingPage: string }> {
-    const response = await apiClient.get(`/navigation/landing-page/${role}`);
+    const response = await apiClient.get<{ role: UserRole; landingPage: string }>(`/navigation/landing-page/${role}`);
     return response.data;
   }
 
@@ -109,7 +122,7 @@ export class NavigationAPI {
     userId: string,
     action: string,
     target: string,
-    metadata?: any
+    metadata?: Record<string, unknown>
   ): Promise<{ success: boolean }> {
     // Skip API calls for guest users to prevent connection errors
     if (userId.includes('guest')) {
@@ -118,7 +131,7 @@ export class NavigationAPI {
     }
     
     try {
-      const response = await apiClient.post(`/navigation/activity/${userId}`, {
+      const response = await apiClient.post<{ success: boolean }>(`/navigation/activity/${userId}`, {
         action,
         target,
         metadata
@@ -132,7 +145,7 @@ export class NavigationAPI {
 
   // Analytics
   static async getNavigationAnalytics(userId: string): Promise<NavigationAnalytics> {
-    const response = await apiClient.get(`/navigation/analytics/${userId}`);
+    const response = await apiClient.get<NavigationAnalytics>(`/navigation/analytics/${userId}`);
     return response.data;
   }
 
@@ -141,15 +154,70 @@ export class NavigationAPI {
     route: string,
     role: UserRole
   ): Promise<{ route: string; breadcrumbs: Array<{ label: string; href: string }> }> {
-    const response = await apiClient.get('/navigation/breadcrumbs', {
-      params: { route, role }
-    });
-    return response.data;
+    try {
+      const response = await apiClient.get<{ route: string; breadcrumbs: Array<{ label: string; href: string }> }>(
+        '/navigation/breadcrumbs',
+        { params: { route, role } }
+      );
+      return response.data;
+    } catch (error) {
+      console.warn('Failed to fetch breadcrumbs from API, using fallback:', error);
+      
+      // Fallback breadcrumbs based on route and role
+      const fallbackBreadcrumbs = this.generateFallbackBreadcrumbs(route, role);
+      return { route, breadcrumbs: fallbackBreadcrumbs };
+    }
+  }
+
+  private static generateFallbackBreadcrumbs(route: string, role: UserRole): Array<{ label: string; href: string }> {
+    const breadcrumbs: Array<{ label: string; href: string }> = [];
+    
+    // Always add Home
+    breadcrumbs.push({ label: 'Home', href: '/' });
+    
+    // Parse route to generate breadcrumbs
+    const routeParts = route.split('/').filter(Boolean);
+    
+    if (routeParts.length === 0) {
+      return breadcrumbs;
+    }
+    
+    // Add dashboard if first part is dashboard
+    if (routeParts[0] === 'dashboard') {
+      breadcrumbs.push({ label: 'Dashboard', href: '/dashboard' });
+    }
+    
+    // Add other route parts
+    let currentPath = '';
+    for (let i = 0; i < routeParts.length; i++) {
+      currentPath += '/' + routeParts[i];
+      const label = routeParts[i].charAt(0).toUpperCase() + routeParts[i].slice(1);
+      
+      // Special handling for common routes
+      if (routeParts[i] === 'orders') {
+        breadcrumbs.push({ label: 'Orders', href: '/orders' });
+      } else if (routeParts[i] === 'analytics') {
+        breadcrumbs.push({ label: 'Analytics', href: '/analytics' });
+      } else if (routeParts[i] === 'fleet') {
+        breadcrumbs.push({ label: 'Fleet Management', href: '/fleet' });
+      } else if (routeParts[i] === 'tracking') {
+        breadcrumbs.push({ label: 'Tracking', href: '/tracking' });
+      } else if (routeParts[i] === 'reports') {
+        breadcrumbs.push({ label: 'Reports', href: '/reports' });
+      } else if (routeParts[i] === 'admin') {
+        breadcrumbs.push({ label: 'Administration', href: '/admin' });
+      } else if (i === routeParts.length - 1) {
+        // Last part is the current page
+        breadcrumbs.push({ label, href: currentPath });
+      }
+    }
+    
+    return breadcrumbs;
   }
 
   // Navigation Customization
-  static async getUserNavigationCustomization(userId: string): Promise<any> {
-    const response = await apiClient.get(`/navigation/customization/${userId}`);
+  static async getUserNavigationCustomization(userId: string): Promise<Record<string, unknown>> {
+    const response = await apiClient.get<Record<string, unknown>>(`/navigation/customization/${userId}`);
     return response.data;
   }
 
@@ -157,7 +225,7 @@ export class NavigationAPI {
     itemId: string,
     count: number
   ): Promise<{ itemId: string; count: number; updated: boolean }> {
-    const response = await apiClient.post(`/navigation/badge/${itemId}`, { count });
+    const response = await apiClient.post<{ itemId: string; count: number; updated: boolean }>(`/navigation/badge/${itemId}`, { count });
     return response.data;
   }
 
@@ -197,8 +265,16 @@ export class NavigationAPI {
   // Navigation State Management
   static async getNavigationState(userId: string, role: UserRole): Promise<{
     menu: NavigationItem[];
-    permissions: any;
-    customization: any;
+    permissions: {
+      role: UserRole;
+      permissions: {
+        actions: string[];
+        restrictedComponents: string[];
+        landingPage: string;
+        menuStructure: NavigationItem[];
+      };
+    };
+    customization: Record<string, unknown>;
     analytics: NavigationAnalytics;
   }> {
     const [menu, permissions, customization, analytics] = await Promise.all([
@@ -217,7 +293,12 @@ export class NavigationAPI {
   }
 
   // Route Guards Helper
-  static async createRouteGuard(userId: string, role: UserRole) {
+  static async createRouteGuard(userId: string, role: UserRole): Promise<{
+    canActivate: (route: string) => Promise<boolean>;
+    getAllowedRoutes: () => string[];
+    getRestrictedComponents: () => string[];
+    getAvailableActions: () => string[];
+  }> {
     const permissions = await this.getNavigationPermissions(role);
     const allowedRoutes = new Set(permissions.permissions.menuStructure.map(item => item.href));
 
