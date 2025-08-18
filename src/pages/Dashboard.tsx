@@ -28,6 +28,20 @@ const Dashboard = () => {
     { month: 'Jun', revenue: 950 },
   ];
 
+  // Dynamically load Recharts only when Dashboard mounts
+  const [R, setR] = useState<any>(null);
+  useEffect(() => {
+    let mounted = true;
+    import('recharts')
+      .then((mod) => {
+        if (mounted) setR(mod);
+      })
+      .catch((e) => console.error('Failed to load Recharts', e));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NaviBar />
@@ -151,29 +165,28 @@ const Dashboard = () => {
           <div className="mt-12 bg-card rounded-xl p-6 shadow-lg">
             <h3 className="text-xl font-semibold mb-6">Revenue Overview</h3>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <ChartContainer config={{
-                  revenue: {
-                    label: "Revenue",
-                    color: "hsl(var(--chart-1))",
-                  },
-                }}>
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <ChartTooltip />
-                    <ChartLegend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2} 
-                      activeDot={{ r: 8 }} 
-                    />
-                  </LineChart>
-                </ChartContainer>
-              </ResponsiveContainer>
+              {R ? (
+                <R.ResponsiveContainer width="100%" height="100%">
+                  <div className="flex aspect-video justify-center text-xs">
+                    <R.LineChart data={chartData}>
+                      <R.CartesianGrid strokeDasharray="3 3" />
+                      <R.XAxis dataKey="month" />
+                      <R.YAxis />
+                      <R.Tooltip />
+                      <R.Legend />
+                      <R.Line 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="hsl(var(--primary))" 
+                        strokeWidth={2} 
+                        activeDot={{ r: 8 }} 
+                      />
+                    </R.LineChart>
+                  </div>
+                </R.ResponsiveContainer>
+              ) : (
+                <div className="w-full h-full animate-pulse rounded-md bg-muted" />
+              )}
             </div>
           </div>
         </div>
