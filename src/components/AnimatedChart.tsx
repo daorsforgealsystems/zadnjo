@@ -37,8 +37,18 @@ const CustomTooltip = ({ active, payload, label }: TooltipPropsLike) => {
     );
   }
 
+  // Show nothing for tooltip if not active
   return null;
 };
+
+// Empty state for chart
+const ChartEmptyState = ({ title }: { title: string }) => (
+  <div className="flex flex-col items-center justify-center h-48 text-zinc-400">
+    <span className="text-2xl mb-2">📊</span>
+    <span className="font-semibold">No data available</span>
+    <span className="text-xs mt-1">{title}</span>
+  </div>
+);
 
 const resolveColor = (color: string): string => {
   const colorName = color.replace('bg-', '');
