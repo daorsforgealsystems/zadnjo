@@ -3,26 +3,31 @@ import { AnimationConfig, InteractionAnimations, EntranceAnimation } from '@/typ
 
 export const interactionAnimationPresets: InteractionAnimations = {
   buttonHover: {
+    targets: '',
     duration: 200,
     easing: 'easeOutQuad',
     autoplay: false,
   },
   cardHover: {
+    targets: '',
     duration: 300,
     easing: 'easeOutCubic',
     autoplay: false,
   },
   modalEntrance: {
+    targets: '',
     duration: 400,
     easing: 'easeOutBack',
     autoplay: false,
   },
   tooltipShow: {
+    targets: '',
     duration: 150,
     easing: 'easeOutQuart',
     autoplay: false,
   },
   loadingSpinner: {
+    targets: '',
     duration: 1000,
     easing: 'linear',
     autoplay: true,

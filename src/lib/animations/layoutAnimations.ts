@@ -7,26 +7,56 @@ export const layoutAnimationPresets: LayoutAnimations = {
     easing: 'easeOutBack',
     autoplay: false,
   },
+    gridReorder: {
+      targets: '',
+      duration: 400,
+      easing: 'easeOutBack',
+      autoplay: false,
+    },
   componentAdd: {
     duration: 500,
     easing: 'easeOutElastic(1, .6)',
     autoplay: false,
   },
+    componentAdd: {
+      targets: '',
+      duration: 500,
+      easing: 'easeOutElastic(1, .6)',
+      autoplay: false,
+    },
   componentRemove: {
     duration: 300,
     easing: 'easeInBack',
     autoplay: false,
   },
+    componentRemove: {
+      targets: '',
+      duration: 300,
+      easing: 'easeInBack',
+      autoplay: false,
+    },
   containerResize: {
     duration: 350,
     easing: 'easeOutCubic',
     autoplay: false,
   },
+    containerResize: {
+      targets: '',
+      duration: 350,
+      easing: 'easeOutCubic',
+      autoplay: false,
+    },
   breakpointTransition: {
     duration: 450,
     easing: 'easeOutQuart',
     autoplay: false,
   },
+    breakpointTransition: {
+      targets: '',
+      duration: 450,
+      easing: 'easeOutQuart',
+      autoplay: false,
+    },
 };
 
 export const animateGridReorder = (

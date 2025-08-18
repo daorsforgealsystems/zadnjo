@@ -6,26 +6,31 @@ export const navigationAnimationPresets: NavigationAnimations = {
     duration: 300,
     easing: 'easeOutCubic',
     autoplay: false,
+  targets: '',
   },
   menuItemHover: {
     duration: 200,
     easing: 'easeOutQuad',
     autoplay: false,
+  targets: '',
   },
   breadcrumbTransition: {
     duration: 250,
     easing: 'easeInOutQuad',
     autoplay: false,
+  targets: '',
   },
   mobileMenuSlide: {
     duration: 350,
     easing: 'easeOutBack',
     autoplay: false,
+  targets: '',
   },
   searchExpansion: {
     duration: 200,
     easing: 'easeOutQuart',
     autoplay: false,
+  targets: '',
   },
 };
 
