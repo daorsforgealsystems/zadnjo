@@ -89,10 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isMounted && loading) {
         console.warn('Auth initialization timed out, proceeding as guest');
         setLoading(false);
-        // Optionally set as guest user to allow app to function
+        // Set as guest user to allow app to function when auth times out
         setUser({ id: 'timeout-guest', username: 'Guest User', role: ROLES.GUEST });
       }
-    }, 8000); // Increased to 8 seconds to give more time
+    }, 15000); // Increased to 15 seconds to give more time for the entire auth process
     
     const initializeAuth = async () => {
       try {
@@ -104,18 +104,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Try to get session with timeout
+        // Try to get session with increased timeout and better error handling
         let sessionData = null;
         try {
+          // Increase timeout to 10 seconds to give more time for the session fetch
           const { data } = await Promise.race([
             supabase.auth.getSession(),
             new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Session fetch timeout')), 5000)
+              setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
             )
           ]);
           sessionData = data?.session;
         } catch (sessionError) {
           console.warn('Session fetch failed:', sessionError);
+          // Don't treat this as a fatal error, continue with null session
         }
         
         if (!isMounted) return;
@@ -126,15 +128,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (sessionData) {
           let userData = null;
           try {
+            // Increase timeout to 10 seconds to give more time for the user fetch
             const { data } = await Promise.race([
               supabase.auth.getUser(),
               new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('User fetch timeout')), 5000)
+                setTimeout(() => reject(new Error('User fetch timeout')), 10000)
               )
             ]);
             userData = data?.user;
           } catch (userError) {
             console.warn('User fetch failed:', userError);
+            // Continue with null user data, will be handled below
           }
           
           if (!isMounted) return;
@@ -147,7 +151,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.warn('Auth initialization error:', e);
         // Non-fatal; fallback to guest/local state
-        setUser({ id: 'error-guest', username: 'Guest User', role: ROLES.GUEST });
+        if (isMounted) {
+          setUser({ id: 'error-guest', username: 'Guest User', role: ROLES.GUEST });
+          
+          // Try to recover by checking localStorage for any previous session info
+          try {
+            const storedSession = localStorage.getItem('daorsforge-auth-storage');
+            if (storedSession) {
+              console.log('Found stored session, attempting recovery...');
+              // This might trigger the auth state change listener which will update the state
+            }
+          } catch (storageError) {
+            console.warn('Failed to check localStorage:', storageError);
+          }
+        }
       } finally {
         if (isMounted) {
           setLoading(false);

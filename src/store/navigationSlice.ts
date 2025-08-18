@@ -15,7 +15,14 @@ export interface NavigationState {
   error: string | null;
   badges: Record<string, number>;
   customization: any;
-  routeGuard: any;
+  routeGuard: {
+    userId: string;
+    role: UserRole;
+    allowedRoutes: string[];
+    restrictedComponents: string[];
+    availableActions: string[];
+    // Functions will be created outside the store
+  };
 }
 
 const initialState: NavigationState = {
@@ -31,7 +38,13 @@ const initialState: NavigationState = {
   error: null,
   badges: {},
   customization: {},
-  routeGuard: null,
+  routeGuard: {
+    userId: '',
+    role: 'GUEST' as UserRole,
+    allowedRoutes: ['*'],
+    restrictedComponents: [],
+    availableActions: []
+  },
 };
 
 // Load complete navigation state
@@ -86,40 +99,54 @@ export const refreshNavigationAnalytics = createAsyncThunk(
   }
 );
 
-// Create and store route guard helper
+// Create and store route guard data
 export const createRouteGuardThunk = createAsyncThunk(
   'navigation/createRouteGuard',
   async (
     { userId, role }: { userId: string; role: UserRole },
     { dispatch }
   ) => {
-    // For guest users, create a simple route guard that allows all routes
+    // For guest users, create a simple route guard data
     if (userId.includes('guest')) {
-      const guestGuard = {
-        canActivate: async () => true,
-        getAllowedRoutes: () => ['*'],
-        getRestrictedComponents: () => [],
-        getAvailableActions: () => []
+      const guestGuardData = {
+        userId,
+        role,
+        allowedRoutes: ['*'],
+        restrictedComponents: [],
+        availableActions: []
       };
-      dispatch(setRouteGuard(guestGuard));
-      return true;
+      dispatch(setRouteGuard(guestGuardData));
+      return guestGuardData;
     }
     
     try {
-      const guard = await NavigationAPI.createRouteGuard(userId, role);
-      dispatch(setRouteGuard(guard));
-      return true;
+      // Get permissions from API
+      const permissions = await NavigationAPI.getNavigationPermissions(role);
+      const allowedRoutes = permissions.permissions.menuStructure.map(item => item.href);
+      
+      // Create serializable guard data
+      const guardData = {
+        userId,
+        role,
+        allowedRoutes,
+        restrictedComponents: permissions.permissions.restrictedComponents,
+        availableActions: permissions.permissions.actions
+      };
+      
+      dispatch(setRouteGuard(guardData));
+      return guardData;
     } catch (error) {
       console.warn('Failed to create route guard:', error);
-      // Create a fallback guard that allows basic routes
-      const fallbackGuard = {
-        canActivate: async () => true,
-        getAllowedRoutes: () => ['/dashboard', '/orders', '/profile'],
-        getRestrictedComponents: () => [],
-        getAvailableActions: () => []
+      // Create fallback guard data
+      const fallbackGuardData = {
+        userId,
+        role,
+        allowedRoutes: ['/dashboard', '/orders', '/profile'],
+        restrictedComponents: [],
+        availableActions: []
       };
-      dispatch(setRouteGuard(fallbackGuard));
-      return false;
+      dispatch(setRouteGuard(fallbackGuardData));
+      return fallbackGuardData;
     }
   }
 );
