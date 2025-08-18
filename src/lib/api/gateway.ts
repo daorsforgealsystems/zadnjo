@@ -4,7 +4,9 @@
 import { config } from '@/lib/config';
 
 const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const USER_SERVICE_BASE = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:4001';
+// The user service (NestJS) exposes a global prefix `/api` in development.
+// Ensure the default includes the prefix so apiClient builds correct URLs like http://localhost:4001/api/navigation/...
+const USER_SERVICE_BASE = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:4001/api';
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers || {});
@@ -36,8 +38,10 @@ class APIClient {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
-    // Build URL with query parameters
-    const url = new URL(`${this.baseURL}${path}`);
+  // Build URL with query parameters. Normalize joining to avoid duplicate slashes
+  const base = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL;
+  const rel = path.startsWith('/') ? path : `/${path}`;
+  const url = new URL(`${base}${rel}`);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
