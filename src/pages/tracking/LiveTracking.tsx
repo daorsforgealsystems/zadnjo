@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Tabs from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Truck, Package, MapPin, RefreshCw, Clock, Info } from 'lucide-react';
@@ -10,9 +10,10 @@ import { debug } from '@/lib/debug';
 
 // Fix for Leaflet marker icons in React
 import L from 'leaflet';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+// Use string paths instead of direct imports for marker icons
+const markerIcon = 'leaflet/dist/images/marker-icon.png';
+const markerIcon2x = 'leaflet/dist/images/marker-icon-2x.png';
+const markerShadow = 'leaflet/dist/images/marker-shadow.png';
 
 // Mock data for demonstration
 const mockVehicles = [
@@ -97,14 +98,14 @@ const LiveTracking: React.FC = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="map" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="map">Map View</TabsTrigger>
-          <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
-          <TabsTrigger value="shipments">Shipments</TabsTrigger>
-        </TabsList>
+      <Tabs.Root defaultValue="map" className="w-full">
+        <Tabs.List className="grid w-full grid-cols-3 mb-6">
+          <Tabs.Trigger value="map">Map View</Tabs.Trigger>
+          <Tabs.Trigger value="vehicles">Vehicles</Tabs.Trigger>
+          <Tabs.Trigger value="shipments">Shipments</Tabs.Trigger>
+        </Tabs.List>
 
-        <TabsContent value="map" className="space-y-4">
+        <Tabs.Content value="map" className="space-y-4">
           <Card>
             <CardContent className="p-0">
               <div className="h-[500px] w-full rounded-md overflow-hidden">
@@ -142,9 +143,9 @@ const LiveTracking: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </Tabs.Content>
 
-        <TabsContent value="vehicles" className="space-y-4">
+        <Tabs.Content value="vehicles" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {mockVehicles.map(vehicle => (
               <Card key={vehicle.id} className={`${selectedVehicle === vehicle.id ? 'ring-2 ring-primary' : ''}`}>
@@ -187,9 +188,9 @@ const LiveTracking: React.FC = () => {
               </Card>
             ))}
           </div>
-        </TabsContent>
+        </Tabs.Content>
 
-        <TabsContent value="shipments" className="space-y-4">
+        <Tabs.Content value="shipments" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {mockShipments.map(shipment => (
               <Card key={shipment.id}>
@@ -232,8 +233,8 @@ const LiveTracking: React.FC = () => {
               </Card>
             ))}
           </div>
-        </TabsContent>
-      </Tabs>
+        </Tabs.Content>
+      </Tabs.Root>
     </div>
   );
 };
