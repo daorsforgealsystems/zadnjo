@@ -7,101 +7,69 @@ import {
   Users, 
   TrendingUp, 
   Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  DollarSign,
-  Globe
-} from "lucide-react";
-import Sidebar from "@/components/Sidebar";
-import MetricCard from "@/components/widgets/MetricCard";
-import ChartWidget from "@/components/widgets/ChartWidget";
-import ActivityFeed from "@/components/widgets/ActivityFeed";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext";
-import { Link } from "react-router-dom";
-import ParticleBackground from "@/components/ParticleBackground";
-import { useQuery } from "@tanstack/react-query";
-import { getItems, getMetricData } from "@/lib/api";
-import GlobalFilterBar from "@/components/filters/GlobalFilterBar";
-
-const EnhancedDashboard = () => {
-  const { user, hasRole } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const handleAlertsClick = () => {
-    // Handle alerts click - could navigate to alerts page or show alerts modal
-    console.log('Alerts clicked');
-    // You can add navigation logic here, for example:
-    // navigate('/alerts');
-  };
-
-  const { data: items = [] } = useQuery({
-    queryKey: ['items'],
-    queryFn: getItems,
-  });
-
-  const { data: metrics } = useQuery({
-    queryKey: ['metrics'],
-    queryFn: getMetricData,
-  });
-
-  // Mock data for demonstration
-  const mockActivities = [
-    {
-      id: '1',
-      type: 'package_delivered' as const,
-      title: 'Package PKG-001 delivered',
-      description: 'Successfully delivered to Belgrade, Serbia',
-      timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
-      user: { name: 'Marko Petrović', avatar: 'https://i.pravatar.cc/150?u=marko' },
-      metadata: { packageId: 'PKG-001', location: 'Belgrade, Serbia', status: 'delivered' }
-    },
-    {
-      id: '2',
-      type: 'route_optimized' as const,
-      title: 'Route optimization completed',
-      description: 'Optimized route for 5 deliveries, saved 45 minutes',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-      user: { name: 'Ana Jovanović', avatar: 'https://i.pravatar.cc/150?u=ana' },
-      metadata: { location: 'Sarajevo Region' }
-    },
-    {
-      id: '3',
-      type: 'package_picked_up' as const,
-      title: 'Package PKG-002 picked up',
-      description: 'Collected from distribution center',
-      timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
-      user: { name: 'Stefan Nikolić', avatar: 'https://i.pravatar.cc/150?u=stefan' },
-      metadata: { packageId: 'PKG-002', location: 'Zagreb, Croatia', status: 'in_transit' }
-    },
-    {
-      id: '4',
-      type: 'alert' as const,
-      title: 'Delivery delay alert',
-      description: 'PKG-003 delayed due to traffic conditions',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-      metadata: { packageId: 'PKG-003', location: 'Novi Sad, Serbia', status: 'delayed' }
-    },
-    {
-      id: '5',
-      type: 'location_update' as const,
-      title: 'Vehicle location updated',
-      description: 'TRK-001 reached checkpoint in Banja Luka',
-      timestamp: new Date(Date.now() - 1000 * 60 * 90), // 1.5 hours ago
-      user: { name: 'Aleksandar Mitrović', avatar: 'https://i.pravatar.cc/150?u=aleksandar' },
-      metadata: { location: 'Banja Luka, BiH' }
-    }
-  ];
-
-  const deliveryData = [
-    { label: 'Mon', value: 45 },
-    { label: 'Tue', value: 52 },
-    { label: 'Wed', value: 38 },
-    { label: 'Thu', value: 61 },
+    <div
+      className="min-h-screen w-full bg-cover bg-center bg-no-repeat relative overflow-hidden"
+      style={{ backgroundImage: 'url(/Whisk_cauajde4m2myzdrmlwfkyzutnduzyi1hngqzltk.mp4)', backgroundColor: '#f8fafc' }}
+    >
+      {/* Optionally, you can use a video background for .mp4, but for now use as image for performance */}
+      <Sidebar isOpen={sidebarOpen} onAlertsClick={handleAlertsClick} />
+      <main className={cn("transition-all duration-300 pt-6", sidebarOpen ? "ml-64" : "ml-16")}> 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-2">
+          <MetricCard
+            title="Active Shipments"
+            value={activeShipments}
+            change={{ value: 12, type: 'increase', period: 'last week' }}
+            icon={Package}
+            iconColor="text-blue-600"
+            description="Currently in transit"
+            trend={[
+              { label: 'Mon', value: 45 },
+              { label: 'Tue', value: 52 },
+              { label: 'Wed', value: 48 },
+              { label: 'Thu', value: activeShipments }
+            ]}
+          />
+          <MetricCard
+            title="Delivered Today"
+            value={deliveredToday}
+            change={{ value: 8, type: 'increase', period: 'yesterday' }}
+            icon={CheckCircle}
+            iconColor="text-green-600"
+            description="Successfully completed"
+          />
+          <MetricCard
+            title="Total Revenue"
+            value={`$${totalRevenue.toLocaleString()}`}
+            change={{ value: 15, type: 'increase', period: 'last month' }}
+            icon={DollarSign}
+            iconColor="text-yellow-600"
+            description="This month"
+          />
+          <MetricCard
+            title="Avg Delivery Time"
+            value={`${avgDeliveryTime}h`}
+            change={{ value: 5, type: 'decrease', period: 'last month' }}
+            icon={Clock}
+            iconColor="text-purple-600"
+            description="Average completion time"
+          />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <ChartWidget
+            title="Weekly Deliveries"
+            data={deliveryData}
+            type="line"
+            showTrend
+            trendValue={12}
+          />
+          <ChartWidget
+            title="Monthly Revenue"
+            data={revenueData}
+            type="bar"
+            showTrend
+            trendValue={18}
+          />
+        </div>
     { label: 'Fri', value: 55 },
     { label: 'Sat', value: 42 },
     { label: 'Sun', value: 35 }

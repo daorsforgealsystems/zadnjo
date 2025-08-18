@@ -64,21 +64,29 @@ const Login = () => {
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen">
-      <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" />
-      <div className="relative z-10 w-full max-w-md">
-        <Card className="w-full glass hover-lift transition-all duration-300">
+    <div className="relative flex flex-col items-center justify-center min-h-screen w-full bg-black/90 overflow-hidden">
+      {/* Hero image as background, zoomed out and darkened */}
+      <img
+        src="/src/assets/hero-logistics.jpg"
+        alt="Logistics hero background"
+        className="fixed inset-0 w-full h-full object-cover object-center scale-110 md:scale-125 z-0"
+        style={{ filter: 'brightness(0.45) blur(2px)' }}
+      />
+      {/* Glassy dark overlay for extra porosity */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-zinc-900/80 to-black/90 backdrop-blur-xl z-10" />
+      <div className="relative z-20 w-full max-w-md">
+        <Card className="w-full bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl hover-lift transition-all duration-300">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-6">
               <Logo size="lg" showText={true} linkTo={null} />
             </div>
-            <CardTitle className="text-xl">{t('login.title', 'Login to your Account')}</CardTitle>
-            <CardDescription>{t('login.description', 'Enter your credentials to access the dashboard.')}</CardDescription>
+            <CardTitle className="text-2xl font-bold text-white drop-shadow-lg">{t('login.title', 'Login to your Account')}</CardTitle>
+            <CardDescription className="text-zinc-300">{t('login.description', 'Enter your credentials to access the dashboard.')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">{t('login.email', 'Email')}</Label>
+                <Label htmlFor="email" className="text-zinc-200">{t('login.email', 'Email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -86,32 +94,34 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-black/40 border-white/10 text-white placeholder-zinc-400 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">{t('login.password', 'Password')}</Label>
+                <Label htmlFor="password" className="text-zinc-200">{t('login.password', 'Password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="bg-black/40 border-white/10 text-white placeholder-zinc-400 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
+              {error && <p className="text-sm text-red-400">{error}</p>}
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold shadow-lg hover:brightness-110" disabled={loading}>
                 {loading ? t('login.loading', 'Logging in...') : t('login.submit', 'Login')}
               </Button>
             </form>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-4 text-center text-sm text-zinc-300">
               {t('login.no_account', "Don't have an account?")}{' '}
-              <Link to="/signup" className="underline">
+              <Link to="/signup" className="underline text-blue-400 hover:text-blue-300">
                 {t('login.signup', 'Sign up')}
               </Link>
             </div>
             {/* Guest Login Button */}
             <div className="mt-4 text-center">
-              <Button variant="outline" className="w-full" onClick={handleGuestLogin} disabled={loading}>
+              <Button variant="outline" className="w-full bg-black/40 border-white/10 text-white hover:bg-black/60" onClick={handleGuestLogin} disabled={loading}>
                 {t('login.guest', 'Login as Guest')}
               </Button>
             </div>

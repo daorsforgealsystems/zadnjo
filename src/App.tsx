@@ -102,7 +102,7 @@ const AppContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   // Pages where footer should be hidden
-  const hideFooterPaths = ['/login', '/signup'];
+  const hideFooterPaths = ['/login', '/signup', '/dashboard', '/portal/dashboard', '/enhanceddashboard'];
   const shouldHideFooter = hideFooterPaths.includes(location.pathname);
 
   // Log when AppContent component is rendered

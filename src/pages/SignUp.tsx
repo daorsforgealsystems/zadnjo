@@ -53,21 +53,29 @@ const handleSignUp = async (e: React.FormEvent) => {
   }
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen">
-      <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" />
-      <div className="relative z-10">
-        <Card className="w-full max-w-md glass hover-lift transition-all duration-300">
+    <div className="relative flex items-center justify-center min-h-screen w-full bg-black/90 overflow-hidden">
+      {/* Hero image as background, zoomed out and darkened */}
+      <img
+        src="/src/assets/hero-logistics.jpg"
+        alt="Logistics hero background"
+        className="fixed inset-0 w-full h-full object-cover object-center scale-110 md:scale-125 z-0"
+        style={{ filter: 'brightness(0.45) blur(2px)' }}
+      />
+      {/* Glassy dark overlay for extra porosity */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-zinc-900/80 to-black/90 backdrop-blur-xl z-10" />
+      <div className="relative z-20 w-full max-w-md">
+        <Card className="w-full bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl hover-lift transition-all duration-300">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-6">
               <Logo size="lg" showText={true} linkTo={null} />
             </div>
-            <CardTitle className="text-xl">{t('signup.title', 'Create an Account')}</CardTitle>
-            <CardDescription>{t('signup.description', 'Sign up to get started.')}</CardDescription>
+            <CardTitle className="text-2xl font-bold text-white drop-shadow-lg">{t('signup.title', 'Create an Account')}</CardTitle>
+            <CardDescription className="text-zinc-300">{t('signup.description', 'Sign up to get started.')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">{t('signup.username', 'Username')}</Label>
+                <Label htmlFor="username" className="text-zinc-200">{t('signup.username', 'Username')}</Label>
                 <Input
                   id="username"
                   type="text"
@@ -75,10 +83,11 @@ const handleSignUp = async (e: React.FormEvent) => {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  className="bg-black/40 border-white/10 text-white placeholder-zinc-400 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">{t('signup.email', 'Email')}</Label>
+                <Label htmlFor="email" className="text-zinc-200">{t('signup.email', 'Email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -86,27 +95,29 @@ const handleSignUp = async (e: React.FormEvent) => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-black/40 border-white/10 text-white placeholder-zinc-400 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">{t('signup.password', 'Password')}</Label>
+                <Label htmlFor="password" className="text-zinc-200">{t('signup.password', 'Password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="bg-black/40 border-white/10 text-white placeholder-zinc-400 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              {message && <p className="text-sm text-green-500">{message}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
+              {error && <p className="text-sm text-red-400">{error}</p>}
+              {message && <p className="text-sm text-green-400">{message}</p>}
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold shadow-lg hover:brightness-110" disabled={loading}>
                 {loading ? t('signup.loading', 'Creating account...') : t('signup.submit', 'Sign Up')}
               </Button>
             </form>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-4 text-center text-sm text-zinc-300">
               {t('signup.have_account', 'Already have an account?')}{' '}
-              <Link to="/login" className="underline">
+              <Link to="/login" className="underline text-blue-400 hover:text-blue-300">
                 {t('signup.login', 'Log in')}
               </Link>
             </div>

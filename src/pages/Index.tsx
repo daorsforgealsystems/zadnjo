@@ -115,23 +115,28 @@ const Index = () => {
 
   return (
     <motion.div
-      className="min-h-screen bg-background relative overflow-hidden"
+      className="min-h-screen w-full bg-black/90 relative overflow-hidden"
       variants={pageTransition}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <MediaBackground mediaSrc="/src/assets/hero-logistics.jpg" type="image" />
-      <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/80 to-background/90 z-10" />
-      
+      {/* Hero image as background, zoomed out for more space */}
+      <img
+        src="/src/assets/hero-logistics.jpg"
+        alt="Logistics hero background"
+        className="fixed inset-0 w-full h-full object-cover object-center scale-110 md:scale-125 z-0"
+        style={{ filter: 'brightness(0.45) blur(2px)' }}
+      />
+      {/* Glassy dark overlay for extra porosity */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-zinc-900/80 to-black/90 backdrop-blur-xl z-10" />
+
       <div className="relative z-20">
-        
         <Sidebar 
           isOpen={sidebarOpen}
           onAlertsClick={() => setIsAlertsPanelOpen(true)}
           alertsCount={anomalies?.length || 0}
         />
-        
         <AlertsPanel
           isOpen={isAlertsPanelOpen}
           onOpenChange={setIsAlertsPanelOpen}
@@ -139,77 +144,73 @@ const Index = () => {
           onClearAlerts={handleClearAlerts}
           onRemoveAlert={handleRemoveAlert}
         />
-
-        <main className={cn("transition-all duration-300 pt-header", sidebarOpen ? "ml-64" : "ml-16")}>
-           <div className="p-6 space-y-6">
+        <main className={cn("transition-all duration-300 pt-header", sidebarOpen ? "ml-64" : "ml-16")}> 
+          <div className="p-6 space-y-8">
             <div className="space-y-2 animate-slide-up-fade">
-              <h1 className="text-3xl font-bold gradient-text">{`Welcome, ${user?.username}`}</h1>
-              <p className="text-muted-foreground">Here is your logistics overview.</p>
+              <h1 className="text-4xl font-extrabold text-white drop-shadow-lg tracking-tight">{`Welcome, ${user?.username}`}</h1>
+              <p className="text-zinc-300 text-lg">Here is your logistics overview.</p>
             </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div>
-                        <MetricCard title='Active Shipments' value={metricData?.activeShipments.value || 0} change={metricData?.activeShipments.change} changeType="positive" icon={Truck} delay={100} />
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="glass">
-                      <DialogHeader>
-                        <DialogTitle>Historical Data For: Active Shipments</DialogTitle>
-                      </DialogHeader>
-                      <AnimatedChart title='Last 30 Days' data={generateHistoricalData(478)} type="line" />
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div>
-                        <MetricCard title='Total Revenue' value={metricData?.totalRevenue.value || 0} change={metricData?.totalRevenue.change} changeType="positive" icon={DollarSign} delay={200} currency="€" />
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="glass">
-                      <DialogHeader>
-                        <DialogTitle>Historical Data For: Total Revenue</DialogTitle>
-                      </DialogHeader>
-                      <AnimatedChart title='Last 30 Days' data={generateHistoricalData(125840)} type="line" />
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div>
-                        <MetricCard title='On-Time Delivery' value={metricData?.onTimeDelivery.value || 0} change={metricData?.onTimeDelivery.change} changeType="positive" icon={Clock} delay={300} currency="%" />
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="glass">
-                      <DialogHeader>
-                        <DialogTitle>Historical Data For: On-Time Delivery</DialogTitle>
-                      </DialogHeader>
-                      <AnimatedChart title='Last 30 Days' data={generateHistoricalData(94.8)} type="line" />
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div>
-                        <MetricCard title='Border Crossings' value={metricData?.borderCrossings.value || 0} change={metricData?.borderCrossings.change} changeType="neutral" icon={Shield} delay={400} />
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="glass">
-                      <DialogHeader>
-                        <DialogTitle>Historical Data For: Border Crossings</DialogTitle>
-                      </DialogHeader>
-                      <AnimatedChart title='Last 30 Days' data={generateHistoricalData(1247)} type="line" />
-                    </DialogContent>
-                  </Dialog>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  <AnimatedChart title='Shipment Status Distribution' data={shipmentData || []} type="donut" delay={500} />
-                  <AnimatedChart title='Monthly Revenue Trend' data={revenueData || []} type="line" delay={600} />
-                  <AnimatedChart title='Popular Trade Routes' data={routeData || []} type="bar" delay={700} />
-                </div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Glassy metric cards */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div>
+                    <MetricCard className="bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl" title='Active Shipments' value={metricData?.activeShipments.value || 0} change={metricData?.activeShipments.change} changeType="positive" icon={Truck} delay={100} />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="bg-black/70 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Historical Data For: Active Shipments</DialogTitle>
+                  </DialogHeader>
+                  <AnimatedChart title='Last 30 Days' data={generateHistoricalData(478)} type="line" />
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div>
+                    <MetricCard className="bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl" title='Total Revenue' value={metricData?.totalRevenue.value || 0} change={metricData?.totalRevenue.change} changeType="positive" icon={DollarSign} delay={200} currency="€" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="bg-black/70 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Historical Data For: Total Revenue</DialogTitle>
+                  </DialogHeader>
+                  <AnimatedChart title='Last 30 Days' data={generateHistoricalData(125840)} type="line" />
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div>
+                    <MetricCard className="bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl" title='On-Time Delivery' value={metricData?.onTimeDelivery.value || 0} change={metricData?.onTimeDelivery.change} changeType="positive" icon={Clock} delay={300} currency="%" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="bg-black/70 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Historical Data For: On-Time Delivery</DialogTitle>
+                  </DialogHeader>
+                  <AnimatedChart title='Last 30 Days' data={generateHistoricalData(94.8)} type="line" />
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div>
+                    <MetricCard className="bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl" title='Border Crossings' value={metricData?.borderCrossings.value || 0} change={metricData?.borderCrossings.change} changeType="neutral" icon={Shield} delay={400} />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="bg-black/70 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Historical Data For: Border Crossings</DialogTitle>
+                  </DialogHeader>
+                  <AnimatedChart title='Last 30 Days' data={generateHistoricalData(1247)} type="line" />
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <AnimatedChart className="bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl" title='Shipment Status Distribution' data={shipmentData || []} type="donut" delay={500} />
+              <AnimatedChart className="bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl" title='Monthly Revenue Trend' data={revenueData || []} type="line" delay={600} />
+              <AnimatedChart className="bg-black/60 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-2xl" title='Popular Trade Routes' data={routeData || []} type="bar" delay={700} />
+            </div>
+          </div>
         </main>
         <Chatbot />
       </div>
