@@ -1,75 +1,41 @@
-import { useState, useEffect } from "react";
-import { 
-  Package, 
-  Truck, 
-  MapPin, 
-  BarChart3, 
-  Users, 
-  TrendingUp, 
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  Package,
+  Truck,
+  MapPin,
+  BarChart3,
+  Users,
+  TrendingUp,
   Activity,
-    <div
-      className="min-h-screen w-full bg-cover bg-center bg-no-repeat relative overflow-hidden"
-      style={{ backgroundImage: 'url(/Whisk_cauajde4m2myzdrmlwfkyzutnduzyi1hngqzltk.mp4)', backgroundColor: '#f8fafc' }}
-    >
-      {/* Optionally, you can use a video background for .mp4, but for now use as image for performance */}
-      <Sidebar isOpen={sidebarOpen} onAlertsClick={handleAlertsClick} />
-      <main className={cn("transition-all duration-300 pt-6", sidebarOpen ? "ml-64" : "ml-16")}> 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-2">
-          <MetricCard
-            title="Active Shipments"
-            value={activeShipments}
-            change={{ value: 12, type: 'increase', period: 'last week' }}
-            icon={Package}
-            iconColor="text-blue-600"
-            description="Currently in transit"
-            trend={[
-              { label: 'Mon', value: 45 },
-              { label: 'Tue', value: 52 },
-              { label: 'Wed', value: 48 },
-              { label: 'Thu', value: activeShipments }
-            ]}
-          />
-          <MetricCard
-            title="Delivered Today"
-            value={deliveredToday}
-            change={{ value: 8, type: 'increase', period: 'yesterday' }}
-            icon={CheckCircle}
-            iconColor="text-green-600"
-            description="Successfully completed"
-          />
-          <MetricCard
-            title="Total Revenue"
-            value={`$${totalRevenue.toLocaleString()}`}
-            change={{ value: 15, type: 'increase', period: 'last month' }}
-            icon={DollarSign}
-            iconColor="text-yellow-600"
-            description="This month"
-          />
-          <MetricCard
-            title="Avg Delivery Time"
-            value={`${avgDeliveryTime}h`}
-            change={{ value: 5, type: 'decrease', period: 'last month' }}
-            icon={Clock}
-            iconColor="text-purple-600"
-            description="Average completion time"
-          />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <ChartWidget
-            title="Weekly Deliveries"
-            data={deliveryData}
-            type="line"
-            showTrend
-            trendValue={12}
-          />
-          <ChartWidget
-            title="Monthly Revenue"
-            data={revenueData}
-            type="bar"
-            showTrend
-            trendValue={18}
-          />
-        </div>
+  CheckCircle,
+  DollarSign,
+  Clock,
+  AlertTriangle,
+  Globe,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { GlobalFilterBar } from "@/components/filters/GlobalFilterBar";
+import { MetricCard } from "@/components/MetricCard";
+import { ChartWidget } from "@/components/ChartWidget";
+import { ActivityFeed, mockActivities } from "@/components/ActivityFeed";
+import { Sidebar } from "@/components/Sidebar";
+
+const EnhancedDashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const handleAlertsClick = () => {
+    console.log("Alerts panel triggered");
+  };
+
+  const deliveryData = [
+    { label: 'Mon', value: 45 },
+    { label: 'Tue', value: 52 },
+    { label: 'Wed', value: 48 },
+    { label: 'Thu', value: 60 },
     { label: 'Fri', value: 55 },
     { label: 'Sat', value: 42 },
     { label: 'Sun', value: 35 }
@@ -91,38 +57,29 @@ import {
     { label: 'Delayed', value: 12, color: '#ef4444' }
   ];
 
-  const activeShipments = items.filter(item => 
-    item.status === 'In Transit' || item.status === 'Processing'
-  ).length;
-
-  const deliveredToday = items.filter(item => 
-    item.status === 'Delivered'
-  ).length;
-
+  const activeShipments = 89 + 34;
+  const deliveredToday = 25; 
   const totalRevenue = 125000;
   const avgDeliveryTime = 2.4;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <ParticleBackground />
-      <div className="relative z-20">
-        <Sidebar isOpen={sidebarOpen} onAlertsClick={handleAlertsClick} />
-
-        <main className={cn("transition-all duration-300 pt-header", sidebarOpen ? "ml-64" : "ml-16")}>
-          <div className="p-6 space-y-6">
-            {/* Header */}
-            <header className="space-y-2 animate-slide-up-fade">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <Sidebar isOpen={sidebarOpen} onAlertsClick={handleAlertsClick} />
+      <div
+        className="flex-1 bg-cover bg-center bg-no-repeat relative overflow-y-auto"
+        style={{ backgroundImage: 'url(/hero-logistics.jpg)', backgroundColor: '#f8fafc' }}
+      >
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <main className={cn("transition-all duration-300 p-6 relative z-10", sidebarOpen ? "lg:ml-64" : "lg:ml-16")}>
+          <div className="space-y-6">
+            <header>
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold gradient-text">
-                    Welcome back, {user?.username || 'User'}!
-                  </h1>
-                  <p className="text-muted-foreground">
-                    Here's what's happening with your logistics operations today.
-                  </p>
+                  <h1 className="text-3xl font-bold text-white">Enhanced Dashboard</h1>
+                  <p className="text-gray-300">Real-time logistics overview</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="gap-1">
+                  <Badge variant="outline" className="gap-1 text-white border-gray-400">
                     <Activity className="h-3 w-3" />
                     Live Updates
                   </Badge>
@@ -131,11 +88,9 @@ import {
                   </Badge>
                 </div>
               </div>
-              {/* Global filters synced to URL */}
               <GlobalFilterBar className="mt-4" />
             </header>
 
-            {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
                 title="Active Shipments"
@@ -151,7 +106,6 @@ import {
                   { label: 'Thu', value: activeShipments }
                 ]}
               />
-
               <MetricCard
                 title="Delivered Today"
                 value={deliveredToday}
@@ -160,7 +114,6 @@ import {
                 iconColor="text-green-600"
                 description="Successfully completed"
               />
-
               <MetricCard
                 title="Total Revenue"
                 value={`$${totalRevenue.toLocaleString()}`}
@@ -169,7 +122,6 @@ import {
                 iconColor="text-yellow-600"
                 description="This month"
               />
-
               <MetricCard
                 title="Avg Delivery Time"
                 value={`${avgDeliveryTime}h`}
@@ -180,7 +132,6 @@ import {
               />
             </div>
 
-            {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <ChartWidget
                 title="Weekly Deliveries"
@@ -189,7 +140,6 @@ import {
                 showTrend
                 trendValue={12}
               />
-
               <ChartWidget
                 title="Monthly Revenue"
                 data={revenueData}
@@ -199,7 +149,6 @@ import {
               />
             </div>
 
-            {/* Status Distribution and Activity Feed */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <ChartWidget
                 title="Shipment Status Distribution"
@@ -207,7 +156,6 @@ import {
                 type="pie"
                 className="lg:col-span-1"
               />
-
               <ActivityFeed
                 activities={mockActivities}
                 className="lg:col-span-2"
@@ -215,7 +163,6 @@ import {
               />
             </div>
 
-            {/* Quick Actions */}
             <Card className="glass">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -231,21 +178,18 @@ import {
                       <span>Track Package</span>
                     </Button>
                   </Link>
-
                   <Link to="/route-optimization">
                     <Button variant="outline" className="w-full h-20 flex flex-col gap-2 hover-lift">
                       <Truck className="h-6 w-6" />
                       <span>Optimize Routes</span>
                     </Button>
                   </Link>
-
                   <Link to="/live-map">
                     <Button variant="outline" className="w-full h-20 flex flex-col gap-2 hover-lift">
                       <MapPin className="h-6 w-6" />
                       <span>Live Map</span>
                     </Button>
                   </Link>
-
                   <Link to="/reports">
                     <Button variant="outline" className="w-full h-20 flex flex-col gap-2 hover-lift">
                       <BarChart3 className="h-6 w-6" />
@@ -256,7 +200,6 @@ import {
               </CardContent>
             </Card>
 
-            {/* Recent Alerts */}
             <Card className="glass">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -274,7 +217,6 @@ import {
                     </div>
                     <Badge variant="outline">Active</Badge>
                   </div>
-
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                     <Globe className="h-5 w-5 text-blue-600" />
                     <div className="flex-1">
@@ -283,7 +225,6 @@ import {
                     </div>
                     <Badge variant="secondary">Info</Badge>
                   </div>
-
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     <div className="flex-1">
