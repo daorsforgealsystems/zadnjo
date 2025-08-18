@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { LayoutProvider } from '@/context/LayoutContext';
-import { NavigationProvider } from '@/context/NavigationContext';
 import { AnimationProvider } from './AnimationProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -17,9 +16,7 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
         <Router>
           <AuthProvider>
             <LayoutProvider>
-              <NavigationProvider>
-                {children}
-              </NavigationProvider>
+              {children}
             </LayoutProvider>
           </AuthProvider>
         </Router>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LayoutProvider } from '@/components/providers/LayoutProvider';
 import { ResponsiveNavbar } from '@/components/layout/navigation/ResponsiveNavbar';
 import { CollapsibleSidebar } from '@/components/layout/navigation/CollapsibleSidebar';
@@ -8,6 +8,10 @@ import { ResponsiveGrid } from '@/components/layout/grid/ResponsiveGrid';
 import { InteractiveBackground } from '@/components/ui/react-bits/InteractiveBackground';
 import { useLayout } from '@/components/providers/LayoutProvider';
 import { generateTemplate } from '@/lib/layout/layoutUtils';
+import { useAuth } from '@/context/AuthContext';
+import { useLocation } from 'react-router-dom';
+import { useAppDispatch } from '@/store/hooks';
+import { createRouteGuardThunk, loadNavigationState, trackPageViewThunk, updateBreadcrumbsThunk } from '@/store/navigationSlice';
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -16,6 +20,26 @@ interface DashboardLayoutProps {
 const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { state, actions } = useLayout();
   const [alertsCount] = useState(3);
+  const { user } = useAuth();
+  const location = useLocation();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (user?.id && (user as any).roles?.[0]) {
+      const role = (user as any).roles[0];
+      dispatch(loadNavigationState({ userId: user.id, role }));
+      dispatch(createRouteGuardThunk({ userId: user.id, role }));
+    }
+  }, [user?.id, (user as any)?.roles, dispatch]);
+
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(trackPageViewThunk({ userId: user.id, page: location.pathname }));
+      if ((user as any)?.roles?.[0]) {
+        dispatch(updateBreadcrumbsThunk({ route: location.pathname, role: (user as any).roles[0] }));
+      }
+    }
+  }, [location.pathname, user?.id, (user as any)?.roles, dispatch]);
 
   const handleNavClick = (item: unknown) => {
     console.log('Navigation clicked:', item);

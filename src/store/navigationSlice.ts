@@ -34,6 +34,7 @@ const initialState: NavigationState = {
   routeGuard: null,
 };
 
+// Load complete navigation state
 export const loadNavigationState = createAsyncThunk(
   'navigation/loadState',
   async ({ userId, role }: { userId: string; role: UserRole }) => {
@@ -41,6 +42,7 @@ export const loadNavigationState = createAsyncThunk(
   }
 );
 
+// Check a single route access
 export const checkRouteAccess = createAsyncThunk(
   'navigation/checkRouteAccess',
   async ({ userId, route, role }: { userId: string; route: string; role: UserRole }) => {
@@ -48,10 +50,77 @@ export const checkRouteAccess = createAsyncThunk(
   }
 );
 
+// Refresh analytics
 export const refreshNavigationAnalytics = createAsyncThunk(
   'navigation/refreshAnalytics',
   async ({ userId }: { userId: string }) => {
     return await NavigationAPI.getNavigationAnalytics(userId);
+  }
+);
+
+// Create and store route guard helper
+export const createRouteGuardThunk = createAsyncThunk(
+  'navigation/createRouteGuard',
+  async (
+    { userId, role }: { userId: string; role: UserRole },
+    { dispatch }
+  ) => {
+    const guard = await NavigationAPI.createRouteGuard(userId, role);
+    dispatch(setRouteGuard(guard));
+    return true;
+  }
+);
+
+// Update breadcrumbs based on current route/role
+export const updateBreadcrumbsThunk = createAsyncThunk(
+  'navigation/updateBreadcrumbs',
+  async (
+    { route, role }: { route: string; role: UserRole },
+    { dispatch }
+  ) => {
+    const result = await NavigationAPI.getBreadcrumbs(route, role);
+    dispatch(setBreadcrumbs(result.breadcrumbs));
+    return result.breadcrumbs;
+  }
+);
+
+// Update a single badge and mirror into store
+export const updateBadgeThunk = createAsyncThunk(
+  'navigation/updateBadge',
+  async (
+    { itemId, count }: { itemId: string; count: number },
+    { dispatch }
+  ) => {
+    await NavigationAPI.updateNavigationBadge(itemId, count);
+    dispatch(updateBadges({ [itemId]: count }));
+    return { itemId, count };
+  }
+);
+
+// Fire-and-forget tracking calls
+export const trackPageViewThunk = createAsyncThunk(
+  'navigation/trackPageView',
+  async ({ userId, page, timeSpent }: { userId: string; page: string; timeSpent?: number }) => {
+    await NavigationAPI.trackPageView(userId, page, timeSpent);
+    return true;
+  }
+);
+
+export const trackSearchThunk = createAsyncThunk(
+  'navigation/trackSearch',
+  async ({ userId, query, resultCount }: { userId: string; query: string; resultCount: number }) => {
+    await NavigationAPI.trackSearch(userId, query, resultCount);
+    return true;
+  }
+);
+
+export const trackComponentInteractionThunk = createAsyncThunk(
+  'navigation/trackComponentInteraction',
+  async (
+    { userId, componentId, interaction }: { userId: string; componentId: string; interaction: string }
+  ) => {
+    await NavigationAPI.trackComponentInteraction(userId, componentId, interaction);
+    return true;
   }
 );
 
@@ -67,6 +136,9 @@ const navigationSlice = createSlice({
     },
     setCustomization(state, action: PayloadAction<any>) {
       state.customization = action.payload;
+    },
+    setRouteGuard(state, action: PayloadAction<any>) {
+      state.routeGuard = action.payload;
     },
     resetState() {
       return initialState;
@@ -100,5 +172,5 @@ const navigationSlice = createSlice({
   }
 });
 
-export const { setBreadcrumbs, updateBadges, setCustomization, resetState } = navigationSlice.actions;
+export const { setBreadcrumbs, updateBadges, setCustomization, setRouteGuard, resetState } = navigationSlice.actions;
 export default navigationSlice.reducer;
