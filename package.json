@@ -52,6 +52,7 @@
     "@radix-ui/react-toggle": "^1.1.9",
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@reduxjs/toolkit": "^2.3.0",
     "@supabase/supabase-js": "^2.45.0",
     "@tanstack/react-query": "^5.84.2",
     "@types/jspdf": "^2.0.0",
@@ -63,6 +64,7 @@
     "cmdk": "^1.1.1",
     "core-js": "^3.45.0",
     "date-fns": "^3.6.0",
+    "dompurify": "^3.1.6",
     "framer-motion": "^11.18.2",
     "i18next": "^25.3.2",
     "i18next-browser-languagedetector": "^8.2.0",
@@ -82,7 +84,6 @@
     "react-i18next": "^15.6.1",
     "react-leaflet": "^4.2.1",
     "react-redux": "^9.1.2",
-    "@reduxjs/toolkit": "^2.3.0",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.23.0",
     "recharts": "^3.1.2",
@@ -91,8 +92,7 @@
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
     "vaul": "^0.9.9",
-    "zod": "^3.25.76",
-    "dompurify": "^3.1.6"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@testing-library/dom": "^8.19.0",
@@ -115,6 +115,7 @@
     "jest-environment-jsdom": "^30.0.5",
     "postcss": "^8.5.6",
     "sharp": "^0.34.3",
+    "svgo": "^4.0.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.0",
