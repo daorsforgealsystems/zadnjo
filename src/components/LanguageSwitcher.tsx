@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Check, ChevronDown } from 'lucide-react';
@@ -37,18 +37,31 @@ const LanguageSwitcher = ({ variant = 'default', className }: LanguageSwitcherPr
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language | null>(null);
+  const isMountedRef = useRef(false);
+
+  // Track mount status to avoid setting state after unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const current = languages.find(lang => lang.code === i18n.language) || languages[1]; // Default to English
-    setCurrentLanguage(current);
+    if (isMountedRef.current) {
+      setCurrentLanguage(current);
+    }
   }, [i18n.language]);
 
   const handleLanguageChange = async (languageCode: string) => {
     try {
       await i18n.changeLanguage(languageCode);
       const newLanguage = languages.find(lang => lang.code === languageCode);
-      setCurrentLanguage(newLanguage || languages[1]);
-      setIsOpen(false);
+      if (isMountedRef.current) {
+        setCurrentLanguage(newLanguage || languages[1]);
+        setIsOpen(false);
+      }
       
       // Store the language preference
       localStorage.setItem('i18nextLng', languageCode);

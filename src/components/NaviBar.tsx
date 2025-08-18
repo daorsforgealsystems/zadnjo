@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   NavigationMenu,
@@ -19,9 +19,11 @@ const NaviBar = () => {
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const isMountedRef = useRef(false);
 
   // Add scroll effect
   const handleScroll = () => {
+    if (!isMountedRef.current) return;
     if (window.scrollY > 20) {
       setIsScrolled(true);
     } else {
@@ -29,21 +31,22 @@ const NaviBar = () => {
     }
   };
 
-  // Set up scroll listener in useEffect to avoid state updates before component mount
+  // Set up scroll listener in useEffect and guard with mount ref
   useEffect(() => {
-    // Check if we're in a browser environment
+    isMountedRef.current = true;
     if (typeof window !== 'undefined') {
       // Initial check for scroll position
       handleScroll();
-      
       // Add event listener
       window.addEventListener('scroll', handleScroll);
-      
-      // Clean up event listener on component unmount
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-      };
     }
+    // Clean up event listener on component unmount
+    return () => {
+      isMountedRef.current = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, []);
 
   return (
