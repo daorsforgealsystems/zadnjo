@@ -33,6 +33,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { ROLES, Role } from "@/lib/types";
 import { preloadMapComponents } from "@/components/MapView";
+import { useNavigationState } from "@/hooks/useNavigationState";
 
 // Import the new advanced sidebar component
 import { CollapsibleSidebar } from "@/components/layout/navigation/CollapsibleSidebar";
@@ -65,6 +66,7 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
   const { hasRole } = useAuth();
+  const { badges } = useNavigationState();
   const [openCollapsibles, setOpenCollapsibles] = useState<string[]>([]);
 
   const toggleCollapsible = (id: string) => {
@@ -125,8 +127,8 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
         <>
             <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive ? "text-primary" : item.color)} />
             {isOpen && <span className={cn("flex-1", isActive && "font-semibold")}>{item.label}</span>}
-            {item.id === 'alerts' && isOpen && alertsCount > 0 && (
-              <Badge variant="destructive" className="animate-pulse">{alertsCount}</Badge>
+            {item.id === 'alerts' && isOpen && (alertsCount || badges?.alerts) > 0 && (
+              <Badge variant="destructive" className="animate-pulse">{alertsCount || badges?.alerts}</Badge>
             )}
             {isOpen && item.subItems && <ChevronRight className={cn("h-4 w-4 transition-transform", isCollapsibleOpen && "rotate-90")} />}
             {!isOpen && isActive && (

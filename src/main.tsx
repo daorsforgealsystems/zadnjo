@@ -8,6 +8,8 @@ import ErrorBoundary from './components/ErrorBoundary.tsx';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { LayoutProvider } from '@/components/providers/LayoutProvider';
+import { Provider as ReduxProvider } from 'react-redux';
+import { store } from './store';
 import { debug, initDebug } from './lib/debug';
 
 // Create a client with more resilient configuration
@@ -100,8 +102,10 @@ if (container) {
                     <ErrorBoundary>
                       {debug('Rendering LayoutProvider', 'info') || null}
                       <LayoutProvider>
-                        {debug('Rendering App component', 'info') || null}
-                        <App />
+                        {debug('Wiring Redux Provider', 'info') || null}
+                        <ReduxProvider store={store}>
+                          <App />
+                        </ReduxProvider>
                       </LayoutProvider>
                     </ErrorBoundary>
                   </ThemeProvider>

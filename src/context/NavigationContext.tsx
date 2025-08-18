@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useReducer, useCallback } 
 import { NavigationAPI, NavigationItem, NavigationAnalytics, UserRole } from '@/lib/api/navigation-api';
 import { useAuth } from './AuthContext';
 import { useLocation } from 'react-router-dom';
+import { useAppDispatch } from '@/store/hooks';
+import { loadNavigationState, setBreadcrumbs as setBreadcrumbsAction, updateBadges as updateBadgesAction } from '@/store/navigationSlice';
 
 interface NavigationState {
   menu: NavigationItem[];
@@ -110,6 +112,7 @@ export const NavigationProvider: React.FC<NavigationProviderProps> = ({ children
   const [state, dispatch] = useReducer(navigationReducer, initialState);
   const { user } = useAuth();
   const location = useLocation();
+  const rdxDispatch = useAppDispatch();
 
   // Track page navigation
   useEffect(() => {
@@ -121,12 +124,14 @@ export const NavigationProvider: React.FC<NavigationProviderProps> = ({ children
 
   // Load navigation data on mount or user change
   useEffect(() => {
-    if (user?.id && user.roles?.[0]) {
+    if (user?.id && (user as any).roles?.[0]) {
       loadNavigationData();
+      // Seed Redux store in parallel
+      rdxDispatch(loadNavigationState({ userId: user.id, role: (user as any).roles[0] as UserRole }));
     } else {
       dispatch({ type: 'RESET_STATE' });
     }
-  }, [user?.id, user?.roles]);
+  }, [user?.id, (user as any)?.roles, rdxDispatch]);
 
   const loadNavigationData = useCallback(async () => {
     if (!user?.id || !user.roles?.[0]) return;
@@ -206,24 +211,28 @@ export const NavigationProvider: React.FC<NavigationProviderProps> = ({ children
   }, [user?.id]);
 
   const updateBreadcrumbs = useCallback(async (route: string) => {
-    if (!user?.roles?.[0]) return;
+    if (!(user as any)?.roles?.[0]) return;
 
     try {
-      const result = await NavigationAPI.getBreadcrumbs(route, user.roles[0] as UserRole);
+      const result = await NavigationAPI.getBreadcrumbs(route, (user as any).roles[0] as UserRole);
       dispatch({ type: 'SET_BREADCRUMBS', payload: result.breadcrumbs });
+      // Mirror into Redux for consumers
+      rdxDispatch(setBreadcrumbsAction(result.breadcrumbs));
     } catch (error) {
       console.error('Error updating breadcrumbs:', error);
     }
-  }, [user?.roles]);
+  }, [(user as any)?.roles, rdxDispatch]);
 
   const updateBadge = useCallback(async (itemId: string, count: number) => {
     try {
       await NavigationAPI.updateNavigationBadge(itemId, count);
       dispatch({ type: 'UPDATE_BADGES', payload: { [itemId]: count } });
+      // Mirror into Redux for consumers
+      rdxDispatch(updateBadgesAction({ [itemId]: count }));
     } catch (error) {
       console.error('Error updating badge:', error);
     }
-  }, []);
+  }, [rdxDispatch]);
 
   const refreshAnalytics = useCallback(async () => {
     if (!user?.id) return;
