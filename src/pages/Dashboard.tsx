@@ -4,18 +4,95 @@ import NaviBar from '@/components/NaviBar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import FallbackBackground from '@/components/FallbackBackground';
 // Recharts will be dynamically imported to keep initial bundles smaller
 
 const Dashboard = () => {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoFailed, setVideoFailed] = useState(false);
 
-  // Initialize particles background
+  // Initialize video background with better error handling
   useEffect(() => {
-    // Video autoplay logic
+    // Video autoplay logic with retry mechanism and fallback
+    const attemptPlay = async () => {
+      if (!videoRef.current) return;
+      
+      try {
+        // Try to play the video
+        await videoRef.current.play();
+        setVideoFailed(false);
+      } catch (error) {
+        console.warn("Video autoplay initially failed, applying fallback strategy:", error);
+        
+        // Show the fallback background immediately
+        setVideoFailed(true);
+        
+        // Add event listeners to try playing when conditions might be better
+        const playOnUserInteraction = () => {
+          if (videoRef.current) {
+            videoRef.current.play().then(() => {
+              setVideoFailed(false);
+            }).catch(e => {
+              // If still failing, ensure the video is hidden and fallback is shown
+              setVideoFailed(true);
+              if (videoRef.current) {
+                videoRef.current.style.opacity = '0';
+              }
+            });
+          }
+          
+          // Remove the event listeners after first interaction
+          document.removeEventListener('click', playOnUserInteraction);
+          document.removeEventListener('touchstart', playOnUserInteraction);
+        };
+        
+        // Try to play on user interaction
+        document.addEventListener('click', playOnUserInteraction);
+        document.addEventListener('touchstart', playOnUserInteraction);
+      }
+    };
+    
+    attemptPlay();
+    
+    // Add visibility change listener to handle tab switching
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && videoRef.current) {
+        videoRef.current.play().then(() => {
+          setVideoFailed(false);
+        }).catch(() => {
+          // If still failing, ensure fallback is shown
+          setVideoFailed(true);
+        });
+      }
+    };
+    
+    // Add event listener for when video plays successfully after a delay
+    const handleVideoPlay = () => {
+      setVideoFailed(false);
+    };
+    
+    // Add event listener for when video fails
+    const handleVideoError = () => {
+      setVideoFailed(true);
+    };
+    
     if (videoRef.current) {
-      videoRef.current.play().catch(e => console.error("Video autoplay failed:", e));
+      videoRef.current.addEventListener('play', handleVideoPlay);
+      videoRef.current.addEventListener('error', handleVideoError);
     }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.removeEventListener('play', handleVideoPlay);
+        videoRef.current.removeEventListener('error', handleVideoError);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // We don't need to remove these as they're already removed after first interaction
+      // or they were never added if play was successful
+    };
   }, []);
 
   // Sample data for charts
@@ -48,6 +125,10 @@ const Dashboard = () => {
       
       {/* Hero Section with Video Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Fallback background shown when video fails */}
+        <FallbackBackground visible={videoFailed} />
+        
+        {/* Video background with better error handling */}
         <video
           ref={videoRef}
           src="/Whisk_cauajde4m2myzdrmlwfkyzutnduzyi1hngqzltk.mp4"
@@ -55,7 +136,14 @@ const Dashboard = () => {
           loop
           muted
           playsInline
+          poster="/video-poster.jpg" 
+          preload="auto"
           className="absolute top-0 left-0 w-full h-full object-cover z-0"
+          style={{ 
+            opacity: videoFailed ? 0 : 1,
+            transition: 'opacity 0.5s ease-in-out',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)' // Slight background color in case video fails
+          }}
         />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-background/90 via-background/70 to-background/50 z-10"></div>
         

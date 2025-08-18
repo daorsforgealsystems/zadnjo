@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   NavigationMenu,
@@ -29,10 +29,22 @@ const NaviBar = () => {
     }
   };
 
-  // Set up scroll listener
-  if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', handleScroll);
-  }
+  // Set up scroll listener in useEffect to avoid state updates before component mount
+  useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      // Initial check for scroll position
+      handleScroll();
+      
+      // Add event listener
+      window.addEventListener('scroll', handleScroll);
+      
+      // Clean up event listener on component unmount
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, []);
 
   return (
     <header 
