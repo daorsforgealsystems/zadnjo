@@ -13,7 +13,7 @@ interface ResponsiveNavbarProps {
   className?: string;
 }
 
-const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
+export const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
   config,
   onMenuToggle,
   className = '',
@@ -118,11 +118,6 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
                 placeholder={config.search.placeholder || "Search..."}
                 className="
                   w-full pl-10 pr-4 py-2 
-  // ...rest of the component JSX and logic...
-  // (No code should be after this function except export default)
-}
-
-export default ResponsiveNavbar;
                   bg-accent/50 border border-border rounded-md
                   focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
                   transition-all duration-200
