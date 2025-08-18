@@ -56,10 +56,9 @@ const ItemDetails = ({ item, onClose, onItemChange }: ItemDetailsProps) => {
                 <MapView coordinates={item.coordinates} />
               </div>
             </div>
-          </TabsContent>
+          </Tabs.Content>
 
-          <TabsContent value="history" className="mt-4">
-            <Tabs.Content value="history" className="mt-4">
+          <Tabs.Content value="history" className="mt-4">
             <ul className="space-y-2 max-h-72 overflow-y-auto">
               {item.history.map((entry, index) => (
                 <li key={index} className="text-sm p-2 rounded bg-muted/50">
@@ -67,20 +66,18 @@ const ItemDetails = ({ item, onClose, onItemChange }: ItemDetailsProps) => {
                 </li>
               ))}
             </ul>
-          </TabsContent>
+          </Tabs.Content>
 
-          <TabsContent value="documents" className="mt-4">
-            <Tabs.Content value="documents" className="mt-4">
+          <Tabs.Content value="documents" className="mt-4">
             <DocumentManager item={item} onDocumentsChange={handleDocumentsChange} />
-          </TabsContent>
+          </Tabs.Content>
 
-          <TabsContent value="chat" className="mt-4">
-            <Tabs.Content value="chat" className="mt-4">
+          <Tabs.Content value="chat" className="mt-4">
             <div className="h-[400px] border rounded-lg">
               <ShipmentChat shipmentId={item.id} />
             </div>
-          </TabsContent>
-        </Tabs>
+          </Tabs.Content>
+        </Tabs.Root>
       </DialogContent>
     </Dialog>
   );
