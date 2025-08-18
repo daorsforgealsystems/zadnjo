@@ -40,23 +40,30 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
 
       {/* Sticky Header */}
       <StickyHeader threshold={20} showProgress>
-        <ResponsiveNavbar
-          onMenuToggle={actions.toggleSidebar}
-          config={{
-            title: "DaorsForge",
-            subtitle: "AI Logistics Platform",
-            search: {
-              enabled: true,
-              placeholder: "Search logistics...",
-              showSuggestions: true,
-            },
-            userMenu: {
-              showNotifications: true,
-              notificationCount: alertsCount,
-            },
-            sticky: true,
-          }}
-        />
+        <div className="flex flex-col gap-2">
+          <ResponsiveNavbar
+            onMenuToggle={actions.toggleSidebar}
+            config={{
+              title: "DaorsForge",
+              subtitle: "AI Logistics Platform",
+              search: {
+                enabled: true,
+                placeholder: "Search logistics...",
+                showSuggestions: true,
+              },
+              userMenu: {
+                showNotifications: true,
+                notificationCount: alertsCount,
+              },
+              sticky: true,
+            }}
+          />
+          {/* Redux-driven breadcrumbs */}
+          <div className="px-4">
+            {/* Lazy import to avoid heavy initial render if needed */}
+            {React.createElement(require('@/components/layout/navigation/ReduxBreadcrumbs').ReduxBreadcrumbs)}
+          </div>
+        </div>
       </StickyHeader>
 
       {/* Sidebar */}
