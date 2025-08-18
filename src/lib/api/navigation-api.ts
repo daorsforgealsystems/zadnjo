@@ -111,12 +111,23 @@ export class NavigationAPI {
     target: string,
     metadata?: any
   ): Promise<{ success: boolean }> {
-    const response = await apiClient.post(`/navigation/activity/${userId}`, {
-      action,
-      target,
-      metadata
-    });
-    return response.data;
+    // Skip API calls for guest users to prevent connection errors
+    if (userId.includes('guest')) {
+      console.log('Skipping activity tracking for guest user');
+      return { success: true };
+    }
+    
+    try {
+      const response = await apiClient.post(`/navigation/activity/${userId}`, {
+        action,
+        target,
+        metadata
+      });
+      return response.data;
+    } catch (error) {
+      console.warn('Failed to log navigation activity:', error);
+      return { success: false };
+    }
   }
 
   // Analytics
@@ -152,10 +163,14 @@ export class NavigationAPI {
 
   // Convenience Methods for Common Operations
   static async trackPageView(userId: string, page: string, timeSpent?: number): Promise<void> {
+    // Skip tracking for guest users
+    if (userId.includes('guest')) return;
     await this.logActivity(userId, 'page_view', page, { timeSpent });
   }
 
   static async trackSearch(userId: string, query: string, resultCount: number): Promise<void> {
+    // Skip tracking for guest users
+    if (userId.includes('guest')) return;
     await this.logActivity(userId, 'search', query, { resultCount });
   }
 
@@ -164,6 +179,8 @@ export class NavigationAPI {
     componentId: string,
     interaction: string
   ): Promise<void> {
+    // Skip tracking for guest users
+    if (userId.includes('guest')) return;
     await this.logActivity(userId, 'component_interaction', componentId, { interaction });
   }
 
@@ -172,6 +189,8 @@ export class NavigationAPI {
     route: string,
     timeSpent?: number
   ): Promise<void> {
+    // Skip tracking for guest users
+    if (userId.includes('guest')) return;
     await this.logActivity(userId, 'route_access', route, { timeSpent });
   }
 

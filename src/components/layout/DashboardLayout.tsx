@@ -26,21 +26,26 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (user?.id && (user as any).roles?.[0]) {
-      const role = (user as any).roles[0];
+    if (user?.id) {
+      // Use the user's role if available, otherwise default to GUEST
+      const role = (user as any)?.roles?.[0] || user.role || 'GUEST';
       dispatch(loadNavigationState({ userId: user.id, role }));
       dispatch(createRouteGuardThunk({ userId: user.id, role }));
     }
-  }, [user?.id, (user as any)?.roles, dispatch]);
+  }, [user?.id, (user as any)?.roles, user?.role, dispatch]);
 
   useEffect(() => {
     if (user?.id) {
-      dispatch(trackPageViewThunk({ userId: user.id, page: location.pathname }));
-      if ((user as any)?.roles?.[0]) {
-        dispatch(updateBreadcrumbsThunk({ route: location.pathname, role: (user as any).roles[0] }));
+      // Only track for non-guest users to prevent connection errors
+      if (!user.id.includes('guest')) {
+        dispatch(trackPageViewThunk({ userId: user.id, page: location.pathname }));
       }
+      
+      // Use the user's role if available, otherwise default to GUEST
+      const role = (user as any)?.roles?.[0] || user.role || 'GUEST';
+      dispatch(updateBreadcrumbsThunk({ route: location.pathname, role }));
     }
-  }, [location.pathname, user?.id, (user as any)?.roles, dispatch]);
+  }, [location.pathname, user?.id, (user as any)?.roles, user?.role, dispatch]);
 
   const handleNavClick = (item: unknown) => {
     console.log('Navigation clicked:', item);

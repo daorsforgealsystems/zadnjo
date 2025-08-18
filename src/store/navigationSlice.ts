@@ -38,7 +38,35 @@ const initialState: NavigationState = {
 export const loadNavigationState = createAsyncThunk(
   'navigation/loadState',
   async ({ userId, role }: { userId: string; role: UserRole }) => {
-    return await NavigationAPI.getNavigationState(userId, role);
+    // For guest users, return a minimal navigation state to prevent API calls
+    if (userId.includes('guest')) {
+      return {
+        menu: [],
+        permissions: {
+          actions: [],
+          restrictedComponents: [],
+          landingPage: '/dashboard',
+          menuStructure: []
+        },
+        customization: {},
+        analytics: {
+          userId,
+          mostUsedRoutes: [],
+          searchQueries: [],
+          componentInteractions: [],
+          timeSpentByPage: {},
+          deviceUsage: { mobile: 0, tablet: 0, desktop: 0 },
+          generatedAt: new Date()
+        }
+      };
+    }
+    
+    try {
+      return await NavigationAPI.getNavigationState(userId, role);
+    } catch (error) {
+      console.warn('Failed to load navigation state:', error);
+      throw error;
+    }
   }
 );
 
@@ -65,9 +93,34 @@ export const createRouteGuardThunk = createAsyncThunk(
     { userId, role }: { userId: string; role: UserRole },
     { dispatch }
   ) => {
-    const guard = await NavigationAPI.createRouteGuard(userId, role);
-    dispatch(setRouteGuard(guard));
-    return true;
+    // For guest users, create a simple route guard that allows all routes
+    if (userId.includes('guest')) {
+      const guestGuard = {
+        canActivate: async () => true,
+        getAllowedRoutes: () => ['*'],
+        getRestrictedComponents: () => [],
+        getAvailableActions: () => []
+      };
+      dispatch(setRouteGuard(guestGuard));
+      return true;
+    }
+    
+    try {
+      const guard = await NavigationAPI.createRouteGuard(userId, role);
+      dispatch(setRouteGuard(guard));
+      return true;
+    } catch (error) {
+      console.warn('Failed to create route guard:', error);
+      // Create a fallback guard that allows basic routes
+      const fallbackGuard = {
+        canActivate: async () => true,
+        getAllowedRoutes: () => ['/dashboard', '/orders', '/profile'],
+        getRestrictedComponents: () => [],
+        getAvailableActions: () => []
+      };
+      dispatch(setRouteGuard(fallbackGuard));
+      return false;
+    }
   }
 );
 
@@ -78,9 +131,36 @@ export const updateBreadcrumbsThunk = createAsyncThunk(
     { route, role }: { route: string; role: UserRole },
     { dispatch }
   ) => {
-    const result = await NavigationAPI.getBreadcrumbs(route, role);
-    dispatch(setBreadcrumbs(result.breadcrumbs));
-    return result.breadcrumbs;
+    try {
+      // For guest users or error cases, generate simple breadcrumbs
+      if (role === 'GUEST') {
+        const simpleBreadcrumbs = [
+          { label: 'Home', href: '/' }
+        ];
+        
+        // Add current page to breadcrumbs
+        const pageName = route.split('/').filter(Boolean).pop();
+        if (pageName) {
+          simpleBreadcrumbs.push({
+            label: pageName.charAt(0).toUpperCase() + pageName.slice(1),
+            href: route
+          });
+        }
+        
+        dispatch(setBreadcrumbs(simpleBreadcrumbs));
+        return simpleBreadcrumbs;
+      }
+      
+      const result = await NavigationAPI.getBreadcrumbs(route, role);
+      dispatch(setBreadcrumbs(result.breadcrumbs));
+      return result.breadcrumbs;
+    } catch (error) {
+      console.warn('Failed to update breadcrumbs:', error);
+      // Fallback breadcrumbs
+      const fallbackBreadcrumbs = [{ label: 'Home', href: '/' }];
+      dispatch(setBreadcrumbs(fallbackBreadcrumbs));
+      return fallbackBreadcrumbs;
+    }
   }
 );
 
@@ -101,16 +181,32 @@ export const updateBadgeThunk = createAsyncThunk(
 export const trackPageViewThunk = createAsyncThunk(
   'navigation/trackPageView',
   async ({ userId, page, timeSpent }: { userId: string; page: string; timeSpent?: number }) => {
-    await NavigationAPI.trackPageView(userId, page, timeSpent);
-    return true;
+    // Skip tracking for guest users
+    if (userId.includes('guest')) return true;
+    
+    try {
+      await NavigationAPI.trackPageView(userId, page, timeSpent);
+      return true;
+    } catch (error) {
+      console.warn('Failed to track page view:', error);
+      return false;
+    }
   }
 );
 
 export const trackSearchThunk = createAsyncThunk(
   'navigation/trackSearch',
   async ({ userId, query, resultCount }: { userId: string; query: string; resultCount: number }) => {
-    await NavigationAPI.trackSearch(userId, query, resultCount);
-    return true;
+    // Skip tracking for guest users
+    if (userId.includes('guest')) return true;
+    
+    try {
+      await NavigationAPI.trackSearch(userId, query, resultCount);
+      return true;
+    } catch (error) {
+      console.warn('Failed to track search:', error);
+      return false;
+    }
   }
 );
 
@@ -119,8 +215,16 @@ export const trackComponentInteractionThunk = createAsyncThunk(
   async (
     { userId, componentId, interaction }: { userId: string; componentId: string; interaction: string }
   ) => {
-    await NavigationAPI.trackComponentInteraction(userId, componentId, interaction);
-    return true;
+    // Skip tracking for guest users
+    if (userId.includes('guest')) return true;
+    
+    try {
+      await NavigationAPI.trackComponentInteraction(userId, componentId, interaction);
+      return true;
+    } catch (error) {
+      console.warn('Failed to track component interaction:', error);
+      return false;
+    }
   }
 );
 
