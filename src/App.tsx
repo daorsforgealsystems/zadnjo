@@ -166,7 +166,7 @@ const AppContent = () => {
               {/* Logistics-themed slide/fade for key app sections */}
               {[
                 // Original routes
-                { path: '/dashboard', element: <Index /> },
+                { path: '/dashboard', element: <Dashboard /> },
                 { path: '/customer-dashboard', element: <CustomerDashboard /> },
                 { path: '/inventory', element: <Inventory /> },
                 { path: '/item-tracking', element: <ItemTracking /> },
