@@ -19,7 +19,7 @@ export interface LayoutPreferences {
   };
   headerConfig: HeaderConfig;
   footerConfig: FooterConfig;
-  updatedAt: Date;
+  updatedAt: string; // Changed from Date to string for serialization
 }
 
 export interface ComponentConfig {
@@ -78,8 +78,8 @@ export interface LayoutTemplate {
     headerConfig: HeaderConfig;
     footerConfig: FooterConfig;
   };
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // Changed from Date to string for serialization
+  updatedAt: string; // Changed from Date to string for serialization
 }
 
 export class PreferencesAPI {

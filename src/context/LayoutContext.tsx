@@ -154,7 +154,7 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
           sticky: false,
           variant: 'default',
         },
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(), // Serialize date as ISO string
       };
       
       dispatch({ type: 'SET_PREFERENCES', payload: defaultPreferences });
@@ -179,7 +179,13 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
     // For guest users, just update the local state without API call
     if (user.id === 'no-session-guest' || user.id === 'error-guest') {
-      dispatch({ type: 'SET_PREFERENCES', payload: { ...state.preferences, updatedAt: new Date() } });
+      dispatch({ 
+        type: 'SET_PREFERENCES', 
+        payload: { 
+          ...state.preferences, 
+          updatedAt: new Date().toISOString() // Serialize date as ISO string
+        } 
+      });
       toast.success('Layout preferences saved locally');
       return;
     }
@@ -329,7 +335,14 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
     // For guest users, directly update preferences
     if (user.id === 'no-session-guest' || user.id === 'error-guest') {
-      dispatch({ type: 'SET_PREFERENCES', payload: { ...data, userId: user.id, updatedAt: new Date() } });
+      dispatch({ 
+        type: 'SET_PREFERENCES', 
+        payload: { 
+          ...data, 
+          userId: user.id, 
+          updatedAt: new Date().toISOString() // Serialize date as ISO string
+        } 
+      });
       toast.success('Preferences imported successfully');
       return;
     }

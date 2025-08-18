@@ -33,7 +33,7 @@ export interface NavigationAnalytics {
     tablet: number;
     desktop: number;
   };
-  generatedAt: Date;
+  generatedAt: string; // Changed from Date to string for serialization
 }
 
 export type UserRole = 'ADMIN' | 'MANAGER' | 'USER' | 'DRIVER' | 'CUSTOMER';
@@ -304,7 +304,7 @@ export class NavigationAPI {
           componentInteractions: [],
           timeSpentByPage: {},
           deviceUsage: { mobile: 0, tablet: 0, desktop: 0 },
-          generatedAt: new Date()
+          generatedAt: new Date().toISOString() // Convert Date to ISO string for serialization
         }
       };
     }
