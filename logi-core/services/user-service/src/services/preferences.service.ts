@@ -130,7 +130,7 @@ export class PreferencesService {
     return allTemplates.filter(template => template.isPublic);
   }
 
-  async createLayoutTemplate(templateData: Omit<LayoutTemplate, 'id'>): Promise<LayoutTemplate> {
+  async createLayoutTemplate(templateData: Omit<LayoutTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<LayoutTemplate> {
     const template: LayoutTemplate = {
       ...templateData,
       id: `template_${Date.now()}`,
@@ -196,7 +196,7 @@ export class PreferencesService {
   ): Promise<LayoutTemplate> {
     const userPrefs = await this.getLayoutPreferences(userId);
     
-    const template: Omit<LayoutTemplate, 'id'> = {
+    const template: Omit<LayoutTemplate, 'id' | 'createdAt' | 'updatedAt'> = {
       name: layoutData.name,
       description: layoutData.description || '',
       preview: '', // Could generate preview image

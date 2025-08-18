@@ -109,7 +109,7 @@ export interface LayoutTemplate {
   authorId: string;
   components: ComponentConfig[];
   config: {
-    theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'auto';
     primaryColor: string;
     sidebarWidth: number;
     gridGap: number;
