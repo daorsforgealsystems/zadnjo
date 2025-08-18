@@ -6,7 +6,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Tabs from "@/components/ui/tabs";
 import { Map, List, MessageSquare, FileText } from "lucide-react";
 import MapView from './MapView';
 import DocumentManager from './DocumentManager';
@@ -38,15 +38,15 @@ const ItemDetails = ({ item, onClose, onItemChange }: ItemDetailsProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="details"><Map className="w-4 h-4 mr-2" />Details</TabsTrigger>
-            <TabsTrigger value="history"><List className="w-4 h-4 mr-2" />History</TabsTrigger>
-            <TabsTrigger value="documents"><FileText className="w-4 h-4 mr-2" />Documents</TabsTrigger>
-            <TabsTrigger value="chat"><MessageSquare className="w-4 h-4 mr-2" />Chat</TabsTrigger>
-          </TabsList>
+        <Tabs.Root defaultValue="details" className="w-full">
+          <Tabs.List className="grid w-full grid-cols-4">
+            <Tabs.Trigger value="details"><Map className="w-4 h-4 mr-2" />Details</Tabs.Trigger>
+            <Tabs.Trigger value="history"><List className="w-4 h-4 mr-2" />History</Tabs.Trigger>
+            <Tabs.Trigger value="documents"><FileText className="w-4 h-4 mr-2" />Documents</Tabs.Trigger>
+            <Tabs.Trigger value="chat"><MessageSquare className="w-4 h-4 mr-2" />Chat</Tabs.Trigger>
+          </Tabs.List>
 
-          <TabsContent value="details" className="mt-4">
+          <Tabs.Content value="details" className="mt-4">
             <div className="space-y-4">
               <div className="flex items-center">
                 <span className="font-semibold mr-2">Location:</span>
@@ -59,6 +59,7 @@ const ItemDetails = ({ item, onClose, onItemChange }: ItemDetailsProps) => {
           </TabsContent>
 
           <TabsContent value="history" className="mt-4">
+            <Tabs.Content value="history" className="mt-4">
             <ul className="space-y-2 max-h-72 overflow-y-auto">
               {item.history.map((entry, index) => (
                 <li key={index} className="text-sm p-2 rounded bg-muted/50">
@@ -69,10 +70,12 @@ const ItemDetails = ({ item, onClose, onItemChange }: ItemDetailsProps) => {
           </TabsContent>
 
           <TabsContent value="documents" className="mt-4">
+            <Tabs.Content value="documents" className="mt-4">
             <DocumentManager item={item} onDocumentsChange={handleDocumentsChange} />
           </TabsContent>
 
           <TabsContent value="chat" className="mt-4">
+            <Tabs.Content value="chat" className="mt-4">
             <div className="h-[400px] border rounded-lg">
               <ShipmentChat shipmentId={item.id} />
             </div>
