@@ -107,17 +107,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Try to get session with increased timeout and better error handling
         let sessionData = null;
         try {
-          // Increase timeout to 10 seconds to give more time for the session fetch
-          const { data } = await Promise.race([
-            supabase.auth.getSession(),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
-            )
+          // Resolve to null on timeout instead of throwing
+          const sessionResult = await Promise.race([
+            supabase.auth.getSession().then(({ data }) => data?.session ?? null),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000))
           ]);
-          sessionData = data?.session;
+          sessionData = sessionResult;
         } catch (sessionError) {
-          console.warn('Session fetch failed:', sessionError);
-          // Don't treat this as a fatal error, continue with null session
+          console.warn('Session fetch failed (non-fatal):', sessionError);
+          // Continue with null session
         }
         
         if (!isMounted) return;
@@ -128,14 +126,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (sessionData) {
           let userData = null;
           try {
-            // Increase timeout to 10 seconds to give more time for the user fetch
-            const { data } = await Promise.race([
-              supabase.auth.getUser(),
-              new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('User fetch timeout')), 10000)
-              )
+            // Resolve to null on timeout instead of throwing
+            const userResult = await Promise.race([
+              supabase.auth.getUser().then(({ data }) => data?.user ?? null),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000))
             ]);
-            userData = data?.user;
+            userData = userResult;
           } catch (userError) {
             console.warn('User fetch failed:', userError);
             // Continue with null user data, will be handled below
@@ -291,7 +287,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {/* Render children even if loading, but you can gate routes/components using useAuth().loading where needed */}
+      {children}
     </AuthContext.Provider>
   );
 }
