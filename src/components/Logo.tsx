@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import daorsforgeLogo from "@/assets/daorsforge-new-logo.jpg";
 
+
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
   className?: string;
-  linkTo?: string | null;
 }
 
-const Logo = ({ size = "md", showText = true, className, linkTo = "/" }: LogoProps) => {
+const Logo = ({ size = "md", showText = true, className }: LogoProps) => {
   const sizeClasses = {
     sm: "w-8 h-8",
     md: "w-10 h-10", 
@@ -50,14 +50,6 @@ const Logo = ({ size = "md", showText = true, className, linkTo = "/" }: LogoPro
       )}
     </div>
   );
-
-  if (linkTo && linkTo !== "") {
-    return (
-      <Link to={linkTo} className="hover:opacity-80 transition-opacity">
-        {logoContent}
-      </Link>
-    );
-  }
 
   return logoContent;
 };

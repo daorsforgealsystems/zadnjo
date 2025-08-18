@@ -88,7 +88,7 @@ export const initDebug = () => {
   // Override console.error to catch unhandled errors
   const originalConsoleError = console.error;
   console.error = (...args) => {
-    debug(`Console error: ${args.join(' ')}`, 'error');
+    // Avoid calling debug here to prevent infinite recursion
     originalConsoleError.apply(console, args);
   };
   

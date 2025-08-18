@@ -413,13 +413,11 @@ const App = () => {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <Router>
-        <AppContent />
-        {/* Debug overlay - press Ctrl+Shift+D to show/hide */}
-        <DebugOverlay enabled={true} />
-      </Router>
-    </ErrorBoundary>
+    <AppProviders>
+      <AppContent />
+      {/* Debug overlay - press Ctrl+Shift+D to show/hide */}
+      <DebugOverlay enabled={true} />
+    </AppProviders>
   );
 };
 
