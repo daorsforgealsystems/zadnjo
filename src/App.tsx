@@ -76,7 +76,7 @@ const CustomerPortalLayout = lazyWithErrorHandling(() => import('./components/Cu
 const ProtectedRoute = lazyWithErrorHandling(() => import('./components/ProtectedRoute'));
 const LandingPage = lazyWithErrorHandling(() => import('./pages/LandingPage'));
 const ResponsiveLayout = lazyWithErrorHandling(() => import('./components/ResponsiveLayout'));
-const DemoPage = lazyWithErrorHandling(() => import('./pages/DemoPage'));
+
 const ModernFooter = lazyWithErrorHandling(() => import('./components/ModernFooter'));
 const ProfilePage = lazyWithErrorHandling(() => import('./pages/ProfilePage'));
 const DashboardLayout = lazyWithErrorHandling(() => import('./components/layout/DashboardLayout').then(m => ({ default: m.DashboardLayout })));
@@ -95,8 +95,7 @@ const DocumentManagement = lazyWithErrorHandling(() => import('./pages/documents
 const ReportGeneration = lazyWithErrorHandling(() => import('./pages/reports/ReportGeneration'));
 const Chatbot = lazyWithErrorHandling(() => import('./pages/chatbot/Chatbot'));
 const FleetTracking = lazyWithErrorHandling(() => import('./pages/FleetTracking'));
-const IntegratedLayoutDemo = lazyWithErrorHandling(() => import('./components/layout/IntegratedLayoutDemo'));
-const UXShowcase = lazyWithErrorHandling(() => import('./pages/UXShowcase'));
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -180,7 +179,7 @@ const AppContent = () => {
                 { path: '/team', element: <Team /> },
                 { path: '/enhanced-dashboard', element: <EnhancedDashboard /> },
                 { path: '/contact', element: <Support /> },
-                { path: '/demo', element: <DemoPage /> },
+
                 { path: '/profile', element: <ProfilePage /> },
                 
                 // New dashboard pages
@@ -197,8 +196,7 @@ const AppContent = () => {
                 { path: '/report-generation', element: <ReportGeneration /> },
                 { path: '/chatbot', element: <Chatbot /> },
                 { path: '/fleet-tracking', element: <FleetTracking /> },
-                { path: '/layout-demo', element: <IntegratedLayoutDemo /> },
-                { path: '/ux-showcase', element: <UXShowcase /> },
+
               ].map(({ path, element }) => (
                 <Route
                   key={path}
