@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
 import { createRouteGuardThunk, loadNavigationState, trackPageViewThunk, updateBreadcrumbsThunk } from '@/store/navigationSlice';
+import ReduxBreadcrumbs from '@/components/layout/navigation/ReduxBreadcrumbs';
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -84,8 +85,7 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
           />
           {/* Redux-driven breadcrumbs */}
           <div className="px-4">
-            {/* Lazy import to avoid heavy initial render if needed */}
-            {React.createElement(require('@/components/layout/navigation/ReduxBreadcrumbs').ReduxBreadcrumbs)}
+            <ReduxBreadcrumbs />
           </div>
         </div>
       </StickyHeader>
