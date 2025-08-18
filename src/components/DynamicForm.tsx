@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, sanitizeInput, sanitizeRecord } from '@/lib/utils';
 import { CalendarIcon, Phone, MapPin } from 'lucide-react';
 
 interface FormFieldSchema {
@@ -90,15 +90,16 @@ const DynamicForm = ({
   };
 
   const handleInputChange = (fieldId: string, value: any) => {
-    setFormData(prev => ({ ...prev, [fieldId]: value }));
+    const field = schema.find(f => f.id === fieldId);
+    // Sanitize string inputs to prevent XSS; keep non-strings as-is
+    const safeValue = typeof value === 'string' ? sanitizeInput(value) : value;
+
+    setFormData(prev => ({ ...prev, [fieldId]: safeValue }));
     
     // Validate on change if field has been touched
-    if (touched[fieldId]) {
-      const field = schema.find(f => f.id === fieldId);
-      if (field) {
-        const error = validateField(field, value);
-        setErrors(prev => ({ ...prev, [fieldId]: error }));
-      }
+    if (touched[fieldId] && field) {
+      const error = validateField(field, safeValue);
+      setErrors(prev => ({ ...prev, [fieldId]: error }));
     }
   };
 
@@ -132,7 +133,9 @@ const DynamicForm = ({
     
     // If no errors, submit
     if (Object.keys(newErrors).length === 0) {
-      onSubmit?.(formData);
+      // Final pass: sanitize all string fields before submit
+      const safePayload = sanitizeRecord(formData);
+      onSubmit?.(safePayload);
     }
   };
 

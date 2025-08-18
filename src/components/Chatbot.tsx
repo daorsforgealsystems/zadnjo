@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { sanitizeInput } from "@/lib/utils";
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,13 +20,15 @@ const Chatbot = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    // Sanitize user keystrokes to prevent script injection attempts
+    setInputValue(e.target.value.replace(/<[^>]*>/g, ""));
   };
 
   const handleSendMessage = async () => {
     if (inputValue.trim() === "") return;
 
-    const newMessages = [...messages, { from: "user", text: inputValue }];
+    const safeText = sanitizeInput(inputValue);
+    const newMessages = [...messages, { from: "user", text: safeText }];
     setMessages(newMessages);
     setInputValue("");
 
