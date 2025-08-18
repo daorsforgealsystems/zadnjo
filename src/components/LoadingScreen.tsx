@@ -1,11 +1,14 @@
 import { Truck, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { FullPageLoading } from '@/components/ui/loading-states';
+import { EnhancedError, createErrorInfo } from '@/components/ui/enhanced-error';
 
 interface LoadingScreenProps {
   timeout?: number; // Timeout in milliseconds
+  useEnhanced?: boolean; // Use enhanced loading screen
 }
 
-const LoadingScreen = ({ timeout = 15000 }: LoadingScreenProps) => {
+const LoadingScreen = ({ timeout = 15000, useEnhanced = true }: LoadingScreenProps) => {
   const [isTimedOut, setIsTimedOut] = useState(false);
   const [loadingTime, setLoadingTime] = useState(0);
   const [loadingStage, setLoadingStage] = useState('Initializing application...');
@@ -53,6 +56,23 @@ const LoadingScreen = ({ timeout = 15000 }: LoadingScreenProps) => {
 
   // If timed out, show retry option
   if (isTimedOut) {
+    if (useEnhanced) {
+      const timeoutError = createErrorInfo.timeout(
+        'The application is taking longer than expected to load. This might be due to network issues or service unavailability.'
+      );
+      timeoutError.timestamp = new Date();
+
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <EnhancedError
+            error={timeoutError}
+            onRetry={() => window.location.reload()}
+            onGoHome={() => window.location.href = '/'}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-6 max-w-md p-6">
@@ -92,6 +112,31 @@ const LoadingScreen = ({ timeout = 15000 }: LoadingScreenProps) => {
   }
 
   // Normal loading screen
+  if (useEnhanced) {
+    const stages = [
+      'Initializing application...',
+      'Loading resources...',
+      'Connecting to services...',
+      'Preparing dashboard...',
+      'Almost there...'
+    ];
+
+    const currentStepIndex = Math.min(
+      Math.floor((loadingTime / timeout) * stages.length),
+      stages.length - 1
+    );
+
+    return (
+      <FullPageLoading
+        title="DAORS Flow Motion"
+        subtitle="Preparing your logistics platform..."
+        progress={(loadingTime / timeout) * 100}
+        steps={stages}
+        currentStep={currentStepIndex}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center space-y-4 max-w-md p-6">

@@ -2,10 +2,12 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { EnhancedError, createErrorInfo } from '@/components/ui/enhanced-error';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  useEnhancedError?: boolean;
 }
 
 interface State {
@@ -39,6 +41,33 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      // Use enhanced error handling if enabled
+      if (this.props.useEnhancedError) {
+        const errorInfo = createErrorInfo.unknown(
+          this.state.error?.message || 'An unexpected error occurred',
+          this.state.error?.stack
+        );
+        errorInfo.timestamp = new Date();
+
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <EnhancedError
+              error={errorInfo}
+              onRetry={this.handleReset}
+              onGoHome={() => window.location.href = '/'}
+              onContactSupport={() => {
+                const subject = encodeURIComponent('Error Report');
+                const body = encodeURIComponent(
+                  `Error: ${errorInfo.title}\nMessage: ${errorInfo.message}\nTimestamp: ${errorInfo.timestamp?.toISOString()}`
+                );
+                window.open(`mailto:support@example.com?subject=${subject}&body=${body}`);
+              }}
+            />
+          </div>
+        );
+      }
+
+      // Fallback to original error UI
       return (
         <div className="min-h-screen flex items-center justify-center p-4">
           <Card className="w-full max-w-md">

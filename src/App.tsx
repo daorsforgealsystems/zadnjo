@@ -96,6 +96,7 @@ const ReportGeneration = lazyWithErrorHandling(() => import('./pages/reports/Rep
 const Chatbot = lazyWithErrorHandling(() => import('./pages/chatbot/Chatbot'));
 const FleetTracking = lazyWithErrorHandling(() => import('./pages/FleetTracking'));
 const IntegratedLayoutDemo = lazyWithErrorHandling(() => import('./components/layout/IntegratedLayoutDemo'));
+const UXShowcase = lazyWithErrorHandling(() => import('./pages/UXShowcase'));
 
 const AppContent = () => {
   const location = useLocation();
@@ -197,6 +198,7 @@ const AppContent = () => {
                 { path: '/chatbot', element: <Chatbot /> },
                 { path: '/fleet-tracking', element: <FleetTracking /> },
                 { path: '/layout-demo', element: <IntegratedLayoutDemo /> },
+                { path: '/ux-showcase', element: <UXShowcase /> },
               ].map(({ path, element }) => (
                 <Route
                   key={path}
