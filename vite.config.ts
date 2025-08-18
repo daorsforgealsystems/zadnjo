@@ -1,13 +1,40 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import svgr from "vite-plugin-svgr";
+import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    // Optimize and import SVGs as React components with SVGO cleanup
+    svgr({
+      svgrOptions: { icon: true },
+      svgo: true,
+      svgoConfig: {
+        plugins: [
+          { name: "removeViewBox", active: false }, // keep viewBox for responsiveness
+          { name: "cleanupIDs", active: true },
+        ],
+      },
+    }),
+
+    // Build-time image optimization (jpg/png/webp/avif/svg)
+    ViteImageOptimizer({
+      includePublic: true, // also optimize images placed in /public
+      logStats: true,
+      // common quality presets; tweak as needed
+      jpg: { quality: 80, mozjpeg: false },
+      png: { quality: 80 },
+      webp: { quality: 75 },
+      avif: { quality: 50 },
+      svg: { multipass: true },
+    }),
+
     react(),
+
     // Progressive Web App support
     VitePWA({
       registerType: 'autoUpdate',
@@ -65,8 +92,24 @@ export default defineConfig({
     },
   },
   build: {
+    // Keep assets as external files (avoid base64 inlining for better caching)
+    assetsInlineLimit: 0,
+
+    // Explicitly enable CSS splitting and modern module preload
+    cssCodeSplit: true,
+    modulePreload: true,
+
+    // Skip computing brotli/gzip sizes to speed up builds
+    reportCompressedSize: false,
+
     // Increase warning limit and split large vendor chunks
     chunkSizeWarningLimit: 1024, // 1 MB
+
+    // Drop console/debugger in production for smaller bundles
+    esbuild: {
+      drop: ["console", "debugger"],
+    },
+
     rollupOptions: {
       output: {
         manualChunks: {

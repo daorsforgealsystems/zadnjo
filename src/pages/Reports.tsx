@@ -4,6 +4,7 @@ import { pageTransition, listItem } from '@/lib/motion-variants';
 import { Item, LiveRoute } from '@/lib/types';
 import { getItems, getLiveRoutes } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { ExportUploadButtons } from '@/components/ExportUploadButtons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download } from 'lucide-react';
@@ -164,15 +165,18 @@ const Reports: React.FC = () => {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-4">
-        <Button onClick={generateCsv} variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Generate CSV
-        </Button>
-        <Button onClick={generatePdf}>
-          <Download className="mr-2 h-4 w-4" />
-          Generate PDF
-        </Button>
+
+      <div className="flex flex-col md:flex-row justify-end gap-4">
+        <div className="flex gap-2">
+          <Button onClick={generatePdf}>
+            <Download className="mr-2 h-4 w-4" />
+            Generate PDF
+          </Button>
+        </div>
+        <ExportUploadButtons
+          data={reportType === 'inventory' ? filteredInventory : filteredShipments}
+          columns={reportType === 'inventory' ? ['id', 'name', 'status', 'location'] : ['id', 'from', 'to', 'status', 'driver', 'eta']}
+        />
       </div>
 
       <div>
