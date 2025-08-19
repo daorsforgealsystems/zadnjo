@@ -34,5 +34,6 @@ export interface MobileNavigationConfig {
   swipeGestures: boolean;
   bottomNavigation: boolean;
   collapsibleSections: boolean;
+  items: NavigationItem[];
   quickActions?: NavigationItem[];
 }

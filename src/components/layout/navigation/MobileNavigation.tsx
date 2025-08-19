@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { Menu, X } from 'lucide-react';
-import { MobileNavigationConfig } from '@/types/navigation';
+import { MobileNavigationConfig, NavigationItem } from '@/types/navigation';
 
 interface MobileNavigationProps {
   config: MobileNavigationConfig;
-  onItemClick: (item: any) => void;
+  onItemClick: (item: NavigationItem) => void;
   className?: string;
 }
 
 // Lazy-loaded menu component
-const LazyMenu: React.FC<{ config: MobileNavigationConfig; onItemClick: (item: any) => void }> = ({ config, onItemClick }) => (
+const LazyMenu: React.FC<{ config: MobileNavigationConfig; onItemClick: (item: NavigationItem) => void }> = ({ config, onItemClick }) => (
   <nav className="p-4">
     {config.items.map((item, index) => (
       <button

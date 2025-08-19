@@ -82,9 +82,9 @@ export const animateMenuItemHover = (
   isHovered: boolean,
   config: NavigationAnimationConfig = navigationAnimationPresets.menuItemHover
 ) => {
-  const icon = element.querySelector('[data-nav-icon]');
-  const text = element.querySelector('[data-nav-text]');
-  const indicator = element.querySelector('[data-nav-indicator]');
+  const icon = element.querySelector('[data-nav-icon]') as HTMLElement;
+  const text = element.querySelector('[data-nav-text]') as HTMLElement;
+  const indicator = element.querySelector('[data-nav-indicator]') as HTMLElement;
 
   anime({
     targets: element,
@@ -224,7 +224,7 @@ export const animateActiveMenuItem = (
   element: HTMLElement,
   config: NavigationAnimationConfig = navigationAnimationPresets.menuItemHover
 ) => {
-  const indicator = element.querySelector('[data-nav-indicator]');
+  const indicator = element.querySelector('[data-nav-indicator]') as HTMLElement;
   
   anime({
     targets: element,
@@ -278,7 +278,7 @@ export const animateSearchFocus = (
   isFocused: boolean,
   config: NavigationAnimationConfig = navigationAnimationPresets.menuItemHover
 ) => {
-  const searchIcon = searchElement.querySelector('[data-search-icon]');
+  const searchIcon = searchElement.querySelector('[data-search-icon]') as HTMLElement;
   
   anime({
     targets: searchElement,

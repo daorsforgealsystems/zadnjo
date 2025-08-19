@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types/navigation';
+import { useBreadcrumbs } from '@/hooks/useBreadcrumbs';
 
 interface BreadcrumbsProps {
   items?: BreadcrumbItem[];
@@ -164,7 +165,7 @@ export const BreadcrumbSeparator: React.FC<{ className?: string }> = ({ classNam
 );
 
 // Individual breadcrumb item component
-export const BreadcrumbItem: React.FC<{
+export const BreadcrumbItemComponent: React.FC<{
   children: React.ReactNode;
   href?: string;
   isActive?: boolean;
@@ -206,38 +207,3 @@ export const BreadcrumbContainer: React.FC<{
     <ol className="flex items-center space-x-1">{children}</ol>
   </nav>
 );
-
-// Hook for generating breadcrumbs from route
-export const useBreadcrumbs = (customItems?: BreadcrumbItem[]) => {
-  const location = useLocation();
-  
-  if (customItems) {
-    return customItems;
-  }
-
-  // Generate breadcrumbs from pathname
-  const pathSegments = location.pathname.split('/').filter(Boolean);
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Home', href: '/', icon: Home },
-  ];
-
-  let currentPath = '';
-  pathSegments.forEach((segment, index) => {
-    currentPath += `/${segment}`;
-    const isLast = index === pathSegments.length - 1;
-    
-    // Convert segment to readable label
-    const label = segment
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-
-    breadcrumbs.push({
-      label,
-      href: currentPath,
-      isActive: isLast,
-    });
-  });
-
-  return breadcrumbs;
-};
