@@ -82,17 +82,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize from Supabase current session with timeout
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
+    let initCompleted = false;
     
     // Set a timeout to prevent hanging indefinitely
     const initTimeout = setTimeout(() => {
-      if (isMounted && loading) {
-        console.warn('Auth initialization timed out, proceeding as guest');
+      if (isMounted && loading && !initCompleted) {
+        if (import.meta.env.DEV) {
+          console.info('Auth initialization timed out, proceeding as guest');
+        }
         setLoading(false);
         // Set as guest user to allow app to function when auth times out
         setUser({ id: 'timeout-guest', username: 'Guest User', role: ROLES.GUEST });
       }
-    }, 15000); // Increased to 15 seconds to give more time for the entire auth process
+    }, 15000); // 15s hard cap for init
     
     const initializeAuth = async () => {
       try {
@@ -163,6 +165,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } finally {
         if (isMounted) {
+          initCompleted = true;
           setLoading(false);
           clearTimeout(initTimeout);
         }
