@@ -134,7 +134,7 @@ export const animateGradientText = (
     direction: 'alternate',
     loop: true,
     autoplay: config.autoplay ?? true,
-    update: (anim) => {
+    update: (anim: anime.AnimeInstance) => {
       const progress = anim.progress / 100;
       const xPos = progress * 400;
       const yPos = Math.sin(progress * Math.PI * 2) * 100 + 100;
@@ -213,7 +213,7 @@ export const animateTextOnScroll = (
         switch (animationType) {
           case 'fadeInUp':
             anime({
-              targets: entry.target,
+              targets: entry.target as HTMLElement,
               opacity: [0, 1],
               translateY: [20, 0],
               duration: config?.duration || 600,
@@ -222,7 +222,7 @@ export const animateTextOnScroll = (
             break;
           case 'slideFromLeft':
             anime({
-              targets: entry.target,
+              targets: entry.target as HTMLElement,
               opacity: [0, 1],
               translateX: [-50, 0],
               duration: config?.duration || 800,

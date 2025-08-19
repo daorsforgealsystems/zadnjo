@@ -157,7 +157,7 @@ export const animateMobileMenuSlide = (
   if (isOpen && menuItems.length > 0) {
     Array.from(menuItems).forEach((item, idx) => {
       anime({
-        targets: item,
+        targets: item as HTMLElement,
         opacity: [0, 1],
         translateX: [-30, 0],
         duration: (config.duration ?? 350) * 0.8,
@@ -208,7 +208,7 @@ export const animateDropdownReveal = (
   if (isVisible && items.length > 0) {
     Array.from(items).forEach((item, idx) => {
       anime({
-        targets: item,
+        targets: item as HTMLElement,
         opacity: [0, 1],
         translateY: [-10, 0],
         duration: (config.duration ?? 200) * 0.8,

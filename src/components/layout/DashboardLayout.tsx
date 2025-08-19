@@ -82,6 +82,38 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
           swipeGestures: true,
           bottomNavigation: true,
           collapsibleSections: true,
+          items: [
+            {
+              id: 'dashboard',
+              label: 'Dashboard',
+              href: '/',
+            },
+            {
+              id: 'live-map',
+              label: 'Live Map',
+              href: '/live-map',
+            },
+            {
+              id: 'inventory',
+              label: 'Inventory',
+              href: '/inventory',
+            },
+            {
+              id: 'fleet-tracking',
+              label: 'Fleet Tracking',
+              href: '/fleet-tracking',
+            },
+            {
+              id: 'reports',
+              label: 'Reports',
+              href: '/reports',
+            },
+            {
+              id: 'settings',
+              label: 'Settings',
+              href: '/settings',
+            },
+          ],
           quickActions: [],
         }}
         onItemClick={handleNavClick}
