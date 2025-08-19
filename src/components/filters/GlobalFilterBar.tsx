@@ -7,9 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+export interface FilterState {
+  q: string;
+  status: string;
+  region: string;
+  vehicle: string;
+  from: string;
+  to: string;
+}
+
 export interface GlobalFilterBarProps {
   className?: string;
-  onApply?: (filters: Record<string, any>) => void;
+  onApply?: (filters: FilterState) => void;
   onReset?: () => void;
   // available options
   statuses?: string[];
@@ -25,7 +34,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
   regions = ['All', 'BA', 'RS', 'HR', 'CH-DE', 'CH-FR'],
   vehicles = ['All', 'TRK-001', 'TRK-002', 'VAN-101'],
 }) => {
-  const [filters, setFilters] = useUrlState({
+  const [filters, setFilters] = useUrlState<FilterState>({
     q: '',
     status: 'All',
     region: 'All',
@@ -50,14 +59,14 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
           <label className="text-xs text-muted-foreground">Search</label>
           <Input
             placeholder="Search shipments, orders, customers..."
-            value={String(filters.q || '')}
+            value={filters.q}
             onChange={(e) => setFilters({ q: e.target.value })}
           />
         </div>
 
         <div>
           <label className="text-xs text-muted-foreground">Status</label>
-          <Select value={String(filters.status)} onValueChange={(v) => setFilters({ status: v })}>
+          <Select value={filters.status} onValueChange={(v) => setFilters({ status: v })}>
             <SelectTrigger>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -71,7 +80,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
 
         <div>
           <label className="text-xs text-muted-foreground">Region</label>
-          <Select value={String(filters.region)} onValueChange={(v) => setFilters({ region: v })}>
+          <Select value={filters.region} onValueChange={(v) => setFilters({ region: v })}>
             <SelectTrigger>
               <SelectValue placeholder="Region" />
             </SelectTrigger>
@@ -85,7 +94,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
 
         <div>
           <label className="text-xs text-muted-foreground">Vehicle</label>
-          <Select value={String(filters.vehicle)} onValueChange={(v) => setFilters({ vehicle: v })}>
+          <Select value={filters.vehicle} onValueChange={(v) => setFilters({ vehicle: v })}>
             <SelectTrigger>
               <SelectValue placeholder="Vehicle" />
             </SelectTrigger>
@@ -101,7 +110,8 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
           <label className="text-xs text-muted-foreground">Date Range</label>
           <DateRangePicker
             onUpdate={(range) => {
-              setFilters({ from: (range as any)?.from ?? '', to: (range as any)?.to ?? '' });
+              const dateRange = range as { from?: string; to?: string } | null;
+              setFilters({ from: dateRange?.from ?? '', to: dateRange?.to ?? '' });
             }}
           />
         </div>
@@ -114,12 +124,16 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
 
       {/* Active filter badges */}
       <div className="mt-3 flex flex-wrap gap-2">
-        {['status', 'region', 'vehicle'].map((k) => {
-          const val = (filters as any)[k];
-          if (!val || val === 'All') return null;
-          return <Badge key={k} variant="outline" className="capitalize">{k}: {String(val)}</Badge>;
-        })}
-        {filters.q ? <Badge variant="outline">q: {String(filters.q)}</Badge> : null}
+        {(Object.keys(filters) as Array<keyof FilterState>)
+          .filter((key): key is 'status' | 'region' | 'vehicle' => 
+            ['status', 'region', 'vehicle'].includes(key)
+          )
+          .map((key) => {
+            const val = filters[key];
+            if (!val || val === 'All') return null;
+            return <Badge key={key} variant="outline" className="capitalize">{key}: {val}</Badge>;
+          })}
+        {filters.q ? <Badge variant="outline">q: {filters.q}</Badge> : null}
       </div>
     </div>
   );

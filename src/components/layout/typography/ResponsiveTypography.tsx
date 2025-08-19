@@ -132,7 +132,7 @@ export const ResponsiveHeading: React.FC<Omit<ResponsiveTypographyProps, 'varian
   level = 1, 
   ...props 
 }) => (
-  <ResponsiveTypography variant={`h${level}` as any} {...props} />
+  <ResponsiveTypography variant={`h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'} {...props} />
 );
 
 export const ResponsiveText: React.FC<Omit<ResponsiveTypographyProps, 'variant'> & { size?: 'large' | 'normal' | 'small' }> = ({ 
