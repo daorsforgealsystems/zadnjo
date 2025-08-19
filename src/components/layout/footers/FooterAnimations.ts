@@ -51,7 +51,7 @@ export const animateFooterSlideUp = (
   element: HTMLElement,
   config: FooterAnimationConfig = footerAnimationPresets.slideUp
 ) => {
-  const sections = element.querySelectorAll('[data-footer-section]');
+  const sections = element.querySelectorAll<HTMLElement>('[data-footer-section]');
   
   // Set initial state
   element.style.transform = 'translateY(100px)';
@@ -112,7 +112,7 @@ export const animateFooterExpand = (
   collapsedHeight: number,
   config: FooterAnimationConfig = footerAnimationPresets.expandCollapse
 ) => {
-  const expandableContent = element.querySelector('[data-expandable-content]');
+  const expandableContent = element.querySelector<HTMLElement>('[data-expandable-content]');
   
   anime({
     targets: element,
@@ -138,7 +138,7 @@ export const animateSocialIconHover = (
   isHovered: boolean,
   config: FooterAnimationConfig = footerAnimationPresets.socialHover
 ) => {
-  const icon = element.querySelector('[data-social-icon]');
+  const icon = element.querySelector<HTMLElement>('[data-social-icon]');
   
   anime({
     targets: element,
@@ -413,7 +413,7 @@ export const animateFooterMobileAccordion = (
     easing: 'easeInOutQuad'
   }
 ) => {
-  const chevron = headerElement.querySelector('[data-accordion-chevron]');
+  const chevron = headerElement.querySelector<HTMLElement>('[data-accordion-chevron]');
   
   // Animate chevron
   if (chevron) {

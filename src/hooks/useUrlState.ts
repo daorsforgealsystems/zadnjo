@@ -27,24 +27,25 @@ function decode(value: string | null): unknown {
   }
 }
 
-export function useUrlState<T extends UrlState = UrlState>(defaults: T) {
+export function useUrlState<T extends object = Record<string, unknown>>(defaults: T) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   const state = useMemo(() => {
-    const entries: Record<string, unknown> = { ...defaults };
-    Object.keys(defaults).forEach((key) => {
-      entries[key] = decode(params.get(key));
-      if (entries[key] === undefined || entries[key] === '') entries[key] = defaults[key];
+    const entries = { ...defaults } as T;
+    (Object.keys(defaults) as (keyof T)[]).forEach((key) => {
+      const raw = params.get(String(key));
+      const decoded = decode(raw);
+      (entries as any)[key] = decoded === undefined || decoded === '' ? (defaults as any)[key] : decoded;
     });
-    return entries as T;
+    return entries;
   }, [params, defaults]);
 
   function setUrlState(patch: Partial<T>, options: { replace?: boolean } = {}) {
     const next = new URLSearchParams(location.search);
-    Object.entries(patch).forEach(([key, val]) => {
+    Object.entries(patch as Record<string, unknown>).forEach(([key, val]) => {
       const encoded = encode(val);
       if (!encoded) next.delete(key);
       else next.set(key, encoded);
@@ -56,7 +57,7 @@ export function useUrlState<T extends UrlState = UrlState>(defaults: T) {
   useEffect(() => {
     if (!location.search) {
       const sp = new URLSearchParams();
-      Object.entries(defaults).forEach(([k, v]) => {
+      Object.entries(defaults as Record<string, unknown>).forEach(([k, v]) => {
         const enc = encode(v);
         if (enc) sp.set(k, enc);
       });

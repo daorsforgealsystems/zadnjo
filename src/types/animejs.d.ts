@@ -1,6 +1,7 @@
 declare module 'animejs' {
   export interface AnimeParams {
-    targets: HTMLElement | HTMLElement[] | NodeList | HTMLCollection | string;
+    // Optional for cases like anime.timeline({ easing: ... }) where targets are provided per .add
+    targets?: HTMLElement | HTMLElement[] | NodeList | HTMLCollection | string;
     translateY?: [number, number] | number | string | ((el: HTMLElement, i: number) => number);
     translateX?: [number, number] | number | string | ((el: HTMLElement, i: number) => number);
     opacity?: [number, number] | number | string | ((el: HTMLElement, i: number) => number);
@@ -30,8 +31,9 @@ declare module 'animejs' {
 
   interface AnimeStatic {
     (params: AnimeParams): AnimeInstance;
-    set(targets: AnimeParams["targets"], props: Partial<AnimeParams>): void;
-    stagger(val: number | string): (el: HTMLElement, i: number) => number;
+    set(targets: NonNullable<AnimeParams["targets"]>, props: Partial<AnimeParams>): void;
+    stagger(val: number | string, params?: any): (el: HTMLElement, i: number) => number;
+    timeline(params?: AnimeParams): AnimeInstance;
     // Add more static methods as needed
   }
   const anime: AnimeStatic;
