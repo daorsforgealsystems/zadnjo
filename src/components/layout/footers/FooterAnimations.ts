@@ -168,6 +168,7 @@ export const animateNewsletterSuccess = (
 ) => {
   const timeline = anime.timeline({
     easing: config.easing,
+    autoplay: config.autoplay,
   });
 
   // Hide form
@@ -312,7 +313,7 @@ export const animateCopyrightText = (
   return anime({
     duration: config.duration,
     easing: config.easing,
-    update: (anim) => {
+    update: (anim: anime.AnimeInstance) => {
       const progress = anim.progress / 100;
       const charsToShow = Math.floor(progress * text.length);
       
