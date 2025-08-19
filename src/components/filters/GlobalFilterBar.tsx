@@ -6,15 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { DateRange } from 'react-day-picker';
 
 export interface FilterState {
   q: string;
   status: string;
   region: string;
   vehicle: string;
-  from: string;
-  to: string;
-  [key: string]: string | number | boolean | undefined | null;
+  dateRange: DateRange | undefined;
 }
 
 export interface GlobalFilterBarProps {
@@ -35,21 +34,20 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
   regions = ['All', 'BA', 'RS', 'HR', 'CH-DE', 'CH-FR'],
   vehicles = ['All', 'TRK-001', 'TRK-002', 'VAN-101'],
 }) => {
-  const [filters, setFilters] = useUrlState<FilterState>({
+  const [filters, setFilters] = useUrlState({
     q: '',
     status: 'All',
     region: 'All',
     vehicle: 'All',
-    from: '',
-    to: '',
-  });
+    dateRange: undefined,
+  } as FilterState);
 
   const apply = () => {
     onApply?.(filters);
   };
 
   const reset = () => {
-    setFilters({ q: '', status: 'All', region: 'All', vehicle: 'All', from: '', to: '' });
+    setFilters({ q: '', status: 'All', region: 'All', vehicle: 'All', dateRange: undefined });
     onReset?.();
   };
 
@@ -110,9 +108,9 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
         <div className="md:col-span-2">
           <label className="text-xs text-muted-foreground">Date Range</label>
           <DateRangePicker
-            onUpdate={(range) => {
-              const dateRange = range as { from?: string; to?: string } | null;
-              setFilters({ from: dateRange?.from ?? '', to: dateRange?.to ?? '' });
+            date={filters.dateRange}
+            setDate={(dateRange: DateRange | undefined) => {
+              setFilters({ dateRange });
             }}
           />
         </div>
@@ -125,16 +123,19 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
 
       {/* Active filter badges */}
       <div className="mt-3 flex flex-wrap gap-2">
-        {(Object.keys(filters) as Array<keyof FilterState>)
-          .filter((key): key is 'status' | 'region' | 'vehicle' => 
-            ['status', 'region', 'vehicle'].includes(key)
-          )
+        {(['status', 'region', 'vehicle'] as const)
           .map((key) => {
             const val = filters[key];
             if (!val || val === 'All') return null;
             return <Badge key={key} variant="outline" className="capitalize">{key}: {val}</Badge>;
           })}
         {filters.q ? <Badge variant="outline">q: {filters.q}</Badge> : null}
+        {filters.dateRange?.from ? (
+          <Badge variant="outline">
+            Date: {filters.dateRange.from.toLocaleDateString()}
+            {filters.dateRange.to ? ` - ${filters.dateRange.to.toLocaleDateString()}` : ''}
+          </Badge>
+        ) : null}
       </div>
     </div>
   );
