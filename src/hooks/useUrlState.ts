@@ -2,15 +2,15 @@
 import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-export type UrlState = Record<string, string | number | boolean | undefined | null>;
+export type UrlState = Record<string, unknown>;
 
-function encode(value: any): string {
+function encode(value: unknown): string {
   if (value === undefined || value === null) return '';
   if (typeof value === 'object') return encodeURIComponent(JSON.stringify(value));
   return String(value);
 }
 
-function decode(value: string | null): any {
+function decode(value: string | null): unknown {
   if (!value) return undefined;
   try {
     const decoded = decodeURIComponent(value);
@@ -34,10 +34,10 @@ export function useUrlState<T extends UrlState = UrlState>(defaults: T) {
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   const state = useMemo(() => {
-    const entries: any = { ...defaults };
+    const entries: Record<string, unknown> = { ...defaults };
     Object.keys(defaults).forEach((key) => {
       entries[key] = decode(params.get(key));
-      if (entries[key] === undefined || entries[key] === '') entries[key] = (defaults as any)[key];
+      if (entries[key] === undefined || entries[key] === '') entries[key] = defaults[key];
     });
     return entries as T;
   }, [params, defaults]);
