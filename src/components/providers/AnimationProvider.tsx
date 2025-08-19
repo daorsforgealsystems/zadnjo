@@ -1,19 +1,13 @@
-import React, { createContext, useState, useCallback, useEffect } from 'react';
-import { AnimationContext, AnimationIntensity } from '@/types/animations';
+import React, { useState, useCallback, useEffect } from 'react';
+import { AnimationIntensity } from '@/types/animations';
 import { useAnimations } from '@/hooks/useAnimations';
+import { AnimationContextProvider, AnimationProviderContext } from './AnimationContext';
 
 interface AnimationProviderProps {
   children: React.ReactNode;
   defaultIntensity?: AnimationIntensity;
   respectReducedMotion?: boolean;
 }
-
-export interface AnimationProviderContext extends AnimationContext {
-  setIntensity: (intensity: AnimationIntensity) => void;
-  toggleReducedMotion: () => void;
-}
-
-export const AnimationContextProvider = createContext<AnimationProviderContext | undefined>(undefined);
 
 export const AnimationProvider: React.FC<AnimationProviderProps> = ({
   children,

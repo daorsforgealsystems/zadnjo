@@ -1,6 +1,5 @@
 import { useContext } from 'react';
-import { AnimationContextProvider } from '@/components/providers/AnimationProvider';
-import { AnimationProviderContext } from '@/components/providers/AnimationProvider';
+import { AnimationContextProvider, AnimationProviderContext } from '@/components/providers/AnimationContext';
 
 export const useAnimationContext = (): AnimationProviderContext => {
   const context = useContext(AnimationContextProvider);

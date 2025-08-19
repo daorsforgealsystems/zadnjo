@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { LayoutComponent } from '@/types/layout';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useLayout } from '@/components/providers/LayoutProvider';
-import { useAnimationContext } from '@/components/providers/AnimationProvider';
+import { useAnimationContext } from '@/hooks/useAnimationContext';
 import { calculateGridColumns, calculateGridItemSize, optimizeGridLayout } from '@/lib/layout/gridSystem';
 import { animateBreakpointTransition } from '@/lib/animations/layoutAnimations';
 

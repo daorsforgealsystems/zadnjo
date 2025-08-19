@@ -1,5 +1,5 @@
-export { AnimationProvider, AnimationContextProvider } from './AnimationProvider';
-export type { AnimationProviderContext } from './AnimationProvider';
+export { AnimationProvider } from './AnimationProvider';
+export { AnimationContextProvider, useAnimationContext } from './AnimationContext';
+export type { AnimationProviderContext } from './AnimationContext';
 export { AnimationSettings } from './AnimationSettings';
 export { withAnimations } from './withAnimations';
-export { useAnimationContext } from '@/hooks/useAnimationContext';

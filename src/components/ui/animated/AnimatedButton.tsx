@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { useAnimations } from '@/hooks/useAnimations';
 import { cn } from '@/lib/utils';
+import anime from 'animejs';
 
 interface AnimatedButtonProps extends ButtonProps {
   animation?: 'pulse' | 'bounce' | 'shake' | 'glow' | 'slide' | 'rotate';
@@ -23,7 +24,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const rippleRef = useRef<HTMLDivElement>(null);
-  const { createAnimation, createHoverAnimation } = useAnimations();
+  const { createAnimation } = useAnimations();
 
   const intensityConfig = {
     subtle: { scale: 1.02, duration: 200 },
@@ -97,33 +98,55 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
     const button = buttonRef.current;
 
     if (trigger === 'mount') {
-      createAnimation('button-mount', button, {
+      createAnimation({
+        targets: button,
         ...currentAnimation.enter,
         autoplay: true,
+        easing: currentAnimation.enter.easing || 'easeOutQuad',
       });
       return;
     }
 
     if (trigger === 'hover') {
-      return createHoverAnimation(
-        button,
-        currentAnimation.enter,
-        currentAnimation.leave
-      );
+      const handleMouseEnter = () => {
+        anime({
+          targets: button,
+          ...currentAnimation.enter,
+        });
+      };
+
+      const handleMouseLeave = () => {
+        anime({
+          targets: button,
+          ...currentAnimation.leave,
+        });
+      };
+
+      button.addEventListener('mouseenter', handleMouseEnter);
+      button.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        button.removeEventListener('mouseenter', handleMouseEnter);
+        button.removeEventListener('mouseleave', handleMouseLeave);
+      };
     }
 
     if (trigger === 'focus') {
       const handleFocus = () => {
-        createAnimation('button-focus', button, {
+        createAnimation({
+          targets: button,
           ...currentAnimation.enter,
           autoplay: true,
+          easing: currentAnimation.enter.easing || 'easeOutQuad',
         });
       };
 
       const handleBlur = () => {
-        createAnimation('button-blur', button, {
+        createAnimation({
+          targets: button,
           ...currentAnimation.leave,
           autoplay: true,
+          easing: currentAnimation.leave.easing || 'easeOutQuad',
         });
       };
 
@@ -135,14 +158,16 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         button.removeEventListener('blur', handleBlur);
       };
     }
-  }, [animation, trigger, intensity, createAnimation, createHoverAnimation]);
+  }, [animation, trigger, intensity, createAnimation]);
 
   // Handle click animation and ripple effect
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (trigger === 'click' && buttonRef.current) {
-      createAnimation('button-click', buttonRef.current, {
+      createAnimation({
+        targets: buttonRef.current,
         ...currentAnimation.enter,
         autoplay: true,
+        easing: currentAnimation.enter.easing || 'easeOutQuad',
       });
     }
 
@@ -162,7 +187,8 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         rippleElement.style.left = `${x}px`;
         rippleElement.style.top = `${y}px`;
 
-        createAnimation('ripple-effect', rippleElement, {
+        createAnimation({
+          targets: rippleElement,
           scale: [0, 1],
           opacity: [0.6, 0],
           duration: 600,
@@ -244,23 +270,21 @@ export const AnimatedButtonGroup: React.FC<{
   className,
 }) => {
   const groupRef = useRef<HTMLDivElement>(null);
-  const { createStaggeredAnimation } = useAnimations();
 
   useEffect(() => {
     if (groupRef.current) {
       const buttons = groupRef.current.querySelectorAll('button');
-      createStaggeredAnimation(
-        buttons,
-        {
-          opacity: [0, 1],
-          translateY: [20, 0],
-          duration: 400,
-          easing: 'easeOutQuart',
-        },
-        stagger
-      );
+      anime({
+        targets: buttons,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 400,
+        delay: anime.stagger(stagger),
+        easing: 'easeOutQuart',
+        autoplay: true,
+      });
     }
-  }, [createStaggeredAnimation, stagger]);
+  }, [stagger]);
 
   return (
     <div
@@ -298,11 +322,13 @@ export const LoadingButton: React.FC<AnimatedButtonProps & {
 
   useEffect(() => {
     if (loading && spinnerRef.current) {
-      createAnimation('spinner', spinnerRef.current, {
+      createAnimation({
+        targets: spinnerRef.current,
         rotate: [0, 360],
         duration: 1000,
         loop: true,
         easing: 'linear',
+        autoplay: true,
       });
     }
   }, [loading, createAnimation]);

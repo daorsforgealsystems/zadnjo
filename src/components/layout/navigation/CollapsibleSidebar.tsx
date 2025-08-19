@@ -16,7 +16,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { NavigationItem } from '@/types/navigation';
-import { useAnimationContext } from '@/components/providers/AnimationProvider';
+import { useAnimationContext } from '@/hooks/useAnimationContext';
 import { useNavigation } from '@/hooks/useNavigation';
 import { animateSidebarToggle, animateDropdown } from '@/lib/animations/navigationAnimations';
 

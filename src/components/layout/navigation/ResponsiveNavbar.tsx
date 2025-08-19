@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Bell, Menu, User, Settings, LogOut } from 'lucide-react';
 import { NavigationConfig } from '@/types/navigation';
-import { useAnimationContext } from '@/components/providers/AnimationProvider';
+import { useAnimationContext } from '@/hooks/useAnimationContext';
 import { useNavigation } from '@/hooks/useNavigation';
 import { Avatar } from '@/components/ui/avatar';
 import NotificationCenter from '@/components/NotificationCenter';

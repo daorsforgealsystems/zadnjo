@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAnimationContext } from '@/hooks/useAnimationContext';
-import { AnimationProviderContext } from './AnimationProvider';
+import { AnimationProviderContext } from './AnimationContext';
 
 // Higher-order component for consuming animation context
 export const withAnimations = <P extends object>(
