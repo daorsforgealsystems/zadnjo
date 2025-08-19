@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect, useMemo } from 'react';
 import { useAnimation } from 'framer-motion';
-import anime from 'animejs';
+import anime, { AnimeInstance } from 'animejs';
 import { 
   AnimationConfig, 
   AnimationContext, 
@@ -22,7 +22,7 @@ import {
 } from '@/lib/animations/navigationAnimations';
 
 export const useAnimations = (intensity: AnimationIntensity = 'medium') => {
-  const activeAnimations = useRef<anime.AnimeInstance[]>([]);
+  const activeAnimations = useRef<AnimeInstance[]>([]);
   const reducedMotion = useMemo(() => {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }, []);
@@ -246,6 +246,7 @@ export const useAnimations = (intensity: AnimationIntensity = 'medium') => {
     animateEntrance: animateEntranceHook,
     animateExit,
     createHoverAnimation,
+    createScrollAnimation,
   }), [
     presets,
     intensity,
@@ -254,6 +255,7 @@ export const useAnimations = (intensity: AnimationIntensity = 'medium') => {
     animateEntranceHook,
     animateExit,
     createHoverAnimation,
+    createScrollAnimation,
   ]);
 
   return {

@@ -152,7 +152,7 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
         animateBreakpointTransition(Array.from(gridItems) as HTMLElement[]);
       }
     }
-  }, [currentBreakpoint.name, animateBreakpointTransition]);
+  }, [currentBreakpoint.name]);
 
   // Set up scroll animations for new items
   useEffect(() => {

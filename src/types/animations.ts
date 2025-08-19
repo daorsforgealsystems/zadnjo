@@ -50,6 +50,7 @@ export interface AnimationContext {
   animateEntrance: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => AnimeInstance;
   animateExit: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => AnimeInstance;
   createHoverAnimation: (element: HTMLElement, config?: Partial<AnimationConfig>) => () => void;
+  createScrollAnimation: (elements: HTMLElement[], config?: Partial<AnimationConfig & { threshold?: number; stagger?: number }>) => () => void;
 }
 
 export interface ScrollAnimationConfig extends AnimationConfig {
