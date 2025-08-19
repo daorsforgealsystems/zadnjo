@@ -14,6 +14,7 @@ export interface FilterState {
   vehicle: string;
   from: string;
   to: string;
+  [key: string]: string | number | boolean | undefined | null;
 }
 
 export interface GlobalFilterBarProps {
