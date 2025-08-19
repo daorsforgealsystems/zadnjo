@@ -100,7 +100,7 @@ const defaultNavigationItems: NavigationItem[] = [
       {
         id: 'reports',
         label: 'Reports',
-        href: '/analytics/reports',
+        href: '/reports',
         allowedRoles: ['admin', 'manager'],
       },
       {
