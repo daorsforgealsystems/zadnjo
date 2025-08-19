@@ -1,6 +1,6 @@
 // Drag-and-drop layout system with anime.js animations
 import React, { useRef, useState, useCallback } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from '@hello-pangea/dnd';
 import { GripVertical, Plus, X, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +14,8 @@ import {
 import { useAnimations } from '@/hooks/useAnimations';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import {
-  animateComponentDrag,
-  animateDragDropPlaceholder,
+  animateDragStart,
+  animateDragEnd,
   animateGridReorder,
 } from '@/lib/animations/layoutAnimations';
 import { cn } from '@/lib/utils';
@@ -42,7 +42,7 @@ export const DragDropLayout: React.FC<DragDropLayoutProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { createAnimation } = useAnimations();
-  const { currentBreakpoint, getCurrentBreakpointInfo } = useResponsiveLayout();
+  const { currentBreakpoint, columns, containerPadding, gap } = useResponsiveLayout();
 
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dropPlaceholder, setDropPlaceholder] = useState<{
@@ -50,21 +50,19 @@ export const DragDropLayout: React.FC<DragDropLayoutProps> = ({
     height: number;
   } | null>(null);
 
-  const breakpointInfo = getCurrentBreakpointInfo();
-
   // Handle drag start
-  const handleDragStart = useCallback((start: any) => {
+  const handleDragStart = useCallback((start: DragStart) => {
     setDraggedItem(start.draggableId);
     
     // Animate the dragged item
     const draggedElement = document.querySelector(`[data-rbd-draggable-id="${start.draggableId}"]`);
     if (draggedElement) {
-      animateComponentDrag(draggedElement as HTMLElement, true);
+      animateDragStart(draggedElement as HTMLElement);
     }
   }, []);
 
   // Handle drag update
-  const handleDragUpdate = useCallback((update: any) => {
+  const handleDragUpdate = useCallback((update: DragUpdate) => {
     if (!update.destination) {
       setDropPlaceholder(null);
       return;
@@ -88,7 +86,7 @@ export const DragDropLayout: React.FC<DragDropLayoutProps> = ({
     // Animate the dragged item back to normal
     const draggedElement = document.querySelector(`[data-rbd-draggable-id="${result.draggableId}"]`);
     if (draggedElement) {
-      animateComponentDrag(draggedElement as HTMLElement, false);
+      animateDragEnd(draggedElement as HTMLElement);
     }
 
     if (!result.destination) {
@@ -110,11 +108,8 @@ export const DragDropLayout: React.FC<DragDropLayoutProps> = ({
     // Update positions based on new order
     const updatedComponents = newComponents.map((component, index) => ({
       ...component,
-      position: {
-        ...component.position,
-        y: Math.floor(index / breakpointInfo.columns),
-        x: index % breakpointInfo.columns,
-      },
+      y: Math.floor(index / columns),
+      x: index % columns,
     }));
 
     onComponentsChange(updatedComponents);
@@ -123,13 +118,13 @@ export const DragDropLayout: React.FC<DragDropLayoutProps> = ({
     if (containerRef.current) {
       const items = containerRef.current.querySelectorAll('[data-component-item]');
       const newPositions = updatedComponents.map((_, index) => ({
-        x: (index % breakpointInfo.columns) * 280,
-        y: Math.floor(index / breakpointInfo.columns) * 200,
+        x: (index % columns) * 280,
+        y: Math.floor(index / columns) * 200,
       }));
       
       animateGridReorder(Array.from(items) as HTMLElement[], newPositions);
     }
-  }, [components, onComponentsChange, breakpointInfo.columns]);
+  }, [components, onComponentsChange, columns]);
 
   // Render component content
   const renderComponentContent = (component: LayoutComponent) => {
@@ -220,7 +215,7 @@ export const DragDropLayout: React.FC<DragDropLayoutProps> = ({
               {...provided.droppableProps}
               className={cn(
                 'grid gap-4 transition-all duration-300',
-                `grid-cols-1 sm:grid-cols-2 lg:grid-cols-${breakpointInfo.columns}`,
+                `grid-cols-1 sm:grid-cols-2 lg:grid-cols-${columns}`,
                 snapshot.isDraggingOver && 'bg-muted/20 rounded-lg p-2'
               )}
             >

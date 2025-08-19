@@ -7,6 +7,12 @@ export interface GridAnimationConfig {
   autoplay?: boolean;
 }
 
+interface StaggerOptions {
+  grid?: [number, number];
+  from?: string;
+  direction?: string;
+}
+
 export const gridAnimationPresets = {
   gridReorder: {
     duration: 400,
@@ -128,7 +134,11 @@ export const animateGridResize = (
   newDimensions: { width?: number; height?: number; columns?: number },
   config: GridAnimationConfig = gridAnimationPresets.gridResize
 ) => {
-  const targets: any = {};
+  const targets: {
+    width?: string;
+    height?: string;
+    gridTemplateColumns?: string;
+  } = {};
   
   if (newDimensions.width) {
     targets.width = `${newDimensions.width}px`;
@@ -169,10 +179,17 @@ export const animateGridReveal = (
       delayFunction = anime.stagger(50);
       break;
     case 'wave':
-      delayFunction = anime.stagger(50, {grid: [Math.ceil(Math.sqrt(elements.length)), Math.ceil(Math.sqrt(elements.length))], from: 'center'});
+      delayFunction = anime.stagger(50, {
+        grid: [Math.ceil(Math.sqrt(elements.length)), Math.ceil(Math.sqrt(elements.length))], 
+        from: 'center'
+      } as StaggerOptions);
       break;
     case 'spiral':
-      delayFunction = anime.stagger(50, {grid: [Math.ceil(Math.sqrt(elements.length)), Math.ceil(Math.sqrt(elements.length))], from: 'center', direction: 'reverse'});
+      delayFunction = anime.stagger(50, {
+        grid: [Math.ceil(Math.sqrt(elements.length)), Math.ceil(Math.sqrt(elements.length))], 
+        from: 'center', 
+        direction: 'reverse'
+      } as StaggerOptions);
       break;
     case 'random':
       delayFunction = () => Math.random() * 300;
@@ -280,10 +297,10 @@ export const animateMasonryLayout = (
 ) => {
   return anime({
     targets: elements,
-    translateX: (el, i) => positions[i].x,
-    translateY: (el, i) => positions[i].y,
-    width: (el, i) => positions[i].width,
-    height: (el, i) => positions[i].height,
+    translateX: (el: HTMLElement, i: number) => positions[i].x,
+    translateY: (el: HTMLElement, i: number) => positions[i].y,
+    width: (el: HTMLElement, i: number) => positions[i].width,
+    height: (el: HTMLElement, i: number) => positions[i].height,
     duration: config.duration,
     delay: anime.stagger(50),
     easing: config.easing,

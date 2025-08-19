@@ -1,7 +1,7 @@
 // Layout-related types
 export interface LayoutComponent {
   id: string;
-  type: 'widget' | 'chart' | 'table' | 'custom';
+  type: 'widget' | 'chart' | 'table' | 'form' | 'custom';
   title?: string;
   width: number;
   height: number;
@@ -13,7 +13,7 @@ export interface LayoutComponent {
   maxHeight?: number;
   resizable?: boolean;
   draggable?: boolean;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
   props?: Record<string, unknown>;
 }
 
