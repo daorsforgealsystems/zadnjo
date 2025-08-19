@@ -71,7 +71,7 @@ export const animateStickyHeaderTransition = (
       
       if (logo) {
         anime({
-          targets: logo,
+          targets: logo as HTMLElement,
           scale: isSticky ? 0.8 : 1,
           duration: config.duration ? config.duration * 0.6 : 180,
           easing: config.easing,
@@ -80,7 +80,7 @@ export const animateStickyHeaderTransition = (
       
       if (title) {
         anime({
-          targets: title,
+          targets: title as HTMLElement,
           fontSize: isSticky ? '1.25rem' : '1.5rem',
           duration: config.duration ? config.duration * 0.6 : 180,
           easing: config.easing,
@@ -128,7 +128,7 @@ export const animateExpandableHeader = (
 
   if (expandedContent) {
     anime({
-      targets: expandedContent,
+      targets: expandedContent as HTMLElement,
       opacity: isExpanded ? [0, 1] : [1, 0],
       translateY: isExpanded ? [20, 0] : [0, -20],
       duration: config.duration ? config.duration * 0.8 : 280,
@@ -139,7 +139,7 @@ export const animateExpandableHeader = (
 
   if (mainContent) {
     anime({
-      targets: mainContent,
+      targets: mainContent as HTMLElement,
       paddingY: isExpanded ? '1.5rem' : '1rem',
       duration: config.duration,
       easing: config.easing,
@@ -203,7 +203,7 @@ export const animateHeaderSearch = (
 
   if (searchIcon) {
     anime({
-      targets: searchIcon,
+      targets: searchIcon as HTMLElement,
       color: isFocused ? '#3b82f6' : '#6b7280',
       scale: isFocused ? 1.1 : 1,
       duration: config.duration,
@@ -213,7 +213,7 @@ export const animateHeaderSearch = (
 
   if (searchInput) {
     anime({
-      targets: searchInput,
+      targets: searchInput as HTMLElement,
       fontSize: isFocused ? '1rem' : '0.875rem',
       duration: config.duration,
       easing: config.easing,
@@ -364,28 +364,31 @@ export const animateThemeToggle = (
   
   if (icon) {
     anime({
-      targets: icon,
+      targets: icon as HTMLElement,
       rotate: [0, 180],
       scale: [1, 0.8, 1],
       duration: config.duration,
       easing: config.easing,
       complete: () => {
         // Switch icon (this would typically be handled by React state)
-        icon.classList.toggle('hidden');
+        (icon as HTMLElement).classList.toggle('hidden');
       }
     });
   }
 
   // Animate header background
-  anime({
-    targets: element.closest('header'),
-    backgroundColor: theme === 'dark' 
-      ? 'rgba(17, 24, 39, 0.95)' 
-      : 'rgba(255, 255, 255, 0.95)',
-    color: theme === 'dark' ? '#f9fafb' : '#111827',
-    duration: config.duration,
-    easing: config.easing,
-  });
+  const headerElement = element.closest('header');
+  if (headerElement) {
+    anime({
+      targets: headerElement,
+      backgroundColor: theme === 'dark' 
+        ? 'rgba(17, 24, 39, 0.95)' 
+        : 'rgba(255, 255, 255, 0.95)',
+      color: theme === 'dark' ? '#f9fafb' : '#111827',
+      duration: config.duration,
+      easing: config.easing,
+    });
+  }
 };
 
 // Mobile menu toggle animation
@@ -399,7 +402,7 @@ export const animateMobileMenuToggle = (
   }
 ) => {
   // Hamburger animation
-  const lines = hamburgerElement.querySelectorAll('[data-hamburger-line]');
+  const lines = Array.from(hamburgerElement.querySelectorAll('[data-hamburger-line]')) as HTMLElement[];
   if (lines.length >= 3) {
     anime({
       targets: lines[0],
@@ -455,7 +458,11 @@ export const animateHeaderLoading = (
       easing: config.easing,
     });
   } else {
-    anime.remove(loadingElements);
+    // Stop any running animations on these elements
+    loadingElements.forEach(element => {
+      anime.remove(element);
+    });
+    
     anime({
       targets: loadingElements,
       opacity: 0,
