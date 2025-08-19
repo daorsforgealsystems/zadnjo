@@ -12,15 +12,27 @@ const Dashboard = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoFailed, setVideoFailed] = useState(false);
 
+  // Sample data for charts
+  const chartData = [
+    { month: 'Jan', revenue: 450 },
+    { month: 'Feb', revenue: 620 },
+    { month: 'Mar', revenue: 580 },
+    { month: 'Apr', revenue: 740 },
+    { month: 'May', revenue: 820 },
+    { month: 'Jun', revenue: 950 },
+  ];
+
   // Initialize video background with better error handling
   useEffect(() => {
+    const videoEl = videoRef.current;
+    
     // Video autoplay logic with retry mechanism and fallback
     const attemptPlay = async () => {
-      if (!videoRef.current) return;
+      if (!videoEl) return;
       
       try {
         // Try to play the video
-        await videoRef.current.play();
+        await videoEl.play();
         setVideoFailed(false);
       } catch (error) {
         console.warn("Video autoplay initially failed, applying fallback strategy:", error);
@@ -30,15 +42,13 @@ const Dashboard = () => {
         
         // Add event listeners to try playing when conditions might be better
         const playOnUserInteraction = () => {
-          if (videoRef.current) {
-            videoRef.current.play().then(() => {
+          if (videoEl) {
+            videoEl.play().then(() => {
               setVideoFailed(false);
             }).catch(e => {
               // If still failing, ensure the video is hidden and fallback is shown
               setVideoFailed(true);
-              if (videoRef.current) {
-                videoRef.current.style.opacity = '0';
-              }
+              videoEl.style.opacity = '0';
             });
           }
           
@@ -57,8 +67,8 @@ const Dashboard = () => {
     
     // Add visibility change listener to handle tab switching
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && videoRef.current) {
-        videoRef.current.play().then(() => {
+      if (document.visibilityState === 'visible' && videoEl) {
+        videoEl.play().then(() => {
           setVideoFailed(false);
         }).catch(() => {
           // If still failing, ensure fallback is shown
@@ -77,17 +87,17 @@ const Dashboard = () => {
       setVideoFailed(true);
     };
     
-    if (videoRef.current) {
-      videoRef.current.addEventListener('play', handleVideoPlay);
-      videoRef.current.addEventListener('error', handleVideoError);
+    if (videoEl) {
+      videoEl.addEventListener('play', handleVideoPlay);
+      videoEl.addEventListener('error', handleVideoError);
     }
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
-      if (videoRef.current) {
-        videoRef.current.removeEventListener('play', handleVideoPlay);
-        videoRef.current.removeEventListener('error', handleVideoError);
+      if (videoEl) {
+        videoEl.removeEventListener('play', handleVideoPlay);
+        videoEl.removeEventListener('error', handleVideoError);
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       // We don't need to remove these as they're already removed after first interaction
@@ -95,18 +105,8 @@ const Dashboard = () => {
     };
   }, []);
 
-  // Sample data for charts
-  const chartData = [
-    { month: 'Jan', revenue: 450 },
-    { month: 'Feb', revenue: 620 },
-    { month: 'Mar', revenue: 580 },
-    { month: 'Apr', revenue: 740 },
-    { month: 'May', revenue: 820 },
-    { month: 'Jun', revenue: 950 },
-  ];
-
   // Dynamically load Recharts only when Dashboard mounts
-  const [R, setR] = useState<any>(null);
+  const [R, setR] = useState<typeof import('recharts') | null>(null);
   useEffect(() => {
     let mounted = true;
     import('recharts')

@@ -7,9 +7,10 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
   className?: string;
+  linkTo?: string | null;
 }
 
-const Logo = ({ size = "md", showText = true, className }: LogoProps) => {
+const Logo = ({ size = "md", showText = true, className, linkTo = null }: LogoProps) => {
   const sizeClasses = {
     sm: "w-8 h-8",
     md: "w-10 h-10", 
@@ -51,7 +52,13 @@ const Logo = ({ size = "md", showText = true, className }: LogoProps) => {
     </div>
   );
 
-  return logoContent;
+  return linkTo ? (
+    <Link to={linkTo} aria-label="DAORSFORGE Home">
+      {logoContent}
+    </Link>
+  ) : (
+    logoContent
+  );
 };
 
 export default Logo;
