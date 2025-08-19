@@ -1,7 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import anime from 'animejs';
+import anime, { AnimeInstance } from 'animejs';
+
+interface AnimeInstanceWithProgress extends AnimeInstance {
+  progress: number;
+}
 
 export interface GlowEffectsProps {
   children: React.ReactNode;
@@ -67,11 +71,14 @@ export const GlowEffects: React.FC<GlowEffectsProps> = ({
   const elementRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(trigger === 'always');
   const [isVisible, setIsVisible] = useState(false);
-  const animationRef = useRef<any>();
+  const animationRef = useRef<AnimeInstance | null>(null);
 
   const glowSize = glowSizes[size] * spread;
   const animationSpeed = glowSpeeds[speed];
-  const effectiveColors = colors || (variant === 'rainbow' ? rainbowColors : [color]);
+  const effectiveColors = useMemo(() => 
+    colors || (variant === 'rainbow' ? rainbowColors : [color]), 
+    [colors, variant, color]
+  );
 
   useEffect(() => {
     if (trigger === 'intersection' && elementRef.current) {
@@ -136,7 +143,7 @@ export const GlowEffects: React.FC<GlowEffectsProps> = ({
         duration: animationSpeed,
         loop: true,
         easing: 'linear',
-        update: (anim) => {
+        update: (anim: AnimeInstanceWithProgress) => {
           const progress = anim.progress / 100;
           const colorIndex = Math.floor(progress * effectiveColors.length) % effectiveColors.length;
           const nextColorIndex = (colorIndex + 1) % effectiveColors.length;
@@ -156,7 +163,7 @@ export const GlowEffects: React.FC<GlowEffectsProps> = ({
         animationRef.current.pause();
       }
     };
-  }, [isActive, animate, disabled, variant, animationSpeed, blur, opacity, offset]);
+  }, [isActive, animate, disabled, variant, animationSpeed, blur, opacity, offset, effectiveColors]);
 
   const handleMouseEnter = () => {
     if (trigger === 'hover' && !disabled) {

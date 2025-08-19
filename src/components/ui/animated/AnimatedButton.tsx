@@ -12,6 +12,16 @@ interface AnimatedButtonProps extends ButtonProps {
   ripple?: boolean;
 }
 
+interface AnimationConfig {
+  scale?: number | number[];
+  translateY?: number | number[];
+  translateX?: number | number[];
+  boxShadow?: string | string[];
+  rotate?: number | number[];
+  duration: number;
+  easing?: string;
+}
+
 export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   children,
   className,
@@ -35,10 +45,10 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   const config = intensityConfig[intensity];
 
   // Animation configurations
-  const animations = {
+  const animations: Record<string, { enter: AnimationConfig; leave: AnimationConfig }> = {
     pulse: {
-      enter: { scale: [1, config.scale, 1], duration: config.duration },
-      leave: { scale: 1, duration: config.duration / 2 },
+      enter: { scale: [1, config.scale, 1], duration: config.duration, easing: 'easeOutQuad' },
+      leave: { scale: 1, duration: config.duration / 2, easing: 'easeOutQuad' },
     },
     bounce: {
       enter: { 
@@ -47,7 +57,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         duration: config.duration,
         easing: 'easeOutBounce' 
       },
-      leave: { translateY: 0, scale: 1, duration: config.duration / 2 },
+      leave: { translateY: 0, scale: 1, duration: config.duration / 2, easing: 'easeOutQuad' },
     },
     shake: {
       enter: { 
@@ -55,7 +65,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         duration: config.duration,
         easing: 'easeInOutQuad' 
       },
-      leave: { translateX: 0, duration: 100 },
+      leave: { translateX: 0, duration: 100, easing: 'easeOutQuad' },
     },
     glow: {
       enter: { 
@@ -64,11 +74,13 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
           `0 0 20px rgba(var(--primary), 0.5)`,
           `0 0 30px rgba(var(--primary), 0.3)`
         ],
-        duration: config.duration 
+        duration: config.duration,
+        easing: 'easeOutQuad'
       },
       leave: { 
         boxShadow: '0 0 0 rgba(var(--primary), 0)', 
-        duration: config.duration / 2 
+        duration: config.duration / 2,
+        easing: 'easeOutQuad'
       },
     },
     slide: {
@@ -77,15 +89,16 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         duration: config.duration,
         easing: 'easeOutBack' 
       },
-      leave: { translateX: 0, duration: config.duration / 2 },
+      leave: { translateX: 0, duration: config.duration / 2, easing: 'easeOutQuad' },
     },
     rotate: {
       enter: { 
         rotate: [0, 5, -5, 0], 
         scale: [1, config.scale, 1],
-        duration: config.duration 
+        duration: config.duration,
+        easing: 'easeOutQuad'
       },
-      leave: { rotate: 0, scale: 1, duration: config.duration / 2 },
+      leave: { rotate: 0, scale: 1, duration: config.duration / 2, easing: 'easeOutQuad' },
     },
   };
 
@@ -101,8 +114,8 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       createAnimation({
         targets: button,
         ...currentAnimation.enter,
-        autoplay: true,
         easing: currentAnimation.enter.easing || 'easeOutQuad',
+        autoplay: true,
       });
       return;
     }
@@ -136,8 +149,8 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         createAnimation({
           targets: button,
           ...currentAnimation.enter,
-          autoplay: true,
           easing: currentAnimation.enter.easing || 'easeOutQuad',
+          autoplay: true,
         });
       };
 
@@ -145,8 +158,8 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         createAnimation({
           targets: button,
           ...currentAnimation.leave,
-          autoplay: true,
           easing: currentAnimation.leave.easing || 'easeOutQuad',
+          autoplay: true,
         });
       };
 
@@ -158,7 +171,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         button.removeEventListener('blur', handleBlur);
       };
     }
-  }, [animation, trigger, intensity, createAnimation]);
+  }, [animation, trigger, intensity, createAnimation, currentAnimation.enter, currentAnimation.leave]);
 
   // Handle click animation and ripple effect
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -166,8 +179,8 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       createAnimation({
         targets: buttonRef.current,
         ...currentAnimation.enter,
-        autoplay: true,
         easing: currentAnimation.enter.easing || 'easeOutQuad',
+        autoplay: true,
       });
     }
 

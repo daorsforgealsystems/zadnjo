@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, forwardRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -64,11 +64,26 @@ const inputVariants = {
 };
 
 const animationVariants = {
-  slide: { x: [-20, 0], opacity: [0, 1] },
-  fade: { opacity: [0, 1] },
-  bounce: { scale: [0.8, 1.1, 1], opacity: [0, 1] },
-  scale: { scale: [0.9, 1], opacity: [0, 1] },
-  glow: { opacity: [0, 1] }
+  slide: {
+    initial: { x: -20, opacity: 0 },
+    animate: { x: 0, opacity: 1 }
+  },
+  fade: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 }
+  },
+  bounce: {
+    initial: { scale: 0.8, opacity: 0 },
+    animate: { scale: [0.8, 1.1, 1], opacity: 1 }
+  },
+  scale: {
+    initial: { scale: 0.9, opacity: 0 },
+    animate: { scale: 1, opacity: 1 }
+  },
+  glow: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 }
+  }
 };
 
 export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
@@ -117,7 +132,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
   };
 
   // Validation logic
-  const validateInput = (inputValue: string) => {
+  const validateInput = useCallback((inputValue: string) => {
     if (!validation) return null;
 
     if (validation.required && !inputValue.trim()) {
@@ -141,7 +156,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
     }
 
     return null;
-  };
+  }, [validation]);
 
   // Handle value change
   useEffect(() => {
@@ -151,7 +166,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
       setIsValid(!validationResult);
       onValidationChange?.(!validationResult);
     }
-  }, [value, hasInteracted, validation]);
+  }, [value, hasInteracted, validation, validateInput, onValidationChange]);
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
@@ -302,8 +317,8 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
 
         {/* Input */}
         <motion.div
-          initial={animationVariants[animation]}
-          animate={{ x: 0, opacity: 1, scale: 1 }}
+          initial={animationVariants[animation].initial}
+          animate={animationVariants[animation].animate}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <Input

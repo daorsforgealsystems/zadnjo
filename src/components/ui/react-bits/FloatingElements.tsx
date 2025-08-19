@@ -87,7 +87,7 @@ export const FloatingElements: React.FC<FloatingElementsProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<FloatingElement[]>([]);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const animationRef = useRef<any>();
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize floating elements
   useEffect(() => {
