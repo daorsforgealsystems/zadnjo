@@ -34,13 +34,13 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
   regions = ['All', 'BA', 'RS', 'HR', 'CH-DE', 'CH-FR'],
   vehicles = ['All', 'TRK-001', 'TRK-002', 'VAN-101'],
 }) => {
-  const [filters, setFilters] = useUrlState({
+  const [filters, setFilters] = useUrlState<FilterState>({
     q: '',
     status: 'All',
     region: 'All',
     vehicle: 'All',
     dateRange: undefined,
-  } as FilterState);
+  });
 
   const apply = () => {
     onApply?.(filters);
