@@ -2,9 +2,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAnimations } from '@/hooks/useAnimations';
-import { animateBreadcrumbTransition } from '@/lib/animations/navigationAnimations';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types/navigation';
 
@@ -73,51 +70,10 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
   className,
 }) => {
   const location = useLocation();
-import React, { memo } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+  const breadcrumbsRef = useRef<HTMLElement>(null);
 
-interface BreadcrumbItem {
-  name: string;
-  path: string;
-}
-
-function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
-  const segments = pathname.split('/').filter(Boolean);
-  let path = '';
-  return segments.map((segment, idx) => {
-    path += `/${segment}`;
-    return {
-      name: decodeURIComponent(segment.charAt(0).toUpperCase() + segment.slice(1)),
-      path,
-    };
-  });
-}
-
-const Breadcrumbs: React.FC = () => {
-  const location = useLocation();
-  const breadcrumbs = generateBreadcrumbs(location.pathname);
-  return (
-    <nav aria-label="Breadcrumb">
-      <ol className="flex space-x-2 text-sm text-gray-500">
-        <li>
-          <Link to="/" className="hover:underline">Home</Link>
-        </li>
-        {breadcrumbs.map((crumb, idx) => (
-          <li key={crumb.path} aria-current={idx === breadcrumbs.length - 1 ? 'page' : undefined}>
-            <span className="mx-1">/</span>
-            {idx === breadcrumbs.length - 1 ? (
-              <span className="font-semibold text-gray-700">{crumb.name}</span>
-            ) : (
-              <Link to={crumb.path} className="hover:underline">{crumb.name}</Link>
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
-};
-
-export default memo(Breadcrumbs);
+  // Get breadcrumb items from props or route mapping
+  const breadcrumbItems = items || routeToBreadcrumb[location.pathname] || [];
 
   // Add home breadcrumb if requested and not already present
   const finalItems = showHome && breadcrumbItems[0]?.href !== '/'
@@ -137,7 +93,17 @@ export default memo(Breadcrumbs);
   useEffect(() => {
     if (breadcrumbsRef.current) {
       const items = breadcrumbsRef.current.querySelectorAll('[data-breadcrumb-item]');
-      animateBreadcrumbTransition(items as NodeListOf<HTMLElement>);
+      // Simple fade-in animation instead of complex animation
+      items.forEach((item, index) => {
+        const element = item as HTMLElement;
+        element.style.opacity = '0';
+        element.style.transform = 'translateX(-10px)';
+        setTimeout(() => {
+          element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          element.style.opacity = '1';
+          element.style.transform = 'translateX(0)';
+        }, index * 50);
+      });
     }
   }, [location.pathname]);
 

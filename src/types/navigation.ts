@@ -8,6 +8,13 @@ export interface NavigationItem {
   children?: NavigationItem[];
 }
 
+export interface BreadcrumbItem {
+  label: string;
+  href: string;
+  isActive?: boolean;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
 export interface NavigationConfig {
   title?: string;
   subtitle?: string;
