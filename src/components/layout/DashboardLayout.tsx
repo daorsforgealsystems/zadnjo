@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
 import { createRouteGuardThunk, loadNavigationState, trackPageViewThunk, updateBreadcrumbsThunk } from '@/store/navigationSlice';
 import ReduxBreadcrumbs from '@/components/layout/navigation/ReduxBreadcrumbs';
+import type { UserRole } from '@/lib/api/navigation-api';
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -25,14 +26,23 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
   const location = useLocation();
   const dispatch = useAppDispatch();
 
+  // Define a type for user if not already defined
+  type AuthUser = {
+    id: string;
+    role?: string;
+    roles?: string[];
+    [key: string]: unknown;
+  };
+
+  const typedUser = user as unknown as AuthUser | undefined;
+  const userRole = (typedUser?.roles?.[0] || typedUser?.role || 'GUEST') as UserRole;
+
   useEffect(() => {
-    if (user?.id) {
-      // Use the user's role if available, otherwise default to GUEST
-      const role = (user as any)?.roles?.[0] || user.role || 'GUEST';
-      dispatch(loadNavigationState({ userId: user.id, role }));
-      dispatch(createRouteGuardThunk({ userId: user.id, role }));
+    if (typedUser?.id) {
+      dispatch(loadNavigationState({ userId: typedUser.id, role: userRole }));
+      dispatch(createRouteGuardThunk({ userId: typedUser.id, role: userRole }));
     }
-  }, [user?.id, (user as any)?.roles, user?.role, dispatch]);
+  }, [typedUser, userRole, dispatch]);
 
   useEffect(() => {
     if (user?.id) {
@@ -40,15 +50,21 @@ const DashboardContent: React.FC<{ children?: React.ReactNode }> = ({ children }
       if (!user.id.includes('guest')) {
         dispatch(trackPageViewThunk({ userId: user.id, page: location.pathname }));
       }
-      
+
       // Use the user's role if available, otherwise default to GUEST
-      const role = (user as any)?.roles?.[0] || user.role || 'GUEST';
-      
+      const typedUser = user as unknown as AuthUser;
+      const userRoles = typedUser.roles;
+      const role = (userRoles && userRoles.length > 0 ? userRoles[0] : typedUser.role || 'GUEST') as UserRole;
+
       // For guest users, we'll use the local breadcrumbs generation in the thunk
       // For authenticated users, the API call will be made
       dispatch(updateBreadcrumbsThunk({ route: location.pathname, role }));
     }
-  }, [location.pathname, user?.id, (user as any)?.roles, user?.role, dispatch]);
+  }, [
+    location.pathname,
+    user,
+    dispatch
+  ]);
 
   const handleNavClick = (item: unknown) => {
     console.log('Navigation clicked:', item);

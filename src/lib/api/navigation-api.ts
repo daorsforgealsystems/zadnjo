@@ -36,7 +36,7 @@ export interface NavigationAnalytics {
   generatedAt: string; // Changed from Date to string for serialization
 }
 
-export type UserRole = 'ADMIN' | 'MANAGER' | 'USER' | 'DRIVER' | 'CUSTOMER';
+export type UserRole = 'ADMIN' | 'MANAGER' | 'USER' | 'DRIVER' | 'CUSTOMER' | 'GUEST';
 
 export class NavigationAPI {
   // Navigation Menu
