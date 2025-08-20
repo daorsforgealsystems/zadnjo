@@ -72,10 +72,8 @@ try {
       initImmediate: false,
       // Add fallback resources
       resources: defaultResources,
-      // Add retry options
-      retry: 5,
-      // Add timeout
-      requestTimeout: 5000
+  // (note) retry/requestTimeout are not valid i18n init options; network retries
+  // are handled by the backend or fetch wrapper if needed.
     }, (err, t) => {
       if (err) {
         console.warn('i18n initialization error:', err);

@@ -69,7 +69,7 @@ export const loadNavigationState = createAsyncThunk(
           componentInteractions: [],
           timeSpentByPage: {},
           deviceUsage: { mobile: 0, tablet: 0, desktop: 0 },
-          generatedAt: new Date()
+          generatedAt: new Date().toISOString()
         }
       };
     }
@@ -285,10 +285,11 @@ const navigationSlice = createSlice({
       })
       .addCase(loadNavigationState.fulfilled, (state, action) => {
         const { menu, permissions, customization, analytics } = action.payload;
-        state.menu = menu;
-        state.permissions = permissions.permissions;
-        state.customization = customization;
-        state.analytics = analytics;
+          state.menu = menu;
+          // permissions may be nested or already the shape we need
+          state.permissions = (permissions && (permissions.permissions ? permissions.permissions : permissions)) || state.permissions;
+          state.customization = customization || state.customization;
+          state.analytics = analytics || state.analytics;
         state.loading = false;
         state.error = null;
       })

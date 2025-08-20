@@ -86,7 +86,7 @@ export class PreferencesAPI {
   // Layout Preferences
   static async getLayoutPreferences(userId: string): Promise<LayoutPreferences> {
     const response = await apiClient.get(`/preferences/layout/${userId}`);
-    return response.data;
+  return response.data as LayoutPreferences;
   }
 
   static async updateLayoutPreferences(
@@ -94,13 +94,13 @@ export class PreferencesAPI {
     preferences: Partial<LayoutPreferences>
   ): Promise<LayoutPreferences> {
     const response = await apiClient.put(`/preferences/layout/${userId}`, preferences);
-    return response.data;
+  return response.data as LayoutPreferences;
   }
 
   // Navigation Preferences
   static async getNavigationPreferences(userId: string) {
     const response = await apiClient.get(`/preferences/navigation/${userId}`);
-    return response.data;
+  return response.data as unknown;
   }
 
   static async updateNavigationPreferences(
@@ -108,7 +108,7 @@ export class PreferencesAPI {
     preferences: any
   ) {
     const response = await apiClient.put(`/preferences/navigation/${userId}`, preferences);
-    return response.data;
+  return response.data as unknown;
   }
 
   // Layout Templates
@@ -116,12 +116,12 @@ export class PreferencesAPI {
     const response = await apiClient.get('/preferences/templates', {
       params: role ? { role } : {}
     });
-    return response.data;
+  return response.data as LayoutTemplate[];
   }
 
   static async createLayoutTemplate(template: Omit<LayoutTemplate, 'id'>): Promise<LayoutTemplate> {
     const response = await apiClient.post('/preferences/templates', template);
-    return response.data;
+  return response.data as LayoutTemplate;
   }
 
   static async updateLayoutTemplate(
@@ -129,7 +129,7 @@ export class PreferencesAPI {
     template: Partial<LayoutTemplate>
   ): Promise<LayoutTemplate> {
     const response = await apiClient.put(`/preferences/templates/${templateId}`, template);
-    return response.data;
+  return response.data as LayoutTemplate;
   }
 
   static async deleteLayoutTemplate(templateId: string): Promise<void> {
@@ -138,13 +138,13 @@ export class PreferencesAPI {
 
   static async applyLayoutTemplate(templateId: string, userId: string): Promise<LayoutPreferences> {
     const response = await apiClient.post(`/preferences/templates/${templateId}/apply/${userId}`);
-    return response.data;
+  return response.data as LayoutPreferences;
   }
 
   // Dashboard Components
   static async getDashboardComponents(userId: string): Promise<ComponentConfig[]> {
     const response = await apiClient.get(`/preferences/components/${userId}`);
-    return response.data;
+  return response.data as ComponentConfig[];
   }
 
   static async updateDashboardComponents(
@@ -152,7 +152,7 @@ export class PreferencesAPI {
     components: ComponentConfig[]
   ): Promise<ComponentConfig[]> {
     const response = await apiClient.put(`/preferences/components/${userId}`, components);
-    return response.data;
+  return response.data as ComponentConfig[];
   }
 
   // Utility Methods
@@ -185,7 +185,7 @@ export class PreferencesAPI {
     }
   ): Promise<LayoutTemplate> {
     const response = await apiClient.post(`/preferences/layout/${userId}/save-custom`, layoutData);
-    return response.data;
+  return response.data as LayoutTemplate;
   }
 
   // Theme and Color Helpers

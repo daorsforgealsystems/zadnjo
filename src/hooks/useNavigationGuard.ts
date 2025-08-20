@@ -248,7 +248,7 @@ export const useNavigationGuard = () => {
     return flatMenu.filter(item => 
       item.id.includes('quick') || 
       item.badge !== undefined ||
-      permissions.actions.includes(`quick_${item.id}`)
+      (permissions && 'actions' in permissions && Array.isArray((permissions as any).actions) && (permissions as any).actions.includes(`quick_${item.id}`))
     );
   }, [getFlatMenu, permissions]);
 
