@@ -15,43 +15,7 @@ type LeafletComponents = {
   Icon: typeof Leaflet.Icon;
 };
 
-// Dynamic imports for Leaflet
-const loadLeafletComponents = async (): Promise<LeafletComponents> => {
-  const [reactLeaflet, leaflet] = await Promise.all([
-    import('react-leaflet'),
-    import('leaflet')
-  ]);
-
-  // Load CSS dynamically
-  await import('leaflet/dist/leaflet.css');
-
-  // Narrow dynamic import to Leaflet types without using `any`
-  const leafletModule = leaflet as unknown as typeof Leaflet;
-  const L = leafletModule;
-  const Icon = leafletModule.Icon;
-
-  // Fix for default icon issue with webpack
-  // Accessing an internal property; silence type-check for this single operation
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
-
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  });
-
-  return {
-    MapContainer: reactLeaflet.MapContainer,
-    TileLayer: reactLeaflet.TileLayer,
-    Marker: reactLeaflet.Marker,
-    Popup: reactLeaflet.Popup,
-    Polyline: reactLeaflet.Polyline,
-    L,
-    Icon
-  };
-};
+import { loadLeafletComponents } from './mapUtils';
 
 // Hook for creating vehicle icons
 const useVehicleIcons = (Icon: typeof Leaflet.Icon | null | undefined) => {
@@ -285,10 +249,6 @@ const MapView = memo((props: MapViewProps) => {
 
 MapView.displayName = 'MapView';
 
-// Preload function for hover prefetching
-// Attach preload helper to the exported component (avoids Fast Refresh named-export issue)
-type MapViewWithPreload = typeof MapView & { preloadMapComponents?: () => void };
-const MapViewExport = MapView as MapViewWithPreload;
-MapViewExport.preloadMapComponents = () => { void loadLeafletComponents(); };
-
+// Export default MapView (kept component-only to preserve fast refresh)
+const MapViewExport = MapView as typeof MapView;
 export default MapViewExport;
