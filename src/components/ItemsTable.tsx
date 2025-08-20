@@ -66,7 +66,7 @@ ItemTableRow.displayName = 'ItemTableRow';
 const ItemsTable = () => {
   const { t } = useTranslation();
   const { user, hasRole } = useAuth();
-  const { data: initialItems = [] } = useQuery({
+  const { data: initialItems = [] } = useQuery<Item[]>({
     queryKey: ['items'],
     queryFn: getItems,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -84,7 +84,7 @@ const ItemsTable = () => {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   // Update items when filteredItems change
-  useMemo(() => {
+  useEffect(() => {
     setItems(filteredItems);
   }, [filteredItems]);
 

@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
       staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 3, // Increased retries
       retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff
-      cacheTime: 1000 * 60 * 30, // 30 minutes
+  // cacheTime intentionally omitted to satisfy @tanstack/react-query types here
     },
     mutations: {
       retry: 2,
@@ -83,16 +83,20 @@ if (container) {
     debug('Starting React render', 'info');
     
     // Wrap the entire app in error boundaries
+    // Call debug logs before rendering to avoid void expressions in JSX
+    debug('Rendering QueryClientProvider', 'info');
+    debug('Rendering AuthProvider', 'info');
+    debug('Rendering ThemeProvider', 'info');
+    debug('Rendering LayoutProvider', 'info');
+    debug('Wiring Redux Provider', 'info');
+
     root.render(
       <React.StrictMode>
         <ErrorBoundary>
-          {debug('Rendering QueryClientProvider', 'info') || null}
           <QueryClientProvider client={queryClient}>
             <ErrorBoundary>
-              {debug('Rendering AuthProvider', 'info') || null}
               <AuthProvider>
                 <ErrorBoundary>
-                  {debug('Rendering ThemeProvider', 'info') || null}
                   <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
@@ -100,9 +104,7 @@ if (container) {
                     disableTransitionOnChange
                   >
                     <ErrorBoundary>
-                      {debug('Rendering LayoutProvider', 'info') || null}
                       <LayoutProvider>
-                        {debug('Wiring Redux Provider', 'info') || null}
                         <ReduxProvider store={store}>
                           <App />
                         </ReduxProvider>

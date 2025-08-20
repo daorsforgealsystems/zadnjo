@@ -26,6 +26,8 @@ interface AuthContextType {
   ) => Promise<{ error?: { message: string } }>;
   loginAsGuest: () => Promise<{ error?: { message: string } }>;
   signOut: () => Promise<void>;
+  // Backwards-compatible alias many components expect
+  logout: () => Promise<void>;
 
   // Authz helpers
   hasRole: (roles: Role[]) => boolean;
@@ -61,6 +63,7 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => ({}),
   loginAsGuest: async () => ({ }),
   signOut: async () => {},
+  logout: async () => {},
   hasRole: () => false,
 });
 
@@ -284,7 +287,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     signup,
     loginAsGuest,
-    signOut,
+  signOut,
+  // alias for components expecting `logout`
+  logout: signOut,
     hasRole,
   };
 
