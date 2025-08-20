@@ -30,7 +30,7 @@ export const useDragDrop = (options: UseDragDropOptions = {}) => {
   });
 
   const dragStartPos = useRef<{ x: number; y: number } | null>(null);
-  const dragOffset = useRef<{ x: number; y: number } | null>(null);
+  const dragOffset = useRef<{ offsetX: number; offsetY: number } | null>(null);
   const activeElement = useRef<HTMLElement | null>(null);
 
   // Handle drag start
@@ -41,19 +41,19 @@ export const useDragDrop = (options: UseDragDropOptions = {}) => {
   ) => {
     event.preventDefault?.();
     
-    const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0;
-    const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0;
+  const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
     
     const rect = element.getBoundingClientRect();
     const containerRect = containerRef?.current?.getBoundingClientRect();
     
     if (!containerRect) return;
 
-    const offsetX = clientX - rect.left;
-    const offsetY = clientY - rect.top;
+  const offsetX = clientX - rect.left;
+  const offsetY = clientY - rect.top;
     
-    dragStartPos.current = { x: clientX, y: clientY };
-    dragOffset.current = { offsetX, offsetY };
+  dragStartPos.current = { x: clientX, y: clientY };
+  dragOffset.current = { offsetX, offsetY };
     activeElement.current = element;
 
     setDragState({
@@ -83,15 +83,15 @@ export const useDragDrop = (options: UseDragDropOptions = {}) => {
 
     event.preventDefault();
     
-    const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0;
-    const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0;
+  const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const containerRect = containerRef?.current?.getBoundingClientRect();
     if (!containerRect) return;
 
     // Calculate new position relative to container
-    let newX = clientX - containerRect.left - dragOffset.current.offsetX;
-    let newY = clientY - containerRect.top - dragOffset.current.offsetY;
+  let newX = clientX - containerRect.left - (dragOffset.current?.offsetX ?? 0);
+  let newY = clientY - containerRect.top - (dragOffset.current?.offsetY ?? 0);
 
     // Snap to grid if enabled
     if (enableSnapping) {
@@ -177,6 +177,8 @@ export const useDragDrop = (options: UseDragDropOptions = {}) => {
       handleDragStart(event, component, event.currentTarget);
     },
     onTouchStart: (event: React.TouchEvent<HTMLElement>) => {
+      // TouchEvent is adapted to the same handler; cast intentionally
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handleDragStart(event as any, component, event.currentTarget);
     },
     onDragStart: (event: React.DragEvent) => {

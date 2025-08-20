@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo } from "react";
+import { useState, useMemo, useCallback, memo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { listItem } from "@/lib/motion-variants";
 import {
@@ -70,14 +70,13 @@ const ItemsTable = () => {
     queryKey: ['items'],
     queryFn: getItems,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
   const filteredItems = useMemo(() => {
     if (!user || hasRole([ROLES.ADMIN, ROLES.MANAGER])) {
       return initialItems;
     }
-    return initialItems.filter(item => user.associatedItemIds?.includes(item.id));
+    return (initialItems as Item[]).filter((item: Item) => user.associatedItemIds?.includes(item.id));
   }, [user, hasRole, initialItems]);
 
   const [items, setItems] = useState<Item[]>(filteredItems);

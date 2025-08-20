@@ -29,7 +29,7 @@ interface TabsContextValue {
 
 interface TriggerEntry {
   value: string
-  ref: React.RefObject<HTMLButtonElement>
+  ref: React.RefObject<HTMLButtonElement | null>
   indexHint: number // used to preserve DOM order
 }
 

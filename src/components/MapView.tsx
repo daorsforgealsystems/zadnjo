@@ -3,12 +3,19 @@ import LoadingSpinner from './LoadingSpinner';
 
 // Types for dynamic imports
 type LeafletComponents = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   MapContainer: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TileLayer: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Marker: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Popup: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Polyline: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   L: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Icon: any;
 };
 
@@ -22,7 +29,8 @@ const loadLeafletComponents = async (): Promise<LeafletComponents> => {
   // Load CSS dynamically
   await import('leaflet/dist/leaflet.css');
 
-  const { L, Icon } = leaflet;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { L, Icon } = leaflet as any;
 
   // Fix for default icon issue with webpack
   delete ((L as any).Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;

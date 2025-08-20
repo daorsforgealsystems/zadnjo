@@ -181,7 +181,8 @@ const FormBuilder = ({ initialFields = [], onFormChange }: FormBuilderProps) => 
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const newOptions = [...(field.options || []), `Option ${field.options?.length + 1 || 1}`];
+                  const nextIndex = (field.options?.length ?? 0) + 1;
+                  const newOptions = [...(field.options || []), `Option ${nextIndex}`];
                   updateField(field.id, { options: newOptions });
                 }}
               >
@@ -294,7 +295,6 @@ const FormBuilder = ({ initialFields = [], onFormChange }: FormBuilderProps) => 
                               </span>
                             </div>
                             {renderFieldEditor(field)}
-                            {provided.placeholder}
                           </div>
                         )}
                       </Draggable>
