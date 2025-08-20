@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import ItemDetails from "./ItemDetails";
 import { Item, ROLES } from "@/lib/types";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { getItems } from "@/lib/api";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

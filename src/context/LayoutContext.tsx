@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useReducer, useCallback } from 'react';
 import { PreferencesAPI, LayoutPreferences, ComponentConfig } from '@/lib/api/preferences-api';
-import { useAuth } from './AuthContext';
+import { useAuth } from './useAuth';
 import { toast } from '@/lib/toast';
 
 interface LayoutState {

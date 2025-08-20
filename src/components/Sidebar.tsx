@@ -30,7 +30,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/useAuth";
 import { ROLES, Role } from "@/lib/types";
 import { preloadMapComponents } from "@/components/MapView";
 import { useNavigationState } from "@/hooks/useNavigationState";

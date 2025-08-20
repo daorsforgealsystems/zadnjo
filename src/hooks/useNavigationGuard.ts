@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useNavigationState } from '@/hooks/useNavigationState';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/useAuth';
 import { NavigationItem, UserRole } from '@/lib/api/navigation-api';
 import type { Role } from '@/lib/types';
 import {

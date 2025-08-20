@@ -25,7 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/useAuth";
 import { ROLES, Anomaly, LiveRoute, Notification } from "@/lib/types";
 import { getMetricData, getShipmentData, getRevenueData, getRouteData, getAnomalies, getLiveRoutes } from "@/lib/api";
 import { MetricData, ChartData } from "@/lib/types";

@@ -8,7 +8,7 @@ import { ResponsiveGrid } from '@/components/layout/grid/ResponsiveGrid';
 import { InteractiveBackground } from '@/components/ui/react-bits/InteractiveBackground';
 import { useLayout } from '@/components/providers/LayoutProvider';
 import { generateTemplate } from '@/lib/layout/layoutUtils';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/useAuth';
 import { useLocation } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
 import { createRouteGuardThunk, loadNavigationState, trackPageViewThunk, updateBreadcrumbsThunk } from '@/store/navigationSlice';
