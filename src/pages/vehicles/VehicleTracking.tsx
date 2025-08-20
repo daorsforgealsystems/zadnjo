@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Filter, RefreshCw, Truck, MapPin, AlertTriangle } from 'lucide-react';
 
 // Components
@@ -226,57 +226,46 @@ const VehicleTracking: React.FC = () => {
     return () => clearInterval(interval);
   }, [refetchVehicles]);
 
-  // Table columns
-  interface TableColumn {
-    header: string;
-    accessorKey: string;
-    cell?: ({ row }: { row: { original: Vehicle } }) => React.ReactNode;
-  }
+  // Table columns - match the Column<T> shape expected by EnhancedTable
+  type Column<T> = {
+    key: keyof T;
+    title: string;
+    sortable?: boolean;
+    render?: (value: unknown, row: T) => React.ReactNode;
+  };
 
-  const vehicleColumns: TableColumn[] = [
-    { 
-      header: 'Vehicle', 
-      accessorKey: 'registrationNumber',
-      cell: ({ row }) => (
+  const vehicleColumns: Column<Vehicle>[] = [
+    {
+      key: 'registrationNumber',
+      title: 'Vehicle',
+      render: (_value, row) => (
         <div className="flex items-center">
           <Truck className="h-4 w-4 mr-2" />
-          <span>{row.original.registrationNumber}</span>
+          <span>{row.registrationNumber}</span>
         </div>
-      )
+      ),
     },
-    { 
-      header: 'Type', 
-      accessorKey: 'type' 
+    { key: 'type', title: 'Type' },
+    {
+      key: 'status',
+      title: 'Status',
+      render: (_value, row) => <StatusBadge status={row.status} />,
     },
-    { 
-      header: 'Status', 
-      accessorKey: 'status',
-      cell: ({ row }) => <StatusBadge status={row.original.status} />
-    },
-    { 
-      header: 'Driver', 
-      accessorKey: 'driver',
-      cell: ({ row }) => row.original.driver?.name || 'N/A'
-    },
-    { 
-      header: 'Speed', 
-      accessorKey: 'speed',
-      cell: ({ row }) => `${row.original.speed} km/h`
-    },
-    { 
-      header: 'Fuel', 
-      accessorKey: 'fuelLevel',
-      cell: ({ row }) => (
+    { key: 'driver', title: 'Driver', render: (_value, row) => row.driver?.name || 'N/A' },
+    { key: 'speed', title: 'Speed', render: (_value, row) => `${row.speed} km/h` },
+    {
+      key: 'fuelLevel',
+      title: 'Fuel',
+      render: (_value, row) => (
         <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <div 
+          <div
             className={`h-2.5 rounded-full ${
-              row.original.fuelLevel > 60 ? 'bg-green-600' : 
-              row.original.fuelLevel > 30 ? 'bg-yellow-400' : 'bg-red-600'
+              row.fuelLevel > 60 ? 'bg-green-600' : row.fuelLevel > 30 ? 'bg-yellow-400' : 'bg-red-600'
             }`}
-            style={{ width: `${row.original.fuelLevel}%` }}
+            style={{ width: `${row.fuelLevel}%` }}
           ></div>
         </div>
-      )
+      ),
     },
   ];
 
@@ -291,7 +280,7 @@ const VehicleTracking: React.FC = () => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
@@ -299,9 +288,9 @@ const VehicleTracking: React.FC = () => {
       transition: {
         type: 'spring',
         stiffness: 100,
-        damping: 15
-      } as any // Fix type error for Variant
-    }
+        damping: 15,
+      },
+    },
   };
 
   return (
@@ -429,8 +418,8 @@ const VehicleTracking: React.FC = () => {
                 data={vehicles}
                 columns={vehicleColumns}
                 pagination={{ pageSize: 5 }}
-                onRowClick={(row) => setSelectedVehicleId(row.id)}
-                isRowSelected={(row) => row.id === selectedVehicleId}
+                onRowClick={(row: Vehicle) => setSelectedVehicleId(row.id)}
+                isRowSelected={(row: Vehicle) => row.id === selectedVehicleId}
                 isLoading={isLoadingVehicles}
               />
             </div>

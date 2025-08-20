@@ -1,10 +1,10 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from './App.tsx';
+import App from './App';
 import './index.css';
 import './i18n';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { LayoutProvider } from '@/components/providers/LayoutProvider';

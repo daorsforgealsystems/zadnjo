@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import DOMPurify from 'dompurify';
@@ -31,12 +31,12 @@ const ReportGeneration: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<ReportFormValues>({
+  } = useForm({
     resolver: zodResolver(reportSchema),
     defaultValues: { reportType: 'kpi', format: 'pdf', fromDate: '', toDate: '', filter: '' },
   });
 
-  const onSubmit = (values: ReportFormValues) => {
+  const onSubmit: SubmitHandler<ReportFormValues> = (values) => {
     const safeFilter = DOMPurify.sanitize(values.filter || '', { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
     // TODO: Replace with real generation call

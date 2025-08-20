@@ -29,7 +29,8 @@ const mockShipments = [
 ];
 
 // Fix Leaflet icon issues
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+const iconDefaultProto = L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown };
+delete iconDefaultProto._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   iconRetinaUrl: markerIcon2x,
@@ -98,7 +99,7 @@ const LiveTracking: React.FC = () => {
         </div>
       </div>
 
-      <Tabs.Root defaultValue="map" className="w-full">
+  <Tabs.Root defaultValue="map">
         <Tabs.List className="grid w-full grid-cols-3 mb-6">
           <Tabs.Trigger value="map">Map View</Tabs.Trigger>
           <Tabs.Trigger value="vehicles">Vehicles</Tabs.Trigger>

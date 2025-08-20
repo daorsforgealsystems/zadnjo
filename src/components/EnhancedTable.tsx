@@ -24,7 +24,7 @@ interface Column<T> {
   key: keyof T;
   title: string;
   sortable?: boolean;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
 }
 
 interface EnhancedTableProps<T> {
@@ -32,13 +32,22 @@ interface EnhancedTableProps<T> {
   columns: Column<T>[];
   itemsPerPage?: number;
   className?: string;
+  // Optional compatibility props
+  pagination?: { pageSize: number };
+  onRowClick?: (row: T) => void;
+  isRowSelected?: (row: T) => boolean;
+  isLoading?: boolean;
 }
 
-const EnhancedTable = <T extends Record<string, any>>({
+const EnhancedTable = <T extends object>({
   data,
   columns,
   itemsPerPage = 10,
   className,
+  pagination,
+  onRowClick,
+  isRowSelected,
+  isLoading,
 }: EnhancedTableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: 'asc' | 'desc' } | null>(null);
@@ -60,10 +69,12 @@ const EnhancedTable = <T extends Record<string, any>>({
     });
   }, [data, sortConfig]);
 
+  const effectivePageSize = pagination?.pageSize ?? itemsPerPage;
+
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedData.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedData, currentPage, itemsPerPage]);
+    const startIndex = (currentPage - 1) * effectivePageSize;
+    return sortedData.slice(startIndex, startIndex + effectivePageSize);
+  }, [sortedData, currentPage, effectivePageSize]);
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
@@ -124,15 +135,25 @@ const EnhancedTable = <T extends Record<string, any>>({
           </TableHeader>
           <TableBody>
             {paginatedData.length > 0 ? (
-              paginatedData.map((row, index) => (
-                <TableRow key={index} className="cursor-pointer hover:bg-muted/50">
-                  {columns.map((column) => (
-                    <TableCell key={`${index}-${column.key as string}`}>
-                      {renderCell(row, column)}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              paginatedData.map((row, index) => {
+                // Try to use a stable id if present, otherwise fall back to index
+                const possibleId = (row as unknown as { id?: string | number }).id;
+                const rowKey = (typeof possibleId === 'string' || typeof possibleId === 'number') ? possibleId : index;
+                const selected = isRowSelected ? isRowSelected(row) : false;
+                return (
+                  <TableRow
+                    key={rowKey}
+                    className={cn('cursor-pointer hover:bg-muted/50', selected && 'ring-2 ring-primary')}
+                    onClick={() => onRowClick?.(row)}
+                  >
+                    {columns.map((column) => (
+                      <TableCell key={`${rowKey}-${column.key as string}`}>
+                        {renderCell(row, column)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="text-center py-8 text-muted-foreground">

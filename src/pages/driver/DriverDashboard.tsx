@@ -2,29 +2,37 @@ import React from 'react';
 import ResponsiveLayout from '@/components/ResponsiveLayout';
 import MetricCard from '@/components/widgets/MetricCard';
 import ActivityFeed from '@/components/widgets/ActivityFeed';
-import { Truck, CheckCircle, Clock, MapPin, Route, Navigation } from 'lucide-react';
+import { Truck, CheckCircle, Clock, MapPin, Route, Navigation, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import type { ActivityItem } from '@/components/widgets/ActivityFeed';
 
 const DriverDashboard: React.FC = () => {
-  const metrics = [
+  type Metric = {
+    title: string;
+    value: string | number;
+    change?: { value: number; type: 'increase' | 'decrease' | 'neutral'; period?: string };
+    icon: LucideIcon;
+  };
+
+  const metrics: Metric[] = [
     { title: 'Assigned Jobs', value: 6, change: { value: 12, type: 'increase', period: 'last week' }, icon: Truck },
     { title: 'Completed Today', value: 3, change: { value: 5, type: 'increase', period: 'yesterday' }, icon: CheckCircle },
     { title: 'Avg. ETA Deviation', value: '8m', change: { value: 2, type: 'decrease', period: 'last week' }, icon: Clock },
-    { title: 'Next Stop', value: 'BZ-102', change: { value: 0, type: 'neutral' as const, period: 'current' }, icon: MapPin },
+    { title: 'Next Stop', value: 'BZ-102', change: { value: 0, type: 'neutral', period: 'current' }, icon: MapPin },
   ];
 
-  const activities = [
+  const activities: ActivityItem[] = [
     { id: '1', type: 'location_update', title: 'Reached checkpoint Banja Luka', description: 'TRK-001 arrived at checkpoint', timestamp: new Date() },
     { id: '2', type: 'package_picked_up', title: 'PKG-884 picked up', description: 'Collected from depot', timestamp: new Date() },
-  ] as any;
+  ];
 
   return (
     <ResponsiveLayout>
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {metrics.map((m) => (
-            <MetricCard key={m.title} title={m.title} value={m.value} change={m.change as any} icon={m.icon as any} />
+            <MetricCard key={m.title} title={m.title} value={m.value} change={m.change} icon={m.icon} />
           ))}
         </div>
 
