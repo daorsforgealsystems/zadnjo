@@ -286,8 +286,12 @@ const navigationSlice = createSlice({
       .addCase(loadNavigationState.fulfilled, (state, action) => {
         const { menu, permissions, customization, analytics } = action.payload;
           state.menu = menu;
-          // permissions may be nested or already the shape we need
-          state.permissions = (permissions && (permissions.permissions ? permissions.permissions : permissions)) || state.permissions;
+          // permissions may be nested (permissions.permissions) or already the shape we need
+          if (permissions && (permissions as any).permissions) {
+            state.permissions = (permissions as any).permissions;
+          } else if (permissions) {
+            state.permissions = permissions as any;
+          }
           state.customization = customization || state.customization;
           state.analytics = analytics || state.analytics;
         state.loading = false;

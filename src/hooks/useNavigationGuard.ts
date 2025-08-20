@@ -265,8 +265,8 @@ export const useNavigationGuard = () => {
     if (state.analytics?.mostUsedRoutes) {
       const recentItems = state.analytics.mostUsedRoutes
         .slice(0, 5)
-        .map(route => getNavigationItem(route.path))
-        .filter((item): item is NavigationItem => item !== null);
+        .map((route: { path: string }) => getNavigationItem(route.path))
+        .filter((item: NavigationItem | null): item is NavigationItem => item !== null);
       
       setRecentNavigation(recentItems);
     }
