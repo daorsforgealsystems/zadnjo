@@ -11,6 +11,8 @@ interface MetricCardProps {
     type: 'increase' | 'decrease' | 'neutral';
     period?: string;
   };
+  formatter?: (val: number) => string;
+  isLoading?: boolean;
   icon: LucideIcon;
   iconColor?: string;
   description?: string;
@@ -22,6 +24,8 @@ const MetricCard = ({
   title,
   value,
   change,
+  formatter,
+  isLoading = false,
   icon: Icon,
   iconColor = 'text-primary',
   description,
@@ -61,7 +65,13 @@ const MetricCard = ({
               )}
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold">{value}</p>
+              <p className="text-2xl font-bold">
+                {isLoading ? (
+                  <span className="text-sm text-muted-foreground">Loading...</span>
+                ) : (
+                  typeof value === 'number' && formatter ? formatter(value) : value
+                )}
+              </p>
               {description && (
                 <p className="text-xs text-muted-foreground">{description}</p>
               )}

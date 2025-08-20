@@ -12,16 +12,11 @@ import DOMPurify from 'dompurify';
 // Zod schema for client-side validation
 const documentSchema = z.object({
   title: z.string().trim().min(3, 'Title must be at least 3 characters').max(100, 'Title is too long'),
-  description: z
-    .string()
-    .trim()
-    .max(1000, 'Description is too long')
-    .optional()
-    .transform((val) => (val == null ? '' : val)),
+  // Ensure description is always a string in the parsed output
+  description: z.string().trim().max(1000, 'Description is too long').optional().default(''),
+  // Use instanceof File so the parsed output has type File
   file: z
-    .
-    any()
-    .refine((f) => f instanceof File, 'A file is required')
+    .instanceof(File)
     .refine(
       (f: File) => ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'].includes(f.type),
       'Only PDF, DOCX, or TXT files are allowed'
@@ -37,7 +32,7 @@ const DocumentManagement: React.FC = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
-  } = useForm<DocumentFormValues>({
+  } = useForm({
     resolver: zodResolver(documentSchema),
     defaultValues: { title: '', description: '' },
   });

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './skeleton';
 
-interface EnhancedSkeletonProps {
+interface EnhancedSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   variant?: 'default' | 'shimmer' | 'wave' | 'pulse';
   speed?: 'slow' | 'normal' | 'fast';
@@ -72,7 +72,7 @@ const EnhancedSkeleton: React.FC<EnhancedSkeletonProps> = ({
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        {...props}
+  {...(props as any)}
       />
     );
   }
@@ -94,7 +94,7 @@ const EnhancedSkeleton: React.FC<EnhancedSkeletonProps> = ({
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        {...props}
+  {...(props as any)}
       />
     );
   }

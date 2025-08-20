@@ -32,7 +32,8 @@ function Portal({ children }: { children: React.ReactNode }) {
 interface DropdownContextValue {
   open: boolean
   setOpen: (o: boolean) => void
-  triggerRef: React.RefObject<HTMLElement>
+  // mutable ref whose current may be HTMLElement or null
+  triggerRef: React.MutableRefObject<HTMLElement | null>
 }
 const DropdownContext = createContext<DropdownContextValue | null>(null)
 function useDropdownContext(component: string): DropdownContextValue {
@@ -52,7 +53,7 @@ function useRovingContext(): RovingContextValue {
   return ctx
 }
 
-interface ItemEntry { ref: React.RefObject<HTMLDivElement>; disabled?: boolean; index: number }
+interface ItemEntry { ref: React.RefObject<HTMLDivElement | null>; disabled?: boolean; index: number }
 
 // Root
 export interface DropdownRootProps {
@@ -66,7 +67,7 @@ export function Root({ open, defaultOpen, onOpenChange, children }: DropdownRoot
   const [uncontrolledOpen, setUncontrolledOpen] = useState<boolean>(defaultOpen ?? false)
   const isControlled = open !== undefined
   const actualOpen = isControlled ? !!open : uncontrolledOpen
-  const triggerRef = useRef<HTMLElement>(null)
+  const triggerRef = useRef<HTMLElement | null>(null)
 
   const setOpen = useCallback(
     (o: boolean) => {
@@ -102,28 +103,42 @@ export function Trigger({ asChild, children, onClick, ...buttonProps }: Dropdown
   const { open, setOpen, triggerRef } = useDropdownContext('DropdownMenu.Trigger')
 
   const handleClick: React.MouseEventHandler<HTMLElement> = (e) => {
-    onClick?.(e as any)
+    // onClick from props expects a MouseEvent for HTMLButtonElement; cast via unknown to avoid `any`
+    onClick?.(e as unknown as React.MouseEvent<HTMLButtonElement>)
     if (e.defaultPrevented) return
     setOpen(!open)
   }
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as any, {
-      ref: (node: HTMLElement) => {
-        // @ts-ignore
-        if (typeof (children as any).ref === 'function') (children as any).ref(node)
-        // @ts-ignore
-        else if ((children as any).ref) (children as any).ref.current = node
-        ;(triggerRef as any).current = node
-      },
-      onClick: handleClick,
-    })
+  const child = children as React.ReactElement
+    type PossibleRef = ((instance: HTMLElement | null) => void) | React.MutableRefObject<HTMLElement | null> | null | undefined
+    const childRef = (child as React.ReactElement & { ref?: PossibleRef }).ref
+  // adding ref to cloned element triggers an overload typing issue; it's safe at runtime
+    // Wrap the provided child so we can attach a DOM ref and click handler.
+    // Using a wrapper keeps the runtime behaviour predictable and avoids TypeScript overload issues.
+    return (
+      <span
+        ref={(node: HTMLElement | null) => {
+          if (typeof childRef === 'function') {
+            ;(childRef as (instance: HTMLElement | null) => void)(node)
+          } else if (childRef && typeof childRef === 'object') {
+            ;(childRef as React.MutableRefObject<HTMLElement | null>).current = node
+          }
+          triggerRef.current = node
+        }}
+        onClick={handleClick}
+      >
+        {child}
+      </span>
+    )
   }
 
   return (
     <button
       type="button"
-      ref={triggerRef as React.RefObject<HTMLButtonElement>}
+      ref={(node: HTMLButtonElement | null) => {
+        triggerRef.current = node
+      }}
       {...buttonProps}
       onClick={handleClick}
     >
@@ -131,6 +146,7 @@ export function Trigger({ asChild, children, onClick, ...buttonProps }: Dropdown
     </button>
   )
 }
+// ItemEntry is defined above and expects RefObject<HTMLDivElement>
 
 // Content
 const _CONTENT_ID = 'dropdown-content-root'
@@ -208,9 +224,10 @@ export function Content({ className, style, align = 'start', onKeyDown, children
     }
   }
 
-  if (!open) return null
-
+  // Prepare roving context value (hooks must run before any early return)
   const rovingValue = useMemo<RovingContextValue>(() => ({ registerItem, moveFocus }), [registerItem, moveFocus])
+
+  if (!open) return null
 
   return (
     <Portal>
@@ -234,16 +251,14 @@ export function Content({ className, style, align = 'start', onKeyDown, children
 }
 
 // Label
-export interface DropdownLabelProps extends React.HTMLAttributes<HTMLDivElement> {}
-export function Label({ className, ...rest }: DropdownLabelProps) {
+export function Label({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div {...rest} className={classNames('px-2 py-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400', className)} />
   )
 }
 
 // Separator
-export interface DropdownSeparatorProps extends React.HTMLAttributes<HTMLDivElement> {}
-export function Separator({ className, ...rest }: DropdownSeparatorProps) {
+export function Separator({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
   return <div role="separator" {...rest} className={classNames('my-1 h-px bg-neutral-200 dark:bg-white/10', className)} />
 }
 
@@ -314,6 +329,4 @@ let __index = 0
 function _nextIndex() {
   return __index++
 }
-
-export const DropdownMenu = { Root, Trigger, Content, Item, Separator, Label }
-export default DropdownMenu
+// Note: individual components are exported above.

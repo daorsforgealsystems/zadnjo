@@ -14,9 +14,11 @@ interface AnimatedChartProps {
   type?: "bar" | "line" | "donut";
   className?: string;
   delay?: number;
+  height?: number;
 }
 
 // Tooltip props type without importing runtime from recharts
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TooltipPropsLike = { active?: boolean; payload?: any[]; label?: string };
 
 const CustomTooltip = ({ active, payload, label }: TooltipPropsLike) => {
@@ -80,8 +82,10 @@ const AnimatedChart = ({
   type = "bar",
   className,
   delay = 0,
+  height,
 }: AnimatedChartProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [R, setR] = useState<any>(null); // dynamically loaded recharts
 
   useEffect(() => {
@@ -103,7 +107,7 @@ const AnimatedChart = ({
 
   const renderBarChart = () => (
     R ? (
-      <R.ResponsiveContainer width="100%" height={200}>
+      <R.ResponsiveContainer width="100%" height={typeof height === 'number' ? height : 200}>
         <R.BarChart data={data}>
           <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
           <R.XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -121,7 +125,7 @@ const AnimatedChart = ({
 
   const renderLineChart = () => (
     R ? (
-      <R.ResponsiveContainer width="100%" height={200}>
+      <R.ResponsiveContainer width="100%" height={typeof height === 'number' ? height : 200}>
         <R.LineChart data={data}>
           <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
           <R.XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -135,7 +139,8 @@ const AnimatedChart = ({
 
   const renderDonutChart = () => {
     const RADIAN = Math.PI / 180;
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
       if (innerRadius === undefined || outerRadius === undefined || cx === undefined || cy === undefined || midAngle === undefined || percent === undefined) return null;
       const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
       const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -148,7 +153,7 @@ const AnimatedChart = ({
     };
 
     return R ? (
-      <R.ResponsiveContainer width="100%" height={200}>
+      <R.ResponsiveContainer width="100%" height={typeof height === 'number' ? height : 200}>
         <R.PieChart>
           <R.Tooltip content={<CustomTooltip />} />
           <R.Pie
