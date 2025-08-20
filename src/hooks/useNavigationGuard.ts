@@ -1,48 +1,69 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigation } from '@/context/NavigationContext';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useNavigationState } from '@/hooks/useNavigationState';
 import { useAuth } from '@/context/AuthContext';
-import { NavigationItem } from '@/lib/api/navigation-api';
+import { NavigationItem, UserRole } from '@/lib/api/navigation-api';
+import type { Role } from '@/lib/types';
+import {
+  checkRouteAccess,
+  createRouteGuardThunk,
+  updateBreadcrumbsThunk,
+  updateBadgeThunk,
+  trackPageViewThunk,
+  trackSearchThunk,
+  trackComponentInteractionThunk,
+} from '@/store/navigationSlice';
 
 export const useNavigationGuard = () => {
-  const { state, actions } = useNavigation();
+  const dispatch = useAppDispatch();
   const { user } = useAuth();
-  
-  const {
-    menu,
-    permissions,
-    breadcrumbs,
-    loading,
-    error,
-    badges,
-    routeGuard
-  } = state;
 
-  const {
-    checkRouteAccess,
-    trackPageView,
-    trackSearch,
-    trackComponentInteraction,
-    canPerformAction,
-    isComponentRestricted,
-    getNavigationItem,
-    getFlatMenu,
-    updateBadge
-  } = actions;
+  // Read navigation state from Redux
+  const { menu, permissions, analytics, breadcrumbs, badges, loading, error } = useNavigationState();
+  const routeGuard = useAppSelector(s => s.navigation.routeGuard);
 
   // Route access checking
+  const mapRoleToUserRole = useCallback((r?: Role): UserRole => {
+    switch (r) {
+      case 'ADMIN':
+        return 'ADMIN';
+      case 'MANAGER':
+        return 'MANAGER';
+      case 'DRIVER':
+        return 'DRIVER';
+      case 'CLIENT':
+        return 'CUSTOMER';
+      case 'GUEST':
+      default:
+        return 'GUEST';
+    }
+  }, []);
+
   const canNavigateTo = useCallback(async (route: string): Promise<boolean> => {
     try {
-      return await checkRouteAccess(route);
-    } catch (error) {
-      console.error('Error checking route access:', error);
+      if (!user) return false;
+      const res = await dispatch(checkRouteAccess({ userId: user.id, route, role: mapRoleToUserRole(user.role) }));
+      return Boolean(res.payload);
+    } catch (err) {
+      console.error('Error checking route access:', err);
       return false;
     }
-  }, [checkRouteAccess]);
+  }, [dispatch, user, mapRoleToUserRole]);
 
   // Navigation helpers
+  const flattenMenu = useCallback((items: NavigationItem[] = []): NavigationItem[] => {
+    return items.reduce<NavigationItem[]>((acc, it) => {
+      acc.push(it);
+      if (it.children) acc.push(...flattenMenu(it.children));
+      return acc;
+    }, []);
+  }, []);
+
+  const getFlatMenu = useCallback((): NavigationItem[] => flattenMenu(menu || []), [menu, flattenMenu]);
+
   const getActiveMenuItem = useCallback((currentPath: string): NavigationItem | null => {
-    return getNavigationItem(currentPath);
-  }, [getNavigationItem]);
+    return getFlatMenu().find(i => i.href === currentPath) || null;
+  }, [getFlatMenu]);
 
   const getMenuItemById = useCallback((id: string): NavigationItem | null => {
     const flatMenu = getFlatMenu();
@@ -63,18 +84,18 @@ export const useNavigationGuard = () => {
       return null;
     };
 
-    return findParent(menu, childId);
+    return findParent(menu || [], childId);
   }, [menu]);
 
   const getMenuItemPath = useCallback((targetId: string): NavigationItem[] => {
     const findPath = (items: NavigationItem[], target: string, path: NavigationItem[] = []): NavigationItem[] | null => {
       for (const item of items) {
         const currentPath = [...path, item];
-        
+
         if (item.id === target) {
           return currentPath;
         }
-        
+
         if (item.children) {
           const result = findPath(item.children, target, currentPath);
           if (result) return result;
@@ -83,61 +104,61 @@ export const useNavigationGuard = () => {
       return null;
     };
 
-    return findPath(menu, targetId) || [];
+    return findPath(menu || [], targetId) || [];
   }, [menu]);
 
   // Permission checks
   const hasPermission = useCallback((action: string): boolean => {
-    return canPerformAction(action);
-  }, [canPerformAction]);
+    const available = routeGuard?.availableActions || permissions?.actions || [];
+    return available.includes(action);
+  }, [routeGuard, permissions]);
 
   const canAccessComponent = useCallback((componentId: string): boolean => {
-    return !isComponentRestricted(componentId);
-  }, [isComponentRestricted]);
+    const restricted = routeGuard?.restrictedComponents || permissions?.restrictedComponents || [];
+    return !restricted.includes(componentId);
+  }, [routeGuard, permissions]);
 
   // Activity tracking
   const trackNavigation = useCallback(async (
     page: string,
     timeSpent?: number,
-    metadata?: any
+    metadata?: Record<string, unknown>
   ) => {
     try {
-      await trackPageView(page, timeSpent);
-      
-      // Track additional navigation metadata if provided
+      if (!user) return;
+      dispatch(trackPageViewThunk({ userId: user.id, page, timeSpent }));
+
       if (metadata) {
-        await trackComponentInteraction('navigation', 'page_change', {
-          page,
-          ...metadata
-        });
+        dispatch(trackComponentInteractionThunk({ userId: user.id, componentId: 'navigation', interaction: JSON.stringify({ action: 'page_change', page, ...metadata }) }));
       }
-    } catch (error) {
-      console.error('Error tracking navigation:', error);
+    } catch (err) {
+      console.error('Error tracking navigation:', err);
     }
-  }, [trackPageView, trackComponentInteraction]);
+  }, [dispatch, user]);
 
   const trackSearchActivity = useCallback(async (
     query: string,
     resultCount: number
   ) => {
     try {
-      await trackSearch(query, resultCount);
-    } catch (error) {
-      console.error('Error tracking search:', error);
+      if (!user) return;
+      dispatch(trackSearchThunk({ userId: user.id, query, resultCount }));
+    } catch (err) {
+      console.error('Error tracking search:', err);
     }
-  }, [trackSearch]);
+  }, [dispatch, user]);
 
   // Badge management
   const setBadgeCount = useCallback(async (itemId: string, count: number) => {
     try {
-      await updateBadge(itemId, count);
-    } catch (error) {
-      console.error('Error updating badge:', error);
+      await dispatch(updateBadgeThunk({ itemId, count }));
+    } catch (err) {
+      console.error('Error updating badge:', err);
     }
-  }, [updateBadge]);
+  }, [dispatch]);
 
   const incrementBadge = useCallback(async (itemId: string, increment: number = 1) => {
-    const currentCount = badges[itemId] || 0;
+    const currentCount = (badges || {})[itemId] || 0;
     await setBadgeCount(itemId, currentCount + increment);
   }, [badges, setBadgeCount]);
 
@@ -154,7 +175,7 @@ export const useNavigationGuard = () => {
       hasChildren?: boolean;
     }
   ): NavigationItem[] => {
-    if (!filter) return menu;
+    if (!filter) return menu || [];
 
     const filterItems = (items: NavigationItem[]): NavigationItem[] => {
       return items.filter(item => {
@@ -188,7 +209,7 @@ export const useNavigationGuard = () => {
       }));
     };
 
-    return filterItems(menu);
+  return filterItems(menu || []);
   }, [menu]);
 
   const getSortedMenu = useCallback((
@@ -214,32 +235,35 @@ export const useNavigationGuard = () => {
       }));
     };
 
-    return sortItems(menu);
+  return sortItems(menu || []);
   }, [menu]);
 
   // Route guard for React Router
   const createRouteGuard = useCallback(() => {
+    // Ensure routeGuard data is populated in the store
+  if (user) dispatch(createRouteGuardThunk({ userId: user.id, role: mapRoleToUserRole(user.role) }));
+
     return {
       canActivate: async (to: string): Promise<boolean> => {
         if (!user) return false;
         return await canNavigateTo(to);
       },
-      
+
       beforeEach: async (to: string, from: string) => {
         // Track navigation
         await trackNavigation(to, undefined, { from });
-        
-        // Update breadcrumbs would be handled by NavigationProvider
-        
+
+        // Update breadcrumbs via thunk
+  if (user) dispatch(updateBreadcrumbsThunk({ route: to, role: mapRoleToUserRole(user.role) }));
+
         return true;
       },
-      
+
       afterEach: (to: string) => {
         // Clear any temporary states
-        // Could be used for cleanup after navigation
       }
     };
-  }, [user, canNavigateTo, trackNavigation]);
+  }, [dispatch, user, canNavigateTo, trackNavigation, mapRoleToUserRole]);
 
   // Quick actions and shortcuts
   const getQuickActions = useCallback(() => {
@@ -248,7 +272,7 @@ export const useNavigationGuard = () => {
     return flatMenu.filter(item => 
       item.id.includes('quick') || 
       item.badge !== undefined ||
-      (permissions && 'actions' in permissions && Array.isArray((permissions as any).actions) && (permissions as any).actions.includes(`quick_${item.id}`))
+  (permissions && 'actions' in permissions && Array.isArray((permissions as unknown as { actions?: string[] }).actions) && (permissions as unknown as { actions?: string[] }).actions!.includes(`quick_${item.id}`))
     );
   }, [getFlatMenu, permissions]);
 
@@ -262,15 +286,15 @@ export const useNavigationGuard = () => {
 
   useEffect(() => {
     // Update recent navigation from analytics
-    if (state.analytics?.mostUsedRoutes) {
-      const recentItems = state.analytics.mostUsedRoutes
+    if (analytics?.mostUsedRoutes) {
+      const recentItems = analytics.mostUsedRoutes
         .slice(0, 5)
-        .map((route: { path: string }) => getNavigationItem(route.path))
+        .map((route: { path: string }) => getActiveMenuItem(route.path))
         .filter((item: NavigationItem | null): item is NavigationItem => item !== null);
-      
+
       setRecentNavigation(recentItems);
     }
-  }, [state.analytics, getNavigationItem]);
+  }, [analytics, getActiveMenuItem]);
 
   return {
     // Navigation state
@@ -283,10 +307,10 @@ export const useNavigationGuard = () => {
     isReady,
     recentNavigation,
 
-    // Route access
-    canNavigateTo,
-    canAccessComponent,
-    hasPermission,
+  // Route access
+  canNavigateTo,
+  canAccessComponent,
+  hasPermission,
 
     // Navigation helpers
     getActiveMenuItem,
@@ -295,23 +319,26 @@ export const useNavigationGuard = () => {
     getMenuItemPath,
     getFlatMenu,
 
-    // Menu filtering and sorting
-    getFilteredMenu,
-    getSortedMenu,
+  // Menu filtering and sorting
+  getFilteredMenu,
+  getSortedMenu,
     getQuickActions,
 
     // Activity tracking
     trackNavigation,
     trackSearchActivity,
-    trackComponentInteraction,
+    trackComponentInteraction: async (componentId: string, interaction: string) => {
+      if (!user) return;
+      dispatch(trackComponentInteractionThunk({ userId: user.id, componentId, interaction }));
+    },
 
     // Badge management
     setBadgeCount,
     incrementBadge,
     clearBadge,
 
-    // Route guarding
-    createRouteGuard,
-    routeGuard,
+  // Route guarding
+  createRouteGuard,
+  routeGuard,
   };
 };
