@@ -5,7 +5,7 @@ import App from './App';
 import './index.css';
 import './i18n';
 import ErrorBoundary from './components/ErrorBoundary';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { LayoutProvider } from '@/components/providers/LayoutProvider';
 import { Provider as ReduxProvider } from 'react-redux';
