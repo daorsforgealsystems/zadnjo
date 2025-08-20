@@ -33,23 +33,25 @@ const LazyLoadingErrorFallback = () => (
 );
 
 // Wrapper for lazy loaded components with error handling
-function lazyWithErrorHandling(importFn: () => Promise<any>) {
+function lazyWithErrorHandling<T extends Record<string, any> = Record<string, any>>(
+  importFn: () => Promise<{ default: React.ComponentType<T> } | React.ComponentType<T>>
+): React.ComponentType<T> {
   const LazyComponent = lazy(() =>
     importFn()
-      .then((mod: any) => {
+      .then((mod: { default: React.ComponentType<T> } | React.ComponentType<T>) => {
         // prefer default export
-        const resolved = mod && (mod.default ?? mod);
+        const resolved = mod && ('default' in mod ? mod.default : mod);
         return { default: resolved };
       })
-      .catch((error: any) => {
+      .catch((error: Error) => {
         console.error('Error loading component:', error);
-        return { default: LazyLoadingErrorFallback };
+        return { default: LazyLoadingErrorFallback as React.ComponentType<T> };
       })
   );
 
-  return (props: any) => (
+  return (props: T) => (
     <ErrorBoundary fallback={<LazyLoadingErrorFallback />}>
-      <LazyComponent {...props} />
+      <LazyComponent {...(props as T)} />
     </ErrorBoundary>
   );
 }

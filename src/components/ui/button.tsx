@@ -23,20 +23,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       const el = buttonRef.current
       if (!el) return
       
-      // Create animation
-      let animation: any = null
-      
       const startAnimation = () => {
         setIsHovered(true)
-        animation = animateButtonHover(el)
+        animateButtonHover(el)
       }
       
       const endAnimation = () => {
         setIsHovered(false)
-        if (animation) {
-          animation.pause()
-          animation = null
-        }
       }
       
       el.addEventListener('mouseenter', startAnimation)
@@ -45,7 +38,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       return () => {
         el.removeEventListener('mouseenter', startAnimation)
         el.removeEventListener('mouseleave', endAnimation)
-        if (animation) animation.pause()
       }
     }, [])
     

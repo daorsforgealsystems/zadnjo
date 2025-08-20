@@ -115,12 +115,13 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
 
     // Apply emitter shape
     switch (emitterShape) {
-      case 'circle':
+      case 'circle': {
         const angle = Math.random() * Math.PI * 2;
         const radius = Math.random() * emitterSize.width / 2;
         x += Math.cos(angle) * radius;
         y += Math.sin(angle) * radius;
         break;
+      }
       
       case 'rectangle':
         x += (Math.random() - 0.5) * emitterSize.width;
@@ -185,7 +186,7 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
   // Update particles
   const updateParticles = useCallback(() => {
     setParticles(prevParticles => {
-      let updatedParticles = prevParticles.map(particle => {
+      const updatedParticles = prevParticles.map(particle => {
         // Update trail
         if (trail) {
           particle.trail.push({ x: particle.x, y: particle.y });
@@ -342,7 +343,7 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
           ctx.fill();
           break;
         
-        case 'star':
+        case 'star': {
           const spikes = 5;
           const outerRadius = particle.size;
           const innerRadius = particle.size / 2;
@@ -363,6 +364,7 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
           ctx.closePath();
           ctx.fill();
           break;
+        }
       }
 
       ctx.restore();
