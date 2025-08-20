@@ -1,71 +1,15 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { ROLES, Role, User as AppUser } from '@/lib/types';
+import { mapSupabaseUserToAppUser } from './authUtils';
+import AuthContext, { AuthContextType } from './authCore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
-// Define proper types for auth responses
-interface AuthError {
-  message: string;
-}
 
-interface AuthContextType {
-  // Session & user state
-  session: Session | null;
-  user: (AppUser & { email?: string }) | null;
-  loading: boolean;
-  isAuthenticated: boolean;
+// mapSupabaseUserToAppUser moved to ./authUtils to keep this file exporting only components/hooks
 
-  // Actions
-  login: (email: string, password: string) => Promise<{ error?: { message: string } }>;
-  signup: (
-    email: string,
-    password: string,
-    username?: string,
-    role?: Role
-  ) => Promise<{ error?: { message: string } }>;
-  loginAsGuest: () => Promise<{ error?: { message: string } }>;
-  signOut: () => Promise<void>;
-  // Backwards-compatible alias many components expect
-  logout: () => Promise<void>;
-
-  // Authz helpers
-  hasRole: (roles: Role[]) => boolean;
-}
-
-function mapSupabaseUserToAppUser(supaUser: SupabaseUser | null): (AppUser & { email?: string }) | null {
-  if (!supaUser) return null;
-  const role: Role =
-    (supaUser.user_metadata?.role as Role) ||
-    (supaUser.app_metadata?.userrole as Role) ||
-    ROLES.CLIENT;
-  const username =
-    supaUser.user_metadata?.username ||
-    supaUser.user_metadata?.name ||
-    supaUser.email?.split('@')?.[0] ||
-    'user';
-  return {
-    id: supaUser.id,
-    username,
-    role,
-    avatarUrl: supaUser.user_metadata?.avatar_url as string | undefined,
-    associatedItemIds: [],
-    email: supaUser.email ?? undefined,
-  };
-}
-
-const AuthContext = createContext<AuthContextType>({
-  session: null,
-  user: null,
-  loading: true,
-  isAuthenticated: false,
-  login: async () => ({}),
-  signup: async () => ({}),
-  loginAsGuest: async () => ({ }),
-  signOut: async () => {},
-  logout: async () => {},
-  hasRole: () => false,
-});
+// AuthContext and AuthContextType are defined in ./authCore to keep this file exporting only components/hooks
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
@@ -87,14 +31,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
     let initCompleted = false;
     
-    // Set a timeout to prevent hanging indefinitely
+    // Set a timeout to prevent hanging indefinitely — don't reference `loading` here so deps can stay []
     const initTimeout = setTimeout(() => {
-      if (isMounted && loading && !initCompleted) {
+      if (isMounted && !initCompleted) {
         if (import.meta.env.DEV) {
           console.info('Auth initialization timed out, proceeding as guest');
         }
+        // Ensure we mark loading false and provide a guest fallback
         setLoading(false);
-        // Set as guest user to allow app to function when auth times out
         setUser({ id: 'timeout-guest', username: 'Guest User', role: ROLES.GUEST });
       }
     }, 15000); // 15s hard cap for init
@@ -301,6 +245,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+// `useAuth` is exported from `src/context/useAuth.ts` to keep this file component-only for fast refresh

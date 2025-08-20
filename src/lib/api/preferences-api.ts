@@ -32,7 +32,7 @@ export interface ComponentConfig {
     w: number;
     h: number;
   };
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   visible?: boolean;
   resizable?: boolean;
   draggable?: boolean;
@@ -57,7 +57,7 @@ export interface FooterConfig {
   backgroundColor?: string;
   showSocialLinks?: boolean;
   showNewsletter?: boolean;
-  customContent?: any;
+  customContent?: Record<string, unknown> | string | unknown;
 }
 
 export interface LayoutTemplate {
@@ -98,15 +98,15 @@ export class PreferencesAPI {
   }
 
   // Navigation Preferences
-  static async getNavigationPreferences(userId: string) {
+  static async getNavigationPreferences(userId: string): Promise<Record<string, unknown> | unknown> {
     const response = await apiClient.get(`/preferences/navigation/${userId}`);
   return response.data as unknown;
   }
 
   static async updateNavigationPreferences(
     userId: string,
-    preferences: any
-  ) {
+    preferences: Record<string, unknown> | unknown
+  ): Promise<Record<string, unknown> | unknown> {
     const response = await apiClient.put(`/preferences/navigation/${userId}`, preferences);
   return response.data as unknown;
   }
@@ -165,14 +165,14 @@ export class PreferencesAPI {
     });
   }
 
-  static async exportPreferences(userId: string) {
+  static async exportPreferences(userId: string): Promise<Record<string, unknown> | unknown> {
     const response = await apiClient.get(`/preferences/export/${userId}`);
-    return response.data;
+    return response.data as unknown;
   }
 
-  static async importPreferences(userId: string, preferencesData: any) {
+  static async importPreferences(userId: string, preferencesData: Record<string, unknown> | unknown): Promise<Record<string, unknown> | unknown> {
     const response = await apiClient.post(`/preferences/import/${userId}`, preferencesData);
-    return response.data;
+    return response.data as unknown;
   }
 
   static async saveCustomLayout(
@@ -180,8 +180,8 @@ export class PreferencesAPI {
     layoutData: {
       name: string;
       description?: string;
-      components: ComponentConfig[];
-      gridConfig: any;
+  components: ComponentConfig[];
+  gridConfig: Record<string, unknown> | unknown;
     }
   ): Promise<LayoutTemplate> {
     const response = await apiClient.post(`/preferences/layout/${userId}/save-custom`, layoutData);

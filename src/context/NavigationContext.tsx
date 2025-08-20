@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react';
 import type { NavigationItem } from '@/lib/api/navigation-api';
 
@@ -6,11 +7,24 @@ import type { NavigationItem } from '@/lib/api/navigation-api';
 // to runtime errors if used directly. It is intended as a temporary bridge
 // while other modules are updated to use the Redux-based hooks.
 
+// Stronger shapes for permissions and analytics used by navigation helpers/hooks.
+export type PermissionsMap = Record<string, boolean>;
+
+export interface AnalyticsEvent {
+  event: string;
+  category?: string;
+  action?: string;
+  label?: string;
+  value?: number;
+  metadata?: Record<string, unknown>;
+  timestamp?: string; // ISO string
+}
+
 type NavigationActions = {
   checkRouteAccess: (route: string) => Promise<boolean>;
   trackPageView: (page: string, timeSpent?: number) => Promise<void>;
   trackSearch: (query: string, resultCount: number) => Promise<void>;
-  trackComponentInteraction: (category: string, action: string, payload?: any) => Promise<void>;
+  trackComponentInteraction: (category: string, action: string, payload?: AnalyticsEvent | Record<string, unknown>) => Promise<void>;
   canPerformAction: (action: string) => boolean;
   isComponentRestricted: (id: string) => boolean;
   getNavigationItem: (path: string) => NavigationItem | null;
@@ -20,13 +34,13 @@ type NavigationActions = {
 
 type NavigationState = {
   menu: NavigationItem[];
-  permissions: any;
+  permissions: PermissionsMap | string[] | null;
   breadcrumbs: Array<{ label: string; href: string }>;
   loading: boolean;
   error: string | null;
   badges: Record<string, number>;
-  routeGuard?: any;
-  analytics?: any;
+  routeGuard?: ((path: string) => boolean | Promise<boolean>) | undefined;
+  analytics?: AnalyticsEvent | Record<string, unknown> | undefined;
 };
 
 const NavigationContext = React.createContext<{
