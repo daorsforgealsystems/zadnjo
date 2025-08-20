@@ -34,7 +34,7 @@ const Settings = () => {
     >
       {/* Hero background image with dark overlay */}
       <img
-        src={require('@/assets/hero-logistics.jpg')}
+        src="/src/assets/hero-logistics.jpg"
         alt="Background"
         className="absolute inset-0 w-full h-full object-cover object-center scale-105 blur-sm opacity-60 z-0 select-none pointer-events-none"
         draggable={false}

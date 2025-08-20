@@ -42,7 +42,13 @@ interface VehicleHistory {
 }
 
 // Mock API functions
-const getVehicles = async (filters: any): Promise<Vehicle[]> => {
+interface VehicleFilters {
+  status: string;
+  type: string;
+  driver: string;
+}
+
+const getVehicles = async (filters: VehicleFilters): Promise<Vehicle[]> => {
   // In a real app, this would call an API with the filters
   console.log('Fetching vehicles with filters:', filters);
   
@@ -221,11 +227,17 @@ const VehicleTracking: React.FC = () => {
   }, [refetchVehicles]);
 
   // Table columns
-  const vehicleColumns = [
+  interface TableColumn {
+    header: string;
+    accessorKey: string;
+    cell?: ({ row }: { row: { original: Vehicle } }) => React.ReactNode;
+  }
+
+  const vehicleColumns: TableColumn[] = [
     { 
       header: 'Vehicle', 
       accessorKey: 'registrationNumber',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="flex items-center">
           <Truck className="h-4 w-4 mr-2" />
           <span>{row.original.registrationNumber}</span>
@@ -239,22 +251,22 @@ const VehicleTracking: React.FC = () => {
     { 
       header: 'Status', 
       accessorKey: 'status',
-      cell: ({ row }: any) => <StatusBadge status={row.original.status} />
+      cell: ({ row }) => <StatusBadge status={row.original.status} />
     },
     { 
       header: 'Driver', 
       accessorKey: 'driver',
-      cell: ({ row }: any) => row.original.driver?.name || 'N/A'
+      cell: ({ row }) => row.original.driver?.name || 'N/A'
     },
     { 
       header: 'Speed', 
       accessorKey: 'speed',
-      cell: ({ row }: any) => `${row.original.speed} km/h`
+      cell: ({ row }) => `${row.original.speed} km/h`
     },
     { 
       header: 'Fuel', 
       accessorKey: 'fuelLevel',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div 
             className={`h-2.5 rounded-full ${
@@ -377,21 +389,23 @@ const VehicleTracking: React.FC = () => {
               <MapView 
                 vehicles={vehicles.map(v => ({
                   id: v.id,
-                  position: v.currentLocation,
+                  position: [v.currentLocation.lat, v.currentLocation.lng],
+                  driver: v.driver?.name || '',
                   status: v.status,
-                  info: {
-                    registration: v.registrationNumber,
-                    driver: v.driver?.name,
-                    speed: v.speed,
-                    destination: v.destination,
+                  hasAnomaly: v.fuelLevel < 20,
+                  popupInfo: {
+                    Registration: v.registrationNumber,
+                    Type: v.type,
+                    Speed: `${v.speed} km/h`,
+                    Fuel: `${v.fuelLevel}%`,
+                    ...(v.destination && { Destination: v.destination })
                   }
                 }))}
-                selectedVehicleId={selectedVehicleId}
-                onSelectVehicle={setSelectedVehicleId}
-                vehicleHistory={selectedVehicleId ? vehicleHistory.map(h => ({
-                  position: h.location,
-                  timestamp: h.timestamp
-                })) : []}
+                center={vehicles.length > 0 ? [vehicles[0].currentLocation.lat, vehicles[0].currentLocation.lng] : undefined}
+                routes={selectedVehicleId ? [{
+                  id: selectedVehicleId,
+                  path: vehicleHistory.map(h => [h.location.lat, h.location.lng])
+                }] : undefined}
               />
               
               {/* Loading overlay */}
@@ -513,25 +527,28 @@ const VehicleTracking: React.FC = () => {
               <div className="bg-card p-6 rounded-lg shadow">
                 <h2 className="text-xl font-semibold mb-4">Alerts</h2>
                 <AlertsPanel 
+                  isOpen={true}
+                  onOpenChange={() => {}}
                   alerts={[
                     {
                       id: 'a1',
-                      title: 'Unscheduled Stop',
-                      description: 'Vehicle ZG-456-CD stopped for 15 minutes outside scheduled rest area',
+                      type: 'UNSCHEDULED_STOP',
                       timestamp: '2023-06-03T13:45:00Z',
-                      severity: 'warning',
+                      severity: 'medium' as const,
+                      description: 'Vehicle ZG-456-CD stopped for 15 minutes outside scheduled rest area',
                       vehicleId: 'v2'
                     },
                     {
                       id: 'a2',
-                      title: 'Low Fuel',
-                      description: 'Vehicle LJ-012-GH fuel level below 15%',
+                      type: 'SPEED_ANOMALY',
                       timestamp: '2023-06-02T16:30:00Z',
-                      severity: 'error',
+                      severity: 'high' as const,
+                      description: 'Vehicle LJ-012-GH fuel level below 15%',
                       vehicleId: 'v4'
                     }
                   ]}
-                  onAlertClick={(alert) => setSelectedVehicleId(alert.vehicleId)}
+                  onClearAlerts={() => {}}
+                  onRemoveAlert={(id) => {}}
                 />
               </div>
             )}

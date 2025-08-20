@@ -10,7 +10,7 @@ export interface ComponentConfig {
     w: number;
     h: number;
   };
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   visible?: boolean;
   resizable?: boolean;
   draggable?: boolean;
@@ -35,7 +35,7 @@ export interface FooterConfig {
   backgroundColor?: string;
   showSocialLinks?: boolean;
   showNewsletter?: boolean;
-  customContent?: any;
+  customContent?: unknown;
 }
 
 export interface LayoutPreferences {
@@ -127,7 +127,7 @@ export interface UserActivity {
   userId: string;
   action: string;
   target: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   timestamp: Date;
 }
 

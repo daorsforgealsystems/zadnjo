@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import {
   Table,
@@ -178,7 +178,7 @@ const WarehouseManagement: React.FC = () => {
     const response = await InventoryService.recordStockMovement({
       itemId: stockAdjustment.itemId,
       warehouseId: stockAdjustment.warehouseId || selectedWarehouse?.id,
-      movementType: stockAdjustment.adjustmentType as any,
+      movementType: stockAdjustment.adjustmentType as 'inbound' | 'outbound' | 'transfer' | 'adjustment' | 'return',
       quantity: stockAdjustment.quantity,
       referenceType: 'adjustment',
       notes: stockAdjustment.notes
@@ -487,15 +487,16 @@ const WarehouseManagement: React.FC = () => {
           </div>
 
           {/* Main Content Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-[600px] grid-cols-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="inventory">Inventory</TabsTrigger>
-              <TabsTrigger value="movements">Movements</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            </TabsList>
+          <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+            <div className="space-y-6">
+              <Tabs.List className="grid w-full max-w-[600px] grid-cols-4">
+              <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
+              <Tabs.Trigger value="inventory">Inventory</Tabs.Trigger>
+              <Tabs.Trigger value="movements">Movements</Tabs.Trigger>
+              <Tabs.Trigger value="analytics">Analytics</Tabs.Trigger>
+              </Tabs.List>
 
-            <TabsContent value="overview" className="space-y-6">
+              <Tabs.Content value="overview" className="space-y-6">
               {/* Warehouse Info Card */}
               <Card>
                 <CardHeader>
@@ -565,9 +566,9 @@ const WarehouseManagement: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+              </Tabs.Content>
 
-            <TabsContent value="inventory" className="space-y-6">
+              <Tabs.Content value="inventory" className="space-y-6">
               <Card>
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -712,9 +713,9 @@ const WarehouseManagement: React.FC = () => {
                   </Table>
                 </CardContent>
               </Card>
-            </TabsContent>
+              </Tabs.Content>
 
-            <TabsContent value="movements" className="space-y-6">
+              <Tabs.Content value="movements" className="space-y-6">
               <Card>
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -776,9 +777,9 @@ const WarehouseManagement: React.FC = () => {
                   </Table>
                 </CardContent>
               </Card>
-            </TabsContent>
+              </Tabs.Content>
 
-            <TabsContent value="analytics" className="space-y-6">
+              <Tabs.Content value="analytics" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -868,8 +869,9 @@ const WarehouseManagement: React.FC = () => {
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-          </Tabs>
+              </Tabs.Content>
+            </div>
+          </Tabs.Root>
         </>
       )}
     </div>

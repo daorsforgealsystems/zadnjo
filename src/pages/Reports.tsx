@@ -17,8 +17,8 @@ interface AutoTableOptions {
   startY?: number;
 }
 
-interface jsPDFWithAutoTable extends jsPDF {
-  autoTable: (options: AutoTableOptions) => jsPDF;
+interface jsPDFWithAutoTable extends JsPdfType {
+  autoTable: (options: AutoTableOptions) => JsPdfType;
 }
 
 const Reports: React.FC = () => {

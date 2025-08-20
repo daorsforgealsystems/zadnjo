@@ -190,8 +190,8 @@ export class PreferencesService {
     layoutData: {
       name: string;
       description?: string;
-      components: any[];
-      gridConfig: any;
+      components: ComponentConfig[];
+      gridConfig: Record<string, unknown>;
     }
   ): Promise<LayoutTemplate> {
     const userPrefs = await this.getLayoutPreferences(userId);
@@ -256,7 +256,7 @@ export class PreferencesService {
     };
   }
 
-  async importUserPreferences(userId: string, data: any) {
+  async importUserPreferences(userId: string, data: { preferences?: { layout?: Partial<LayoutPreferences>; navigation?: Partial<NavigationPreferences> } }) {
     if (data.preferences?.layout) {
       const { id, userId: _, ...layoutPrefs } = data.preferences.layout;
       await this.updateLayoutPreferences(userId, layoutPrefs);
