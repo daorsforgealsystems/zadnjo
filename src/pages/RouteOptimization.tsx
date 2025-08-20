@@ -37,14 +37,19 @@ const RouteOptimization = () => {
     mutationFn: (variables: { from: Location; to: Location }) =>
       RoutingAPI.optimize({ stops: [variables.from.coordinates, variables.to.coordinates] }).then(r => r.data),
     onSuccess: (data) => {
+      // Define a proper interface for the stop data
+      interface Stop {
+        lng: number;
+        lat: number;
+      }
+      
       const routeOptions = generateRouteOptions({
         geometry: {
-          coordinates: data.stops.map((s: any) => [s.lng, s.lat]),
-          type: 'LineString',
+          coordinates: data.stops.map((s: Stop) => [s.lng, s.lat]),
         },
         distance: data.stops.length * 50000, // placeholder
-        duration: data.stops.length * 1800,  // placeholder
-      } as any);
+        duration: data.stops.length * 1800,  // placeholder,
+      });
       setRoutes(routeOptions);
       setSelectedRoute(routeOptions[0]); // Select the first route by default
     },

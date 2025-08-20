@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,7 @@ export default function ProfilePage() {
   const [avatar_url, setAvatarUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      getProfile();
-    }
-  }, [user]);
-
-  async function getProfile() {
+  const getProfile = useCallback(async () => {
     try {
       setLoading(true);
       if (!user) throw new Error("No user on the session!");
@@ -52,7 +46,13 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [user, toast]);
+
+  useEffect(() => {
+    if (user) {
+      getProfile();
+    }
+  }, [user, getProfile]);
 
   async function updateProfile({
     username,

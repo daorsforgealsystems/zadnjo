@@ -63,7 +63,7 @@ const EnhancedDashboard = () => {
   const mockActivities = [
     {
       id: '1',
-      type: 'package_delivered',
+      type: 'package_delivered' as const,
       title: 'Package #123 delivered',
       description: 'Delivered to client at Main St.',
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
@@ -72,7 +72,7 @@ const EnhancedDashboard = () => {
     },
     {
       id: '2',
-      type: 'route_optimized',
+      type: 'route_optimized' as const,
       title: 'Route optimization completed',
       description: 'Optimized 5 routes for today',
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6),
@@ -111,41 +111,27 @@ const EnhancedDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
                 title="Active Shipments"
-                value={activeShipments}
-                change={{ value: 12, type: 'increase', period: 'last week' }}
+                value={activeShipments.toString()}
+                change="12% increase from last week"
                 icon={Package}
-                iconColor="text-blue-600"
-                description="Currently in transit"
-                trend={[
-                  { label: 'Mon', value: 45 },
-                  { label: 'Tue', value: 52 },
-                  { label: 'Wed', value: 48 },
-                  { label: 'Thu', value: activeShipments }
-                ]}
               />
               <MetricCard
                 title="Delivered Today"
                 value={deliveredToday}
-                change={{ value: 8, type: 'increase', period: 'yesterday' }}
+                change="8% increase from yesterday"
                 icon={CheckCircle}
-                iconColor="text-green-600"
-                description="Successfully completed"
               />
               <MetricCard
                 title="Total Revenue"
                 value={`$${totalRevenue.toLocaleString()}`}
-                change={{ value: 15, type: 'increase', period: 'last month' }}
+                change="15% increase from last month"
                 icon={DollarSign}
-                iconColor="text-yellow-600"
-                description="This month"
               />
               <MetricCard
                 title="Avg Delivery Time"
                 value={`${avgDeliveryTime}h`}
-                change={{ value: 5, type: 'decrease', period: 'last month' }}
+                change="5% decrease from last month"
                 icon={Clock}
-                iconColor="text-purple-600"
-                description="Average completion time"
               />
             </div>
 
