@@ -46,7 +46,7 @@ export interface AnimationContext {
   presets: AnimationPresets;
   intensity: AnimationIntensity;
   reducedMotion: boolean;
-  createAnimation: (config: AnimationConfig) => AnimeInstance;
+  createAnimation: (config: AnimationConfig | string, maybeElem?: HTMLElement | null, maybeOptions?: Partial<AnimationConfig>) => AnimeInstance | undefined;
   animateEntrance: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => AnimeInstance;
   animateExit: (element: HTMLElement, type: EntranceAnimation, config?: Partial<AnimationConfig>) => AnimeInstance;
   createHoverAnimation: (element: HTMLElement, config?: Partial<AnimationConfig>) => () => void;

@@ -177,3 +177,14 @@ export const animateLayoutShift = (
     easing: 'easeOutQuart',
   });
 };
+
+// Backwards-compatible helper used by some components
+export const animateFooterReveal = (element: HTMLElement, show: boolean) => {
+  return anime({
+    targets: element,
+    translateY: show ? ['100%', '0%'] : ['0%', '100%'],
+    opacity: show ? [0, 1] : [1, 0],
+    duration: 300,
+    easing: 'easeOutQuart',
+  });
+};

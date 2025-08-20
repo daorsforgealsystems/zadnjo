@@ -187,6 +187,8 @@ export const animateCounter = (
 ) => {
   const obj = { value: 0 };
   
+  // Use a type-ignore for the targets because animejs typings expect DOM targets
+  // @ts-expect-error: animejs targets typing is incompatible with plain objects used for numeric animation
   return anime({
     targets: obj,
     value: targetValue,
@@ -196,7 +198,7 @@ export const animateCounter = (
     delay: config.delay || 0,
     autoplay: config.autoplay ?? true,
     update: () => {
-      element.textContent = obj.value.toLocaleString();
+  element.textContent = (obj as unknown as { value: number }).value.toLocaleString();
     }
   });
 };

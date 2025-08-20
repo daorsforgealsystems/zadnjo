@@ -82,3 +82,11 @@ export interface DragDropState {
   dropTarget: string | null;
   previewPosition: { x: number; y: number } | null;
 }
+
+// Configuration for sticky footer components
+export interface StickyConfig {
+  bottom?: number | string;
+  zIndex?: number;
+  backgroundColor?: string;
+  backdropBlur?: boolean;
+}

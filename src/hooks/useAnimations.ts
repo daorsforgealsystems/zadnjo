@@ -57,8 +57,24 @@ export const useAnimations = (intensity: AnimationIntensity = 'medium') => {
     };
   }, [intensity, reducedMotion]);
 
-  const createAnimation = useCallback((config: AnimationConfig) => {
-    const adjustedConfig = adjustConfig(config);
+  // Accept either a single AnimationConfig, or (name, element, options) for backward compatibility
+  const createAnimation = useCallback((
+    arg1: AnimationConfig | string,
+    maybeElem?: HTMLElement | null,
+    maybeOptions?: Partial<AnimationConfig>
+  ) => {
+    if (typeof arg1 === 'string') {
+      // signature: createAnimation(name, element, options)
+      const element = maybeElem as HTMLElement | null;
+      const options = maybeOptions || {};
+      const cfg = adjustConfig({ duration: options.duration ?? 300, easing: options.easing ?? 'easeOutQuad', ...options } as AnimationConfig);
+  if (!element) return undefined;
+      const anim = anime({ targets: element, ...cfg });
+      activeAnimations.current.push(anim);
+      return anim;
+    }
+
+    const adjustedConfig = adjustConfig(arg1 as AnimationConfig);
     const animation = anime(adjustedConfig);
     activeAnimations.current.push(animation);
     return animation;

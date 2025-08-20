@@ -46,7 +46,7 @@ function classNames(...v: Array<string | false | null | undefined>) {
 }
 
 // Root
-export interface TabsRootProps {
+export interface TabsRootProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: string
   defaultValue?: string
   onValueChange?: (value: string) => void

@@ -460,7 +460,8 @@ export const animateHeaderLoading = (
   } else {
     // Stop any running animations on these elements
     loadingElements.forEach(element => {
-      anime.remove(element);
+      // anime.remove may not be declared in types; cast to any for runtime call
+      (anime as any).remove(element);
     });
     
     anime({
