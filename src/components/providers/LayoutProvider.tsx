@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import { LayoutState, LayoutActions, LayoutComponent, ResponsiveBreakpoint } from '@/types/layout';
 import { defaultBreakpoints, getCurrentBreakpoint } from '@/lib/layout/breakpoints';

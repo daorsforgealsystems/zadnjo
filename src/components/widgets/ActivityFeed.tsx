@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
-interface ActivityItem {
+export interface ActivityItem {
   id: string;
   type: 'package_delivered' | 'package_picked_up' | 'route_optimized' | 'user_login' | 'alert' | 'location_update';
   title: string;

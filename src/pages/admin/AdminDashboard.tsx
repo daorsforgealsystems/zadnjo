@@ -2,28 +2,31 @@ import React from 'react';
 import ResponsiveLayout from '@/components/ResponsiveLayout';
 import MetricCard from '@/components/widgets/MetricCard';
 import ChartWidget from '@/components/widgets/ChartWidget';
-import ActivityFeed from '@/components/widgets/ActivityFeed';
-import { Users, ShieldCheck, Server, Activity, Settings, ClipboardList } from 'lucide-react';
+import ActivityFeed, { ActivityItem } from '@/components/widgets/ActivityFeed';
+import { Users, ShieldCheck, Server, ClipboardList, type LucideIcon } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
-  const metrics = [
+  type MetricChange = { value: number; type: 'increase' | 'decrease' | 'neutral'; period?: string };
+  type Metric = { title: string; value: string | number; change?: MetricChange; icon: LucideIcon };
+
+  const metrics: Metric[] = [
     { title: 'Active Users', value: 328, change: { value: 4, type: 'increase', period: 'last week' }, icon: Users },
     { title: 'System Health', value: '99.9%', change: { value: 0.1, type: 'increase', period: 'last month' }, icon: Server },
     { title: 'Security Events', value: 12, change: { value: 3, type: 'decrease', period: 'last week' }, icon: ShieldCheck },
     { title: 'Open Tickets', value: 5, change: { value: 2, type: 'decrease', period: 'yesterday' }, icon: ClipboardList },
   ];
 
-  const activity = [
+  const activity: ActivityItem[] = [
     { id: '1', type: 'user_login', title: 'New admin added', description: 'User ana.k promoted to ADMIN', timestamp: new Date() },
     { id: '2', type: 'alert', title: 'Failed login attempt', description: 'Multiple attempts from IP 178.22.15.10', timestamp: new Date() },
-  ] as any;
+  ];
 
   return (
     <ResponsiveLayout>
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {metrics.map((m) => (
-            <MetricCard key={m.title} title={m.title} value={m.value} change={m.change as any} icon={m.icon as any} />
+            <MetricCard key={m.title} title={m.title} value={m.value} change={m.change} icon={m.icon} />
           ))}
         </div>
 
