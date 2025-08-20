@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import ParticleBackground from './ParticleBackground';
 
 interface ResponsiveLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   showSidebar?: boolean;
   showParticles?: boolean;
   className?: string;

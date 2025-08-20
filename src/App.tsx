@@ -33,14 +33,15 @@ const LazyLoadingErrorFallback = () => (
 );
 
 // Wrapper for lazy loaded components with error handling
-function lazyWithErrorHandling<T extends Record<string, any> = Record<string, any>>(
-  importFn: () => Promise<{ default: React.ComponentType<T> } | React.ComponentType<T>>
+function lazyWithErrorHandling<T extends Record<string, unknown> = Record<string, unknown>>(
+  importFn: () => Promise<unknown>
 ): React.ComponentType<T> {
   const LazyComponent = lazy(() =>
     importFn()
-      .then((mod: { default: React.ComponentType<T> } | React.ComponentType<T>) => {
+      .then((mod) => {
         // prefer default export
-        const resolved = mod && ('default' in mod ? mod.default : mod);
+        const maybe = mod as Record<string, unknown> | React.ComponentType<T>;
+        const resolved: React.ComponentType<T> = maybe && 'default' in maybe ? (maybe as { default: React.ComponentType<T> }).default : (maybe as React.ComponentType<T>);
         return { default: resolved };
       })
       .catch((error: Error) => {
@@ -74,11 +75,11 @@ const EnhancedDashboard = lazyWithErrorHandling(() => import('./pages/EnhancedDa
 const PortalDashboard = lazyWithErrorHandling(() => import('./pages/portal/Dashboard'));
 const PortalProfile = lazyWithErrorHandling(() => import('./pages/portal/Profile'));
 const PortalShipments = lazyWithErrorHandling(() => import('./pages/portal/Shipments'));
-const CustomerPortalLayout = lazyWithErrorHandling(() => import('./components/CustomerPortalLayout'));
+// ProtectedRoute is lazy loaded; props type will be inferred from the component itself
+// ProtectedRoute is lazy loaded; props type will be inferred from the component itself
 const ProtectedRoute = lazyWithErrorHandling(() => import('./components/ProtectedRoute'));
-const LandingPage = lazyWithErrorHandling(() => import('./pages/LandingPage'));
+const CustomerPortalLayout = lazyWithErrorHandling(() => import('./components/CustomerPortalLayout'));
 const ResponsiveLayout = lazyWithErrorHandling(() => import('./components/ResponsiveLayout'));
-
 const ModernFooter = lazyWithErrorHandling(() => import('./components/ModernFooter'));
 const ProfilePage = lazyWithErrorHandling(() => import('./pages/ProfilePage'));
 const DashboardLayout = lazyWithErrorHandling(() => import('./components/layout/DashboardLayout').then(m => ({ default: m.DashboardLayout })));
@@ -165,11 +166,10 @@ const AppContent = () => {
                     exit="exit"
                     className="min-h-screen bg-gradient-to-b from-background via-background to-background"
                   >
-                    <LandingPage />
+                    <Index />
                   </motion.div>
                 }
               />
-
               {/* Logistics-themed slide/fade for key app sections */}
               {[
                 // Original routes
@@ -405,7 +405,7 @@ const App = () => {
       import('./components/layout/DashboardLayout');
     };
 
-    const idle = (window as any).requestIdleCallback as undefined | ((cb: () => void) => number);
+    const idle = (window as Window & typeof globalThis).requestIdleCallback as undefined | ((cb: () => void) => number);
     let handle: number | undefined;
     if (typeof idle === 'function') {
       handle = idle(prefetch);
@@ -414,10 +414,10 @@ const App = () => {
     }
 
     return () => {
-      // @ts-ignore - cancelIdleCallback may not exist
-      if (typeof (window as any).cancelIdleCallback === 'function' && handle) {
-        // @ts-ignore
-        (window as any).cancelIdleCallback(handle);
+      // cancelIdleCallback may not exist on all browsers; use a correctly typed shim instead of `any`
+      const win = window as unknown as { cancelIdleCallback?: (handle: number) => void };
+      if (typeof win.cancelIdleCallback === 'function' && handle) {
+        win.cancelIdleCallback(handle);
       } else if (handle) {
         clearTimeout(handle);
       }
