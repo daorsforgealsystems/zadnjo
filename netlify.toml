@@ -107,7 +107,7 @@
 
 # Build plugins
 [[plugins]]
-  package = "./netlify/plugins/build-optimizer-simple.js"
+  package = "./netlify/plugins/build-optimizer.js"
 
 # Performance and optimization settings
 [build.processing]
