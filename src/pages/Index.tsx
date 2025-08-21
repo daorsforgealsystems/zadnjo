@@ -48,7 +48,7 @@ const Index = () => {
 
   const metricDataRaw = useQuery<MetricData>({
     queryKey: ['metricData'],
-    queryFn: getMetricData,
+    queryFn: () => getMetricData(),
   }).data;
 
   const metricData: MetricData = metricDataRaw ?? {

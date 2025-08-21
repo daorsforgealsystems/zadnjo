@@ -80,6 +80,28 @@ export default defineConfig({
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24, // 1 day
               },
+              networkTimeoutSeconds: 3,
+              plugins: [
+                {
+                  cacheKeyWillBeUsed: async ({ request }) => {
+                    return `${request.url}?v=${Date.now()}`;
+                  },
+                  handlerDidError: async () => Response.redirect('/offline.html', 302),
+                },
+              ],
+            },
+          },
+          {
+            // Cache API responses with network-first strategy
+            urlPattern: /^https:\/\/api\.daorsflow\.com\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60, // 1 hour
+              },
+              networkTimeoutSeconds: 5,
             },
           },
         ],
