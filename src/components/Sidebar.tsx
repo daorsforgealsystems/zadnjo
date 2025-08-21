@@ -78,7 +78,7 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
   };
 
   const menuItems: MenuItem[] = [
-    { id: "dashboard", label: t("sidebar.dashboard"), icon: Home, color: "text-primary", href: "/", allowedRoles: [ROLES.ADMIN, ROLES.MANAGER] },
+    { id: "dashboard", label: t("sidebar.dashboard"), icon: Home, color: "text-primary", href: "/dashboard", allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.CLIENT, ROLES.DRIVER] },
     { id: "item-tracking", label: t("sidebar.itemTracking"), icon: Package, color: "text-green-400", href: "/item-tracking", allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.CLIENT, ROLES.DRIVER] },
     { id: "route-optimization", label: "Route Optimization", icon: Route, color: "text-teal-400", href: "/route-optimization", allowedRoles: [ROLES.ADMIN, ROLES.MANAGER] },
     { id: "inventory", label: t("sidebar.inventory"), icon: Warehouse, color: "text-orange-400", href: "/inventory", allowedRoles: [ROLES.ADMIN] },

@@ -170,8 +170,7 @@ const AppContent = () => {
 
               {/* Core app routes (dashboard etc.) */}
               {[
-                // Map /dashboard to Index (main app shell)
-                { path: '/dashboard', element: <Index /> },
+                // Core app routes continue below; /dashboard is defined as a guarded route
                 { path: '/customer-dashboard', element: <CustomerDashboard /> },
                 { path: '/inventory', element: <Inventory /> },
                 { path: '/item-tracking', element: <ItemTracking /> },
@@ -261,7 +260,7 @@ const AppContent = () => {
                 }
               />
 
-              {/* Portal with nested routes */}
+              {/* Guarded dashboard route */}
               <Route
                 element={
                   <ErrorBoundary>
@@ -269,6 +268,27 @@ const AppContent = () => {
                   </ErrorBoundary>
                 }
               >
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ErrorBoundary>
+                      <DashboardLayout>
+                        <motion.div
+                          key={location.pathname}
+                          variants={pageTransition}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          className="min-h-screen"
+                        >
+                          <MainDashboard />
+                        </motion.div>
+                      </DashboardLayout>
+                    </ErrorBoundary>
+                  }
+                />
+
+                {/* Portal with nested routes */}
                 <Route
                   path="/portal"
                   element={
@@ -420,11 +440,11 @@ const App = () => {
   }, []);
 
   return (
-    <AppProviders>
+    <>
       <AppContent />
       {/* Debug overlay - press Ctrl+Shift+D to show/hide */}
       <DebugOverlay enabled={true} />
-    </AppProviders>
+    </>
   );
 };
 
