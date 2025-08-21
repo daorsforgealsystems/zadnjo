@@ -20,7 +20,7 @@
     },
     "types": ["@testing-library/jest-dom"]
   },
-  "include": ["src/**/*", "vitest.setup.ts"],
+  "include": ["src/**/*"],
   "exclude": [
     "src/**/__tests__/**",
     "src/**/*.test.ts",

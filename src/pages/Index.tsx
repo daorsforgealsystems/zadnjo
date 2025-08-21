@@ -46,7 +46,7 @@ const Index = () => {
     queryFn: () => getAnomalies(),
   });
 
-  const { data: metricData } = useQuery({ queryKey: ['metricData'], queryFn: getMetricData });
+  const { data: metricData } = useQuery<MetricData>({ queryKey: ['metricData'], queryFn: () => getMetricData() });
   const { data: shipmentData } = useQuery({ queryKey: ['shipmentData'], queryFn: getShipmentData });
   const { data: revenueData } = useQuery({ queryKey: ['revenueData'], queryFn: getRevenueData });
   const { data: routeData } = useQuery({ queryKey: ['routeData'], queryFn: getRouteData });
@@ -56,7 +56,13 @@ const Index = () => {
       const routes = await getLiveRoutes();
       setLiveRoutes(routes);
     };
-    fetchLiveRoutes();
+      // Define the shape of dashboardStats
+      const dashboardStats = {
+        activeShipments: 0,
+        totalRevenue: 0,
+        onTimeDelivery: 0,
+        borderCrossings: 0,
+      };
   }, []);
 
   useEffect(() => {

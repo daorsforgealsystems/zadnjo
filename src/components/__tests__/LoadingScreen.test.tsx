@@ -1,4 +1,3 @@
-import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@/lib/test-utils';
 import LoadingScreen from '../LoadingScreen';
 
