@@ -58,7 +58,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.daorsflow.com https://aysikssfvptxeclfymlk.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.daorsflow.com https://aysikssfvptxeclfymlk.supabase.co wss://aysikssfvptxeclfymlk.supabase.co; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://api.daorsflow.com https://aysikssfvptxeclfymlk.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https://api.daorsflow.com https://aysikssfvptxeclfymlk.supabase.co wss://aysikssfvptxeclfymlk.supabase.co; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
 
 [[headers]]
   for = "*.js"
