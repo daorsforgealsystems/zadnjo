@@ -33,6 +33,7 @@ import Chatbot from "@/components/Chatbot";
 import { detectAnomalies } from "@/lib/anomaly-detector";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+
 const Index = () => {
   const { user, hasRole } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);

@@ -14,6 +14,19 @@ export class ApiErrorHandler {
       apiError = error as ApiError;
     } else if (typeof error === 'string') {
       apiError = new Error(error) as ApiError;
+    } else if (error && typeof error === 'object') {
+      const anyErr = error as Record<string, any>;
+      const message =
+        typeof anyErr.message === 'string'
+          ? anyErr.message
+          : typeof anyErr.error === 'string'
+            ? anyErr.error
+            : 'An unknown error occurred';
+      apiError = new Error(message) as ApiError;
+      // Map common fields from Supabase/Postgrest/HTTP shaped errors
+      apiError.status = anyErr.status ?? anyErr.statusCode;
+      apiError.code = anyErr.code ?? anyErr.error_code;
+      apiError.details = anyErr.details ?? anyErr.hint ?? anyErr.error_description ?? anyErr;
     } else {
       apiError = new Error('An unknown error occurred') as ApiError;
       apiError.details = error;
