@@ -1,1 +1,0 @@
-navigator.serviceWorker.getRegistrations().then(r=>r.forEach(s=>s.unregister())).then(()=>{console.log('SW unregistered'); location.reload();});
