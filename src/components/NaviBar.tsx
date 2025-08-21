@@ -10,13 +10,16 @@ import {
 import { LogIn, UserPlus, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useAuth } from '@/context/useAuth';
 
 const NaviBar = () => {
   const { t } = useTranslation();
+  const { isAuthenticated, signOut } = useAuth();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const isMountedRef = useRef(false);
@@ -48,6 +51,11 @@ const NaviBar = () => {
       }
     };
   }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header 
@@ -87,26 +95,38 @@ const NaviBar = () => {
           <div className="flex items-center gap-3">
             <LanguageSwitcher variant="compact" />
             
-            <Button 
-              variant="ghost" 
-              asChild
-              className="group relative overflow-hidden px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-primary/10"
-            >
-              <Link to="/login">
-                <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                {t('navbar.login', 'Login')}
-              </Link>
-            </Button>
-            
-            <Button 
-              asChild
-              className="relative overflow-hidden px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-md hover:shadow-lg transition-all duration-300"
-            >
-              <Link to="/signup">
-                <UserPlus className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-                {t('navbar.signup', 'Sign Up')}
-              </Link>
-            </Button>
+            {!isAuthenticated ? (
+              <>
+                <Button 
+                  variant="ghost" 
+                  asChild
+                  className="group relative overflow-hidden px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-primary/10"
+                >
+                  <Link to="/login">
+                    <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    {t('navbar.login', 'Login')}
+                  </Link>
+                </Button>
+                <Button 
+                  asChild
+                  className="relative overflow-hidden px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  <Link to="/signup">
+                    <UserPlus className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                    {t('navbar.signup', 'Sign Up')}
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/dashboard">{t('navbar.dashboard', 'Dashboard')}</Link>
+                </Button>
+                <Button variant="outline" onClick={handleLogout}>
+                  {t('navbar.logout', 'Logout')}
+                </Button>
+              </>
+            )}
           </div>
         </div>
         
@@ -139,23 +159,42 @@ const NaviBar = () => {
                   <div className="flex justify-center mb-4">
                     <LanguageSwitcher variant="default" />
                   </div>
-                  
-                  <Link 
-                    to="/login" 
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LogIn className="h-5 w-5 text-primary" />
-                    <span className="font-medium">{t('navbar.login', 'Login')}</span>
-                  </Link>
-                  <Link 
-                    to="/signup" 
-                    className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 text-primary font-medium transition-all hover:bg-primary/20"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    <span>{t('navbar.signup', 'Sign Up')}</span>
-                  </Link>
+                  {!isAuthenticated ? (
+                    <>
+                      <Link 
+                        to="/login" 
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <LogIn className="h-5 w-5 text-primary" />
+                        <span className="font-medium">{t('navbar.login', 'Login')}</span>
+                      </Link>
+                      <Link 
+                        to="/signup" 
+                        className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 text-primary font-medium transition-all hover:bg-primary/20"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <UserPlus className="h-5 w-5" />
+                        <span>{t('navbar.signup', 'Sign Up')}</span>
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link 
+                        to="/dashboard" 
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="font-medium">{t('navbar.dashboard', 'Dashboard')}</span>
+                      </Link>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => { setIsMenuOpen(false); handleLogout(); }}
+                      >
+                        {t('navbar.logout', 'Logout')}
+                      </Button>
+                    </>
+                  )}
                 </motion.div>
               </div>
             </SheetContent>

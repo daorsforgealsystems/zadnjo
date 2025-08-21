@@ -1,11 +1,10 @@
-import { Route, Routes, useLocation, BrowserRouter as Router } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingScreen from './components/LoadingScreen';
 import LanguageChangeNotification from './components/LanguageChangeNotification';
 import ErrorBoundary from './components/ErrorBoundary';
 import DebugOverlay from './components/DebugOverlay';
-import { AppProviders } from './components/providers/AppProviders';
 import { debug } from './lib/debug';
 import { pageTransition, authFade, nestedFadeSlide } from './lib/motion-variants';
 
@@ -64,7 +63,6 @@ const Index = lazyWithErrorHandling(() => import('./pages/Index'));
 const Inventory = lazyWithErrorHandling(() => import('./pages/Inventory'));
 const ItemTracking = lazyWithErrorHandling(() => import('./pages/ItemTracking'));
 const LiveMap = lazyWithErrorHandling(() => import('./pages/LiveMap'));
-const AuthPage = lazyWithErrorHandling(() => import('./pages/AuthPage'));
 const NotFound = lazyWithErrorHandling(() => import('./pages/NotFound'));
 const Reports = lazyWithErrorHandling(() => import('./pages/Reports'));
 const RouteOptimization = lazyWithErrorHandling(() => import('./pages/RouteOptimization'));
@@ -75,14 +73,13 @@ const EnhancedDashboard = lazyWithErrorHandling(() => import('./pages/EnhancedDa
 const PortalDashboard = lazyWithErrorHandling(() => import('./pages/portal/Dashboard'));
 const PortalProfile = lazyWithErrorHandling(() => import('./pages/portal/Profile'));
 const PortalShipments = lazyWithErrorHandling(() => import('./pages/portal/Shipments'));
-// ProtectedRoute is lazy loaded; props type will be inferred from the component itself
-// ProtectedRoute is lazy loaded; props type will be inferred from the component itself
 const ProtectedRoute = lazyWithErrorHandling(() => import('./components/ProtectedRoute'));
 const CustomerPortalLayout = lazyWithErrorHandling(() => import('./components/CustomerPortalLayout'));
-const ResponsiveLayout = lazyWithErrorHandling(() => import('./components/ResponsiveLayout'));
 const ModernFooter = lazyWithErrorHandling(() => import('./components/ModernFooter'));
 const ProfilePage = lazyWithErrorHandling(() => import('./pages/ProfilePage'));
 const DashboardLayout = lazyWithErrorHandling(() => import('./components/layout/DashboardLayout').then(m => ({ default: m.DashboardLayout })));
+const LandingPage = lazyWithErrorHandling(() => import('./pages/LandingPage'));
+const LoginPage = lazyWithErrorHandling(() => import('./pages/Login'));
 
 // New Dashboard Pages
 const MainDashboard = lazyWithErrorHandling(() => import('./pages/dashboard/MainDashboard'));
@@ -102,7 +99,6 @@ const FleetTracking = lazyWithErrorHandling(() => import('./pages/FleetTracking'
 // Tracking Pages
 const LiveTracking = lazyWithErrorHandling(() => import('./pages/tracking/LiveTracking'));
 const ShipmentHistory = lazyWithErrorHandling(() => import('./pages/tracking/ShipmentHistory'));
-
 
 const AppContent = () => {
   const location = useLocation();
@@ -155,6 +151,7 @@ const AppContent = () => {
         <Suspense fallback={<LoadingScreen />}>
           <ErrorBoundary>
             <Routes location={location}>
+              {/* Public landing page */}
               <Route
                 path="/"
                 element={
@@ -166,14 +163,15 @@ const AppContent = () => {
                     exit="exit"
                     className="min-h-screen bg-gradient-to-b from-background via-background to-background"
                   >
-                    <Index />
+                    <LandingPage />
                   </motion.div>
                 }
               />
-              {/* Logistics-themed slide/fade for key app sections */}
+
+              {/* Core app routes (dashboard etc.) */}
               {[
-                // Original routes
-                { path: '/dashboard', element: <Dashboard /> },
+                // Map /dashboard to Index (main app shell)
+                { path: '/dashboard', element: <Index /> },
                 { path: '/customer-dashboard', element: <CustomerDashboard /> },
                 { path: '/inventory', element: <Inventory /> },
                 { path: '/item-tracking', element: <ItemTracking /> },
@@ -185,9 +183,7 @@ const AppContent = () => {
                 { path: '/team', element: <Team /> },
                 { path: '/enhanced-dashboard', element: <EnhancedDashboard /> },
                 { path: '/contact', element: <Support /> },
-
                 { path: '/profile', element: <ProfilePage /> },
-                
                 // New dashboard pages
                 { path: '/main-dashboard', element: <MainDashboard /> },
                 { path: '/driver-dashboard', element: <DriverDashboard /> },
@@ -202,11 +198,9 @@ const AppContent = () => {
                 { path: '/report-generation', element: <ReportGeneration /> },
                 { path: '/chatbot', element: <Chatbot /> },
                 { path: '/fleet-tracking', element: <FleetTracking /> },
-                
                 // Tracking routes
                 { path: '/tracking/live', element: <LiveTracking /> },
                 { path: '/tracking/history', element: <ShipmentHistory /> },
-
               ].map(({ path, element }) => (
                 <Route
                   key={path}
@@ -230,7 +224,7 @@ const AppContent = () => {
                 />
               ))}
 
-              {/* Auth pages: subtle fade to keep focus on form with transport vibe */}
+              {/* Auth pages */}
               <Route
                 path="/login"
                 element={
@@ -243,7 +237,7 @@ const AppContent = () => {
                       exit="exit"
                       className="min-h-screen"
                     >
-                      <AuthPage />
+                      <LoginPage />
                     </motion.div>
                   </ErrorBoundary>
                 }
@@ -260,13 +254,14 @@ const AppContent = () => {
                       exit="exit"
                       className="min-h-screen"
                     >
-                      <AuthPage />
+                      {/* Reuse Login page or keep existing AuthPage if present later */}
+                      <LoginPage />
                     </motion.div>
                   </ErrorBoundary>
                 }
               />
 
-              {/* Portal with nested routes: fade/slide container while children render */}
+              {/* Portal with nested routes */}
               <Route
                 element={
                   <ErrorBoundary>

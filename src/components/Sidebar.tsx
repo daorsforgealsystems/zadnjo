@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Home, 
   Truck, 
@@ -18,7 +18,8 @@ import {
   Warehouse,
   Route,
   User,
-  Users
+  Users,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
@@ -65,7 +66,8 @@ interface SidebarProps {
 const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { hasRole } = useAuth();
+  const navigate = useNavigate();
+  const { hasRole, isAuthenticated, signOut } = useAuth();
   const { badges } = useNavigationState();
   const [openCollapsibles, setOpenCollapsibles] = useState<string[]>([]);
 
@@ -212,6 +214,11 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
     );
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <aside
       className={cn(
@@ -256,6 +263,15 @@ const Sidebar = ({ isOpen, onAlertsClick, alertsCount = 0 }: SidebarProps) => {
             );
           })}
         </div>
+
+        {isAuthenticated && (
+          <div className="pt-3">
+            <Button variant="destructive" className="w-full justify-start gap-3" onClick={handleLogout}>
+              <LogOut className="h-5 w-5" />
+              {isOpen && <span>{t('sidebar.logout', 'Logout')}</span>}
+            </Button>
+          </div>
+        )}
 
         <div className={cn("mt-4 pt-4 border-t border-border/50", !isOpen && "text-center")}>
           <div className="flex items-center gap-2">
