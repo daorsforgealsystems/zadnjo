@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/useAuth';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Label } from '../components/ui/Label';
 import { Input } from '../components/ui/Input';
@@ -73,7 +76,7 @@ const Login = () => {
       {/* Forge Constitution: This form is for client-side UX only. Credentials are sent to server for true authentication. */}
       {/* Hero image as background, zoomed out and darkened */}
       <img
-        src="/src/assets/hero-logistics.jpg"
+        src="/hero-logistics.jpg"
         alt="Logistics hero background"
         className="fixed inset-0 w-full h-full object-cover object-center scale-110 md:scale-125 z-0"
         style={{ filter: 'brightness(0.45) blur(2px)' }}
