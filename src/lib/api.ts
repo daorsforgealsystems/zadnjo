@@ -112,7 +112,7 @@ export const getMetricData = async (
     // Support different timeframes, use getOrderStats for revenue summary and additional queries for deltas
     const calcPeriodRanges = (tf: string) => {
         const now = new Date();
-        let startCurr = new Date(now);
+    const startCurr = new Date(now);
         switch (tf) {
             case 'day': startCurr.setDate(now.getDate() - 1); break;
             case 'week': startCurr.setDate(now.getDate() - 7); break;
@@ -140,12 +140,12 @@ export const getMetricData = async (
             .from('items')
             .select('id, status');
         if (itemsError) throw itemsError;
-        const items = itemsData || [];
-        const activeStatuses = ['In Transit', 'Processing', 'in_progress', 'processing'];
-        const activeCount = items.filter((it: any) => activeStatuses.includes(it.status)).length;
+    const items = (itemsData as { id: string; status: string }[]) || [];
+    const activeStatuses = ['In Transit', 'Processing', 'in_progress', 'processing'];
+    const activeCount = items.filter((it) => activeStatuses.includes(it.status)).length;
 
         // Revenue: use getOrderStats for current period
-        const stats = await getOrderStats(timeframe as any);
+    const stats = await getOrderStats(timeframe);
         const totalRevenueValue = stats?.totalRevenue || 0;
 
         // Revenue previous period: sum orders in previous range
@@ -156,7 +156,7 @@ export const getMetricData = async (
                 .select('total_amount')
                 .gte('created_at', startPrev.toISOString())
                 .lt('created_at', endPrev.toISOString());
-            if (!prevErr && prevOrders) prevRevenue = prevOrders.reduce((s: number, o: any) => s + (o.total_amount || 0), 0);
+            if (!prevErr && prevOrders) prevRevenue = (prevOrders as { total_amount?: number }[]).reduce((s: number, o) => s + (o.total_amount || 0), 0);
         } catch (e) {
             console.warn('getMetricData: failed to fetch prevRevenue', e);
         }
@@ -176,7 +176,7 @@ export const getMetricData = async (
                 .lte('created_at', endCurr.toISOString());
             if (!deliveredErr && delivered && delivered.length > 0) {
                 const totalDelivered = delivered.length;
-                const onTimeCount = delivered.reduce((acc: number, ord: any) => {
+                const onTimeCount = (delivered as { estimated_delivery?: string; actual_delivery?: string }[]).reduce((acc: number, ord) => {
                     if (!ord.estimated_delivery || !ord.actual_delivery) return acc;
                     return acc + (new Date(ord.actual_delivery).getTime() <= new Date(ord.estimated_delivery).getTime() ? 1 : 0);
                 }, 0);
@@ -192,7 +192,7 @@ export const getMetricData = async (
                 .lt('created_at', endPrev.toISOString());
             if (!prevDeliveredErr && prevDelivered && prevDelivered.length > 0) {
                 const totalPrev = prevDelivered.length;
-                const onTimePrevCount = prevDelivered.reduce((acc: number, ord: any) => {
+                const onTimePrevCount = (prevDelivered as { estimated_delivery?: string; actual_delivery?: string }[]).reduce((acc: number, ord) => {
                     if (!ord.estimated_delivery || !ord.actual_delivery) return acc;
                     return acc + (new Date(ord.actual_delivery).getTime() <= new Date(ord.estimated_delivery).getTime() ? 1 : 0);
                 }, 0);
