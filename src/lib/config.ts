@@ -10,14 +10,9 @@ export const config = {
 
   // Supabase Configuration - prefer NEXT_PUBLIC_* (Next.js) but keep VITE_* for backward compatibility
   supabase: {
-    url:
-      (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) ||
-      (import.meta.env.VITE_SUPABASE_URL as string) ||
-      'https://aysikssfvptxeclfymlk.supabase.co',
-    anonKey:
-      (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) ||
-      (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2lrc3NmdnB0eGVjbGZ5bWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0ODUwODcsImV4cCI6MjA3MDA2MTA4N30.MlhXvs_XZgSJxltCwMxn50FP0hZgOZDR8Jtl4SEDkOI',
+    // Require explicit environment variables; avoid shipping real defaults
+    url: (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) || (import.meta.env.VITE_SUPABASE_URL as string),
+    anonKey: (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) || (import.meta.env.VITE_SUPABASE_ANON_KEY as string),
   },
 
   // Application Settings

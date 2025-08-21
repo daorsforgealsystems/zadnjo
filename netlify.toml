@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "24.5.0"
+  NODE_VERSION = "20"
 
 # Redirect rules for SPA
 [[redirects]]
@@ -97,13 +97,13 @@
 
 # Environment-specific redirects
 [context.production]
-  environment = { API_BASE_URL = "https://api.daorsflow.com" }
+  environment = { VITE_API_BASE_URL = "https://api.daorsflow.com" }
 
 [context.deploy-preview]
-  environment = { API_BASE_URL = "https://staging-api.daorsflow.com" }
+  environment = { VITE_API_BASE_URL = "https://staging-api.daorsflow.com" }
 
 [context.branch-deploy]
-  environment = { API_BASE_URL = "https://dev-api.daorsflow.com" }
+  environment = { VITE_API_BASE_URL = "https://dev-api.daorsflow.com" }
 
 # Build plugins
 [[plugins]]
