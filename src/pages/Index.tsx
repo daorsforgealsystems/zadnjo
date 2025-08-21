@@ -46,15 +46,17 @@ const Index = () => {
     queryFn: () => getAnomalies(),
   });
 
-  const { data: metricData = {
+  const metricDataRaw = useQuery<MetricData>({
+    queryKey: ['metricData'],
+    queryFn: getMetricData,
+  }).data;
+
+  const metricData: MetricData = metricDataRaw ?? {
     activeShipments: { value: 0, change: '', changeType: 'neutral' },
     totalRevenue: { value: 0, change: '', changeType: 'neutral' },
     onTimeDelivery: { value: 0, change: '', changeType: 'neutral' },
     borderCrossings: { value: 0, change: '', changeType: 'neutral' },
-  } } = useQuery<MetricData>({
-    queryKey: ['metricData'],
-    queryFn: () => getMetricData(),
-  });
+  };
   const { data: shipmentData } = useQuery({ queryKey: ['shipmentData'], queryFn: getShipmentData });
   const { data: revenueData } = useQuery({ queryKey: ['revenueData'], queryFn: getRevenueData });
   const { data: routeData } = useQuery({ queryKey: ['routeData'], queryFn: getRouteData });
