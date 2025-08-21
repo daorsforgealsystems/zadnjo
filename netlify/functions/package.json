@@ -1,0 +1,17 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Flow Motion logistics platform",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.10",
+    "typescript": "^5.9.2"
+  }
+}
