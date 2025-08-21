@@ -9,7 +9,7 @@ describe('LoadingScreen', () => {
     expect(screen.getByText('DAORS Flow Motion')).toBeInTheDocument();
     
     // Check if the loading message is present
-    expect(screen.getByText('Loading your logistics dashboard...')).toBeInTheDocument();
+    expect(screen.getByText('Preparing your logistics platform...')).toBeInTheDocument();
     
     // Check if the truck icon is present (by checking for the svg element)
     const truckIcon = document.querySelector('svg');
@@ -29,6 +29,9 @@ describe('LoadingScreen', () => {
     
     // Check if the main container has the expected classes
     const mainContainer = container.firstChild as HTMLElement;
-    expect(mainContainer).toHaveClass('min-h-screen', 'flex', 'items-center', 'justify-center');
+    expect(mainContainer).toHaveClass('min-h-screen');
+    expect(mainContainer).toHaveClass('flex');
+    expect(mainContainer).toHaveClass('items-center');
+    expect(mainContainer).toHaveClass('justify-center');
   });
 });
