@@ -235,7 +235,10 @@ const GlobalSearch = ({ className, placeholder, onSelect }: GlobalSearchProps) =
                 return (
                   <div
                     key={result.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleSelect(result)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelect(result)}
                     className={cn(
                       "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
                       index === selectedIndex 

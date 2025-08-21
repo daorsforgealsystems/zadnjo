@@ -14,9 +14,9 @@ afterEach(() => {
 if (typeof global !== 'undefined') {
   // Use ESM import style via dynamic import to satisfy lint rule
   import('util').then(({ TextEncoder, TextDecoder }) => {
-    // @ts-ignore - global typings in Vitest environment
+    // @ts-expect-error - global typings in Vitest environment
     global.TextEncoder = TextEncoder
-    // @ts-ignore - global typings in Vitest environment
+    // @ts-expect-error - global typings in Vitest environment
     global.TextDecoder = TextDecoder
   })
 }

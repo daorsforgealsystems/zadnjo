@@ -13,9 +13,9 @@ afterEach(() => {
 // TextEncoder/TextDecoder polyfill for Node.js environment
 if (typeof global !== 'undefined') {
   import('util').then(({ TextEncoder, TextDecoder }) => {
-    // @ts-ignore - global typings in Vitest environment
+    // @ts-expect-error - global typings in Vitest environment
     global.TextEncoder = TextEncoder
-    // @ts-ignore - global typings in Vitest environment
+    // @ts-expect-error - global typings in Vitest environment
     global.TextDecoder = TextDecoder
   })
 }

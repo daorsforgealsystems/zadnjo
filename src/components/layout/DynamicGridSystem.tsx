@@ -109,16 +109,22 @@ export const DynamicGridSystem: React.FC<DynamicGridSystemProps> = ({
             {customizing && component.resizable && (
               <>
                 <div
+                  role="separator"
+                  aria-orientation="vertical"
                   className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize bg-primary/50 rounded-tl"
                   onMouseDown={() => handleResizeStart(component.id)}
                   onMouseUp={handleResizeEnd}
                 />
                 <div
+                  role="separator"
+                  aria-orientation="horizontal"
                   className="absolute bottom-0 left-0 right-0 h-2 cursor-s-resize bg-primary/30"
                   onMouseDown={() => handleResizeStart(component.id)}
                   onMouseUp={handleResizeEnd}
                 />
                 <div
+                  role="separator"
+                  aria-orientation="vertical"
                   className="absolute top-0 bottom-0 right-0 w-2 cursor-e-resize bg-primary/30"
                   onMouseDown={() => handleResizeStart(component.id)}
                   onMouseUp={handleResizeEnd}
