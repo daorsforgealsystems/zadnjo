@@ -1,5 +1,4 @@
 name: "Flow Motion Build Optimizer"
-description: "Optimizes build performance for Flow Motion applications"
 inputs:
   - name: "cache-warm"
     description: "Whether to trigger cache warming after successful build"

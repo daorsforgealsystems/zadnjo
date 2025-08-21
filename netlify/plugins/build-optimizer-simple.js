@@ -1,5 +1,6 @@
 module.exports = {
   name: "Flow Motion Build Optimizer",
+  
   onPreBuild: async ({ utils, inputs }) => {
     console.log('🚀 Starting Flow Motion build optimization...');
     
@@ -41,14 +42,7 @@ module.exports = {
 
   onBuild: async ({ utils, inputs }) => {
     console.log('🔨 Running build optimizations...');
-    
-    try {
-      // Build-time optimizations can go here
-      console.log('✅ Build optimizations completed');
-    } catch (error) {
-      console.error('❌ Build optimization failed:', error);
-      utils.build.failBuild(`Build optimization failed: ${error.message}`);
-    }
+    console.log('✅ Build optimizations completed');
   },
 
   onPostBuild: async ({ utils, inputs, constants }) => {
@@ -76,69 +70,10 @@ module.exports = {
       fs.writeFileSync(manifestPath, JSON.stringify(buildManifest, null, 2));
       console.log(`📄 Build manifest created at ${manifestPath}`);
 
-      // Create a simple health check endpoint
-      const healthCheckContent = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Flow Motion - Health Check</title>
-    <meta charset="utf-8">
-</head>
-<body>
-    <h1>Flow Motion Logistics Platform</h1>
-    <p>Status: <strong style="color: green;">Healthy</strong></p>
-    <p>Build ID: ${buildManifest.buildId}</p>
-    <p>Deploy ID: ${buildManifest.deployId}</p>
-    <p>Timestamp: ${buildManifest.timestamp}</p>
-    <p>Environment: ${buildManifest.context}</p>
-    <script>
-      // Auto-refresh every 30 seconds
-      setTimeout(() => window.location.reload(), 30000);
-    </script>
-</body>
-</html>
-      `.trim();
-
-      const healthCheckPath = path.join(constants.PUBLISH_DIR, 'health.html');
-      fs.writeFileSync(healthCheckPath, healthCheckContent);
-      console.log(`🏥 Health check page created at ${healthCheckPath}`);
-
       console.log('✅ Post-build optimizations completed');
     } catch (error) {
       console.error('❌ Post-build optimization failed:', error);
-      // Don't fail the build for post-build issues
       console.log('⚠️  Continuing despite post-build optimization failure');
-    }
-  },
-
-  onSuccess: async ({ utils, inputs }) => {
-    console.log('🎉 Build completed successfully!');
-    
-    try {
-      // Trigger cache warming
-      const deployUrl = process.env.DEPLOY_URL;
-      if (deployUrl) {
-        console.log('🔥 Triggering cache warming...');
-        
-        // In a real implementation, you might trigger your cache warmer function here
-        // await fetch(`${deployUrl}/.netlify/functions/cache-warmer`, { method: 'POST' });
-        
-        console.log('✅ Cache warming triggered');
-      }
-    } catch (error) {
-      console.error('❌ Post-success actions failed:', error);
-      // Don't fail the build for post-success issues
-    }
-  },
-
-  onError: async ({ utils, inputs }) => {
-    console.log('💥 Build failed - running cleanup...');
-    
-    try {
-      // Cleanup actions can go here
-      console.log('🧹 Cleanup completed');
-    } catch (error) {
-      console.error('❌ Cleanup failed:', error);
     }
   }
 };
