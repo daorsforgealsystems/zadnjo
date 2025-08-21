@@ -7,8 +7,8 @@ module.exports = {
       const nodeVersion = process.version;
       console.log(`📦 Node.js version: ${nodeVersion}`);
       
-      if (parseInt(nodeVersion.slice(1)) < 24) {
-        utils.build.failBuild('Node.js version 24+ is required for this build');
+      if (parseInt(nodeVersion.slice(1)) < 20) {
+        utils.build.failBuild('Node.js version 20+ is required for this build');
       }
 
       // Validate environment variables
