@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "24"
+  NODE_VERSION = "20"
 
 # Redirect rules for SPA
 [[redirects]]
@@ -32,10 +32,8 @@
   status = 200
 
 # Edge functions for geolocation-based routing
-[[redirects]]
-  from = "/api/geo/edge/*"
-  to = "/.netlify/edge-functions/geo-router"
-  status = 200
+# Note: Netlify edge function routing is configured via [[edge_functions]] or netlify.toml "edge_functions" block, not redirects.
+# If using edge functions, configure them below and remove this redirect if unnecessary.
 
 # Monitoring dashboard
 [[redirects]]
@@ -48,7 +46,8 @@
   from = "/admin/*"
   to = "/index.html"
   status = 200
-  condition = "Role=admin,super-admin"
+  [redirects.conditions]
+    Role = ["admin", "super-admin"]
 
 # Headers for security and caching
 [[headers]]
