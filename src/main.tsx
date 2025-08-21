@@ -5,8 +5,10 @@ import App from './App';
 import './index.css';
 import './i18n';
 import ErrorBoundary from './components/ErrorBoundary';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from './components/ui/theme-provider';
+import { AnimationProvider } from '@/components/providers';
 import { LayoutProvider } from '@/components/providers/LayoutProvider';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './store';
@@ -104,11 +106,15 @@ if (container) {
                     disableTransitionOnChange
                   >
                     <ErrorBoundary>
-                      <LayoutProvider>
+                      <AnimationProvider>
+                        <LayoutProvider>
                         <ReduxProvider store={store}>
-                          <App />
+                          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                            <App />
+                          </Router>
                         </ReduxProvider>
-                      </LayoutProvider>
+                        </LayoutProvider>
+                      </AnimationProvider>
                     </ErrorBoundary>
                   </ThemeProvider>
                 </ErrorBoundary>
