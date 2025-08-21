@@ -8,22 +8,22 @@ import { getOrderStats } from './api/orders';
 // #############################################################################
 
 export const getItems = async (): Promise<Item[]> => {
-    // Use inventory_items from LogiCore schema and map to Item interface
+    // Use the new items table that will be added to LogiCore schema
     const { data, error } = await supabase
-        .from('inventory_items')
-        .select('id, name, sku, description, created_at');
+        .from('items')
+        .select('id, name, description, status, route_id, created_at');
     if (error) throw error;
     
-    // Map inventory items to Item interface
+    // Map to Item interface
     return (data || []).map(item => ({
         id: item.id,
         name: item.name,
-        status: 'available', // Default status since inventory_items doesn't have status
-        location: 'Warehouse', // Default location
+        status: item.status || 'pending',
+        location: 'In Transit', // Default location
         coordinates: { lat: 44.8176, lng: 20.4633 }, // Default to Belgrade
         history: [{ status: 'created', timestamp: item.created_at }],
         documents: [],
-        routeId: undefined,
+        routeId: item.route_id,
         predictedEta: undefined
     }));
 };
@@ -70,57 +70,39 @@ export const getLiveRoutes = async (): Promise<LiveRoute[]> => {
 };
 
 export const getAnomalies = async (vehicleId?: string): Promise<Anomaly[]> => {
-    // Anomalies table doesn't exist in LogiCore schema, return mock data
-    console.warn("getAnomalies: Using mock data as anomalies table doesn't exist in LogiCore schema");
-    return [
-        {
-            id: `anomaly-${Date.now()}`,
-            type: "ROUTE_DEVIATION",
-            timestamp: new Date().toISOString(),
-            severity: "medium",
-            description: "Vehicle deviated from planned route",
-            vehicleId: vehicleId || "unknown"
-        }
-    ];
+    let query = supabase.from('anomalies').select('*');
+    if (vehicleId) {
+        query = query.eq('vehicle_id', vehicleId);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
 };
 
 export const getNotifications = async (): Promise<Notification[]> => {
-    // Notifications table doesn't exist in LogiCore schema, return mock data
-    console.warn("getNotifications: Using mock data as notifications table doesn't exist in LogiCore schema");
-    return [
-        {
-            id: `notif-${Date.now()}`,
-            type: "system_message",
-            message: "System is running on LogiCore schema",
-            timestamp: new Date().toISOString(),
-            read: false
-        }
-    ];
+    const { data, error } = await supabase.from('notifications').select('*');
+    if (error) throw error;
+    return data || [];
 };
 
 export const getChatMessages = async (shipmentId: string): Promise<ChatMessage[]> => {
-    // Chat messages table doesn't exist in LogiCore schema, return mock data
-    console.warn("getChatMessages: Using mock data as chat_messages table doesn't exist in LogiCore schema");
-    return [
-        {
-            id: `msg-${Date.now()}`,
-            shipmentId,
-            userId: "system",
-            username: "System",
-            message: "Chat functionality requires frontend schema tables",
-            timestamp: new Date().toISOString()
-        }
-    ];
+    const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('shipment_id', shipmentId)
+        .order('timestamp', { ascending: true });
+    if (error) throw error;
+    return data || [];
 };
 
 export const postChatMessage = async (message: Omit<ChatMessage, 'id' | 'timestamp'>): Promise<ChatMessage> => {
-    // Chat messages table doesn't exist in LogiCore schema, return mock response
-    console.warn("postChatMessage: Using mock response as chat_messages table doesn't exist in LogiCore schema");
-    return {
-        id: `msg-${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        ...message
-    };
+    const { data, error } = await supabase
+        .from('chat_messages')
+        .insert(message)
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
 };
 
 
@@ -198,14 +180,14 @@ export const getMetricData = async (
     try {
         const { startCurr, endCurr, startPrev, endPrev } = calcPeriodRanges(timeframe);
 
-        // Active shipments: current count of orders in active statuses (using LogiCore schema)
-        const { data: ordersData, error: ordersError } = await supabase
-            .from('orders')
+        // Active shipments: current count of items in active statuses
+        const { data: itemsData, error: itemsError } = await supabase
+            .from('items')
             .select('id, status');
-        if (ordersError) throw ordersError;
-        const orders = (ordersData as { id: string; status: string }[]) || [];
-        const activeStatuses = ['in_progress', 'processing', 'shipped', 'in_transit'];
-        const activeCount = orders.filter((order) => activeStatuses.includes(order.status)).length;
+        if (itemsError) throw itemsError;
+        const items = (itemsData as { id: string; status: string }[]) || [];
+        const activeStatuses = ['in_transit', 'processing', 'shipped'];
+        const activeCount = items.filter((item) => activeStatuses.includes(item.status)).length;
 
         // Revenue: use getOrderStats for current period
     const stats = await getOrderStats(timeframe);
