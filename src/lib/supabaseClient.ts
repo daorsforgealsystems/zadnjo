@@ -64,9 +64,9 @@ const supabaseInstance = createClient(
         // For non-auth endpoints, use standard fetch with timeout
         return fetch(url, {
           ...options,
-          signal: AbortSignal.timeout(15000) // 15 second timeout
+          signal: createTimeoutSignal(15000) // 15 second timeout
         }).catch(error => {
-          console.warn(`Supabase fetch error for ${url}:`, error);
+          devWarn(`Supabase fetch error for ${url}:`, error);
           throw error;
         });
       }

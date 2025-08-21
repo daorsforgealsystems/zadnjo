@@ -12,13 +12,6 @@ export default defineConfig({
     // Optimize and import SVGs as React components with SVGO cleanup
     svgr({
       svgrOptions: { icon: true },
-      svgo: true,
-      svgoConfig: {
-        plugins: [
-          { name: "removeViewBox", active: false }, // keep viewBox for responsiveness
-          { name: "cleanupIDs", active: true },
-        ],
-      },
     }),
 
     // Build-time image optimization (jpg/png/webp/avif/svg)
@@ -38,7 +31,7 @@ export default defineConfig({
     // Progressive Web App support
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt'],
+      includeAssets: ['favicon.ico', 'robots.txt', 'offline.html'],
       manifest: {
         name: 'Flow Motion Logistics',
         short_name: 'FlowMotion',
@@ -127,10 +120,7 @@ export default defineConfig({
     // Increase warning limit and split large vendor chunks
     chunkSizeWarningLimit: 1024, // 1 MB
 
-    // Drop console/debugger in production for smaller bundles
-    esbuild: {
-      drop: ["console", "debugger"],
-    },
+  // Drop console/debugger in production for smaller bundles
 
     rollupOptions: {
       output: {

@@ -8,11 +8,11 @@ export const config = {
     retryDelay: 1000, // 1 second
   },
 
-  // Supabase Configuration - prefer NEXT_PUBLIC_* (Next.js) but keep VITE_* for backward compatibility
+  // Supabase Configuration
   supabase: {
     // Require explicit environment variables; avoid shipping real defaults
-    url: (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) || (import.meta.env.VITE_SUPABASE_URL as string),
-    anonKey: (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) || (import.meta.env.VITE_SUPABASE_ANON_KEY as string),
+    url: import.meta.env.VITE_SUPABASE_URL as string,
+    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
   },
 
   // Application Settings
