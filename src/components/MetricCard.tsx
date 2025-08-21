@@ -58,12 +58,33 @@ const MetricCard = ({
   }, [numericValue, delay]);
 
   const formatDisplayValue = () => {
+    // If a currency is provided, support three-letter ISO codes (e.g. 'EUR') using Intl,
+    // '%' for percent postfix, or treat as a currency symbol prefix otherwise.
     if (currency) {
+      // Percent case: show as postfix
+      if (currency === '%') {
+        return `${Math.round(displayValue)}%`;
+      }
+
+      // ISO currency code (e.g. EUR, USD)
+      if (/^[A-Z]{3}$/.test(currency)) {
+        try {
+          return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(displayValue);
+        } catch (e) {
+          // fallback to simple formatting
+          return `${currency} ${Math.round(displayValue).toLocaleString()}`;
+        }
+      }
+
+      // Otherwise treat currency as a symbol prefix, e.g. '€' or '$'
       return `${currency}${Math.round(displayValue).toLocaleString()}`;
     }
+
+    // If value is a percent-like string, keep old behavior
     if (typeof value === "string" && value.includes("%")) {
       return `${Math.round(displayValue)}%`;
     }
+
     return Math.round(displayValue).toLocaleString();
   };
 

@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 import { Item, ChartData, LiveRoute, MetricData, Anomaly, Notification, ChatMessage } from "./types";
 import { ApiErrorHandler } from './error-handler';
+import { getOrderStats } from './api/orders';
 
 // #############################################################################
 // # Direct Data Fetching from Supabase
@@ -105,30 +106,145 @@ export const getRouteData = async (): Promise<ChartData[]> => {
     ];
 };
 
-export const getMetricData = async (): Promise<MetricData> => {
-    console.warn("getMetricData is returning mock data.");
-    return {
-        activeShipments: {
-            value: 478,
-            change: "+12% from last week",
-            changeType: "positive",
-        },
-        totalRevenue: {
-            value: 125840,
-            change: "+8.2% from last month",
-            changeType: "positive",
-        },
-        onTimeDelivery: {
-            value: 94.8,
-            change: "+2.1% improvement",
-            changeType: "positive",
-        },
-        borderCrossings: {
-            value: 1247,
-            change: "23 active checkpoints",
-            changeType: "neutral",
-        },
+export const getMetricData = async (
+    timeframe: 'day' | 'week' | 'month' | 'year' = 'month'
+): Promise<MetricData> => {
+    // Support different timeframes, use getOrderStats for revenue summary and additional queries for deltas
+    const calcPeriodRanges = (tf: string) => {
+        const now = new Date();
+        let startCurr = new Date(now);
+        switch (tf) {
+            case 'day': startCurr.setDate(now.getDate() - 1); break;
+            case 'week': startCurr.setDate(now.getDate() - 7); break;
+            case 'month': startCurr.setMonth(now.getMonth() - 1); break;
+            case 'year': startCurr.setFullYear(now.getFullYear() - 1); break;
+            default: startCurr.setMonth(now.getMonth() - 1);
+        }
+        const endCurr = now;
+        const startPrev = new Date(startCurr);
+        switch (tf) {
+            case 'day': startPrev.setDate(startCurr.getDate() - 1); break;
+            case 'week': startPrev.setDate(startCurr.getDate() - 7); break;
+            case 'month': startPrev.setMonth(startCurr.getMonth() - 1); break;
+            case 'year': startPrev.setFullYear(startCurr.getFullYear() - 1); break;
+        }
+        const endPrev = new Date(startCurr);
+        return { startCurr, endCurr, startPrev, endPrev };
     };
+
+    try {
+        const { startCurr, endCurr, startPrev, endPrev } = calcPeriodRanges(timeframe);
+
+        // Active shipments: current count of items in active statuses
+        const { data: itemsData, error: itemsError } = await supabase
+            .from('items')
+            .select('id, status');
+        if (itemsError) throw itemsError;
+        const items = itemsData || [];
+        const activeStatuses = ['In Transit', 'Processing', 'in_progress', 'processing'];
+        const activeCount = items.filter((it: any) => activeStatuses.includes(it.status)).length;
+
+        // Revenue: use getOrderStats for current period
+        const stats = await getOrderStats(timeframe as any);
+        const totalRevenueValue = stats?.totalRevenue || 0;
+
+        // Revenue previous period: sum orders in previous range
+        let prevRevenue = 0;
+        try {
+            const { data: prevOrders, error: prevErr } = await supabase
+                .from('orders')
+                .select('total_amount')
+                .gte('created_at', startPrev.toISOString())
+                .lt('created_at', endPrev.toISOString());
+            if (!prevErr && prevOrders) prevRevenue = prevOrders.reduce((s: number, o: any) => s + (o.total_amount || 0), 0);
+        } catch (e) {
+            console.warn('getMetricData: failed to fetch prevRevenue', e);
+        }
+        const revenueChange = prevRevenue > 0
+            ? `${(Math.round(((totalRevenueValue - prevRevenue) / prevRevenue) * 1000) / 10)}% from last period`
+            : (totalRevenueValue > 0 ? 'No previous data' : '');
+
+        // On-time delivery: delivered orders in current period
+        let onTimeRate = 0;
+        let prevOnTimeRate = 0;
+        try {
+            const { data: delivered, error: deliveredErr } = await supabase
+                .from('orders')
+                .select('estimated_delivery, actual_delivery')
+                .eq('status', 'delivered')
+                .gte('created_at', startCurr.toISOString())
+                .lte('created_at', endCurr.toISOString());
+            if (!deliveredErr && delivered && delivered.length > 0) {
+                const totalDelivered = delivered.length;
+                const onTimeCount = delivered.reduce((acc: number, ord: any) => {
+                    if (!ord.estimated_delivery || !ord.actual_delivery) return acc;
+                    return acc + (new Date(ord.actual_delivery).getTime() <= new Date(ord.estimated_delivery).getTime() ? 1 : 0);
+                }, 0);
+                onTimeRate = Math.round((onTimeCount / totalDelivered) * 1000) / 10;
+            }
+
+            // previous period
+            const { data: prevDelivered, error: prevDeliveredErr } = await supabase
+                .from('orders')
+                .select('estimated_delivery, actual_delivery')
+                .eq('status', 'delivered')
+                .gte('created_at', startPrev.toISOString())
+                .lt('created_at', endPrev.toISOString());
+            if (!prevDeliveredErr && prevDelivered && prevDelivered.length > 0) {
+                const totalPrev = prevDelivered.length;
+                const onTimePrevCount = prevDelivered.reduce((acc: number, ord: any) => {
+                    if (!ord.estimated_delivery || !ord.actual_delivery) return acc;
+                    return acc + (new Date(ord.actual_delivery).getTime() <= new Date(ord.estimated_delivery).getTime() ? 1 : 0);
+                }, 0);
+                prevOnTimeRate = Math.round((onTimePrevCount / totalPrev) * 1000) / 10;
+            }
+        } catch (e) {
+            console.warn('getMetricData: failed to compute onTimeDelivery', e);
+        }
+        const onTimeChange = prevOnTimeRate > 0 ? `${(Math.round((onTimeRate - prevOnTimeRate) * 10) / 10)}% vs prev` : '';
+
+        // Border crossings: approximate via waypoint count (no timeframe granularity available)
+        let borderCrossingsValue = 0;
+        try {
+            const { data: waypoints, error: wpErr } = await supabase
+                .from('route_waypoints')
+                .select('id');
+            if (!wpErr && waypoints) borderCrossingsValue = waypoints.length;
+        } catch (e) {
+            console.warn('getMetricData: failed to compute borderCrossings', e);
+        }
+
+        return {
+            activeShipments: {
+                value: activeCount,
+                change: '',
+                changeType: 'positive',
+            },
+            totalRevenue: {
+                value: totalRevenueValue,
+                change: revenueChange,
+                changeType: totalRevenueValue >= prevRevenue ? 'positive' : 'negative',
+            },
+            onTimeDelivery: {
+                value: onTimeRate,
+                change: onTimeChange,
+                changeType: onTimeRate >= prevOnTimeRate ? 'positive' : 'negative',
+            },
+            borderCrossings: {
+                value: borderCrossingsValue,
+                change: '',
+                changeType: 'neutral',
+            },
+        };
+    } catch (err) {
+        ApiErrorHandler.handle(err, 'getMetricData');
+        return {
+            activeShipments: { value: 0, change: '', changeType: 'neutral' },
+            totalRevenue: { value: 0, change: '', changeType: 'neutral' },
+            onTimeDelivery: { value: 0, change: '', changeType: 'neutral' },
+            borderCrossings: { value: 0, change: '', changeType: 'neutral' },
+        };
+    }
 };
 
 // #############################################################################
