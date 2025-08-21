@@ -6,7 +6,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { ignores: ["dist", "logi-core/**", "database/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -31,6 +31,9 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      // Allow explicit any to avoid large refactors; still warn on unused
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }

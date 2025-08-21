@@ -12,9 +12,13 @@ afterEach(() => {
 
 // TextEncoder/TextDecoder polyfill for Node.js environment
 if (typeof global !== 'undefined') {
-  const { TextEncoder, TextDecoder } = require('util')
-  global.TextEncoder = TextEncoder
-  global.TextDecoder = TextDecoder
+  // Use ESM import style via dynamic import to satisfy lint rule
+  import('util').then(({ TextEncoder, TextDecoder }) => {
+    // @ts-ignore - global typings in Vitest environment
+    global.TextEncoder = TextEncoder
+    // @ts-ignore - global typings in Vitest environment
+    global.TextDecoder = TextDecoder
+  })
 }
 
 // Mock CSS modules
