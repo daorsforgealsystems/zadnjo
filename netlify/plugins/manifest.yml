@@ -1,3 +1,5 @@
+name: "Build Optimizer"
+description: "Optimizes build process for better performance"
 inputs:
   cache-warm:
     description: "Whether to trigger cache warming after successful build"
