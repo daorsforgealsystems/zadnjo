@@ -27,7 +27,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-  setError('');
+    setError('');
     try {
       const { error: loginError } = await login(email, password);
       if (loginError) {

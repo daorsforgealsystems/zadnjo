@@ -1,6 +1,21 @@
 import { createClient } from '@supabase/supabase-js'
 import { config } from './config'
 
+// Time-limited AbortSignal helper to avoid hanging requests
+const createTimeoutSignal = (timeoutMs: number): AbortSignal => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  controller.signal.addEventListener('abort', () => clearTimeout(timer));
+  return controller.signal;
+};
+
+// Dev-only warning helper
+const devWarn = (...args: any[]) => {
+  if ((import.meta as any)?.env?.DEV) {
+    console.warn(...args);
+  }
+};
+
 // Helper function to implement retry logic
 const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3, retryDelay = 1000) => {
   let lastError;

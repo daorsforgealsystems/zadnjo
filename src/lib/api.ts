@@ -112,17 +112,27 @@ export const postChatMessage = async (message: Omit<ChatMessage, 'id' | 'timesta
 
 export const getShipmentData = async (): Promise<ChartData[]> => {
     const items = await getItems();
+
+    // Normalize DB/raw statuses to UI buckets
+    const normalize = (status?: string) => {
+        const s = (status || '').toLowerCase();
+        if (s === 'in_transit' || s === 'in transit' || s === 'transit') return 'In Transit';
+        if (s === 'delivered') return 'Delivered';
+        if (s === 'delayed' || s === 'late') return 'Delayed';
+        return 'Pending';
+    };
+
     const statusCounts = items.reduce((acc, item) => {
-        acc[item.status] = (acc[item.status] || 0) + 1;
+        const key = normalize(item.status);
+        acc[key] = (acc[key] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
 
-    // Note: Colors and labels are hardcoded to match the original design.
     return [
-        { label: "In Transit", value: statusCounts["In Transit"] || 0, color: "bg-primary" },
-        { label: "Delivered", value: statusCounts["Delivered"] || 0, color: "bg-success" },
-        { label: "Pending", value: statusCounts["Pending"] || 0, color: "bg-warning" },
-        { label: "Delayed", value: statusCounts["Delayed"] || 0, color: "bg-destructive" },
+        { label: 'In Transit', value: statusCounts['In Transit'] || 0, color: 'bg-primary' },
+        { label: 'Delivered', value: statusCounts['Delivered'] || 0, color: 'bg-success' },
+        { label: 'Pending', value: statusCounts['Pending'] || 0, color: 'bg-warning' },
+        { label: 'Delayed', value: statusCounts['Delayed'] || 0, color: 'bg-destructive' },
     ];
 };
 

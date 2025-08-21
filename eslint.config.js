@@ -31,7 +31,10 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
-      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+      ],
       // Basic accessibility rules
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/aria-props": "error",

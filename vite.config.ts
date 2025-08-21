@@ -41,15 +41,15 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
-          // Add proper PNG icons in /public later for best PWA support
-          // { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          // { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          // { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
+        navigateFallback: '/offline.html',
         runtimeCaching: [
           {
             // Cache image assets
@@ -76,9 +76,6 @@ export default defineConfig({
               networkTimeoutSeconds: 3,
               plugins: [
                 {
-                  cacheKeyWillBeUsed: async ({ request }) => {
-                    return `${request.url}?v=${Date.now()}`;
-                  },
                   handlerDidError: async () => Response.redirect('/offline.html', 302),
                 },
               ],
