@@ -1,0 +1,22 @@
+name: "Flow Motion Build Optimizer"
+version: "1.0.0"
+description: "Build optimization plugin for Flow Motion Logistics Platform"
+author: "Flow Motion Team"
+repository: "https://github.com/daorsforgealsystems/zadnjo"
+license: "MIT"
+inputs:
+  - name: "cache-warm"
+    description: "Whether to trigger cache warming after successful build"
+    type: "boolean"
+    required: false
+    default: true
+  - name: "health-check"
+    description: "Whether to generate a health check page"
+    type: "boolean"
+    required: false
+    default: true
+  - name: "node-version-check"
+    description: "Whether to enforce minimum Node.js version"
+    type: "boolean"
+    required: false
+    default: true

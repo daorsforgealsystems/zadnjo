@@ -13,7 +13,7 @@ const port = process.env.PORT || 4006;
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Notifications (mock queue)
-let notifications: any[] = [];
+const notifications: any[] = [];
 
 app.post('/notifications', (req, res) => {
   const payload = req.body || {};

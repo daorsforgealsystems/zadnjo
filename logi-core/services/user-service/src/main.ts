@@ -80,7 +80,7 @@ async function bootstrap() {
   const port = process.env.PORT || 4001;
   await app.listen(port);
   
-  // eslint-disable-next-line no-console
+   
   console.log(`🚀 User Service listening on ${port}`);
   console.log(`📡 Available endpoints:`);
   console.log(`   - GET  /api/health`);

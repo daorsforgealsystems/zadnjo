@@ -118,7 +118,7 @@ export const resolveCollisions = (
   const resolved: LayoutComponent[] = [];
   
   components.forEach(component => {
-    let resolvedComponent = { ...component };
+    const resolvedComponent = { ...component };
     let hasCollision = true;
     let attempts = 0;
     const maxAttempts = 100;
