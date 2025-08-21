@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import daorsforgeLogo from "@/assets/daorsforge-new-logo.jpg";
+const daorsforgeLogo = "/daorsforge-new-logo.jpg";
 
 
 interface LogoProps {
