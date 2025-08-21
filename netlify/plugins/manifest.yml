@@ -1,14 +1,16 @@
-name: "Flow Motion Build Optimizer"
 inputs:
-  - name: "cache-warm"
+  cache-warm:
     description: "Whether to trigger cache warming after successful build"
+    type: boolean
     required: false
     default: true
-  - name: "health-check"
+  health-check:
     description: "Whether to generate a health check page"
+    type: boolean
     required: false
     default: true
-  - name: "node-version-check"
+  node-version-check:
     description: "Whether to enforce minimum Node.js version"
+    type: boolean
     required: false
     default: true

@@ -7,13 +7,16 @@ export default {
     console.log('🚀 Starting Flow Motion build optimization...');
     
     try {
-      // Check Node.js version
-      const nodeVersion = process.version;
-      console.log(`📦 Node.js version: ${nodeVersion}`);
-      
-      if (parseInt(nodeVersion.slice(1)) < 20) {
-        console.error('❌ Node.js version 20+ is required for this build');
-        utils.build.failBuild('Node.js version 20+ is required for this build');
+      // Check if node version check is enabled
+      if (inputs.nodeVersionCheck !== false) {
+        // Check Node.js version
+        const nodeVersion = process.version;
+        console.log(`📦 Node.js version: ${nodeVersion}`);
+        
+        if (parseInt(nodeVersion.slice(1)) < 20) {
+          console.error('❌ Node.js version 20+ is required for this build');
+          utils.build.failBuild('Node.js version 20+ is required for this build');
+        }
       }
 
       // Validate environment variables
@@ -58,7 +61,6 @@ export default {
     console.log('🎯 Running post-build optimizations...');
     
     try {
-      
       // Generate build manifest
       const buildManifest = {
         buildId: process.env.BUILD_ID || 'unknown',
@@ -77,8 +79,9 @@ export default {
       fs.writeFileSync(manifestPath, JSON.stringify(buildManifest, null, 2));
       console.log(`📄 Build manifest created at ${manifestPath}`);
 
-      // Create a simple health check endpoint
-      const healthCheckContent = `
+      // Create a health check page only if enabled
+      if (inputs.healthCheck !== false) {
+        const healthCheckContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -98,11 +101,12 @@ export default {
     </script>
 </body>
 </html>
-      `.trim();
+        `.trim();
 
-      const healthCheckPath = path.join(constants.PUBLISH_DIR, 'health.html');
-      fs.writeFileSync(healthCheckPath, healthCheckContent);
-      console.log(`🏥 Health check page created at ${healthCheckPath}`);
+        const healthCheckPath = path.join(constants.PUBLISH_DIR, 'health.html');
+        fs.writeFileSync(healthCheckPath, healthCheckContent);
+        console.log(`🏥 Health check page created at ${healthCheckPath}`);
+      }
 
       console.log('✅ Post-build optimizations completed');
     } catch (error) {
@@ -116,15 +120,18 @@ export default {
     console.log('🎉 Build completed successfully!');
     
     try {
-      // Trigger cache warming
-      const deployUrl = process.env.DEPLOY_URL;
-      if (deployUrl) {
-        console.log('🔥 Triggering cache warming...');
-        
-        // In a real implementation, you might trigger your cache warmer function here
-        // await fetch(`${deployUrl}/.netlify/functions/cache-warmer`, { method: 'POST' });
-        
-        console.log('✅ Cache warming triggered');
+      // Trigger cache warming only if enabled
+      if (inputs.cacheWarm !== false) {
+        // Trigger cache warming
+        const deployUrl = process.env.DEPLOY_URL;
+        if (deployUrl) {
+          console.log('🔥 Triggering cache warming...');
+          
+          // In a real implementation, you might trigger your cache warmer function here
+          // await fetch(`${deployUrl}/.netlify/functions/cache-warmer`, { method: 'POST' });
+          
+          console.log('✅ Cache warming triggered');
+        }
       }
     } catch (error) {
       console.error('❌ Post-success actions failed:', error);
