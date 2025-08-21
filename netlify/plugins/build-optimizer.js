@@ -1,14 +1,19 @@
 import fs from 'fs';
 import path from 'path';
 
+// Helper function to read inputs with both camelCase and kebab-case support
+const getInput = (inputs, camelCaseKey, kebabCaseKey, defaultValue = undefined) => {
+  return inputs[camelCaseKey] ?? inputs[kebabCaseKey] ?? defaultValue;
+};
+
 export default {
   name: "Flow Motion Build Optimizer",
   onPreBuild: async ({ utils, inputs }) => {
     console.log('🚀 Starting Flow Motion build optimization...');
     
     try {
-      // Check if node version check is enabled
-      if (inputs.nodeVersionCheck !== false) {
+      // Check if node version check is enabled (supports both nodeVersionCheck and node-version-check)
+      if (getInput(inputs, 'nodeVersionCheck', 'node-version-check', true) !== false) {
         // Check Node.js version
         const nodeVersion = process.version;
         console.log(`📦 Node.js version: ${nodeVersion}`);
