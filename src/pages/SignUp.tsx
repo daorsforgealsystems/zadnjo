@@ -1,14 +1,10 @@
-import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
-import { useAuth } from '@/context/useAuth';
-import { Button } from '@/components/ui/button';
-import Logo from "@/components/Logo";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useTranslation } from 'react-i18next';
-import { ROLES } from "@/lib/types";
-import MediaBackground from "@/components/MediaBackground";
+
+// Forge Constitution: Security boundary clarification
+// This page provides client-side signup UX only.
+// True account creation, authentication, and authorization MUST be enforced server-side.
+// Architectural justification: Modular, accessible signup form for user experience.
+// Trade-off: Improves onboarding and usability, but does NOT guarantee security or access control.
+// Security assessment: Never rely solely on this for sensitive actions or data protection.
 
 const SignUp = () => {
   const { t } = useTranslation();
@@ -20,7 +16,8 @@ const SignUp = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-const handleSignUp = async (e: React.FormEvent) => {
+  // Handles client-side signup UX only. Credentials are sent to server for true account creation and authorization.
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -39,6 +36,7 @@ const handleSignUp = async (e: React.FormEvent) => {
     }
   };
 
+  // UX: Show loading spinner while checking authentication
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -47,13 +45,14 @@ const handleSignUp = async (e: React.FormEvent) => {
     );
   }
 
+  // UX: Redirect authenticated users to dashboard
   if (isAuthenticated) {
-  // After signup/auth, send users to the main dashboard instead of portal
-  return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
     <div className="relative flex items-center justify-center min-h-screen w-full bg-black/90 overflow-hidden">
+      {/* Forge Constitution: This form is for client-side UX only. Credentials are sent to server for true account creation and authorization. */}
       {/* Hero image as background, zoomed out and darkened */}
       <img
         src="/src/assets/hero-logistics.jpg"

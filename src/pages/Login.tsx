@@ -1,14 +1,16 @@
-import { useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
-import { useAuth } from '@/context/useAuth';
-import { Button } from '@/components/ui/button';
-import Logo from "@/components/Logo";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useTranslation } from 'react-i18next';
-import { ROLES } from "@/lib/types"; // Import Role type
-import MediaBackground from "@/components/MediaBackground";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
+import { Label } from '../components/ui/Label';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import Logo from '../components/Logo';
+
+// Forge Constitution: Security boundary clarification
+// This page provides client-side authentication UX only.
+// True authentication and authorization MUST be enforced server-side.
+// Architectural justification: Modular, accessible login form for user experience.
+// Trade-off: Improves onboarding and usability, but does NOT guarantee security or access control.
+// Security assessment: Never rely solely on this for sensitive actions or data protection.
 
 const Login = () => {
   const { t } = useTranslation();
@@ -18,10 +20,11 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => { // Added type for event
+  // Handles client-side login UX only. Credentials are sent to server for true authentication.
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+  setError('');
     try {
       const { error: loginError } = await login(email, password);
       if (loginError) {
@@ -34,7 +37,8 @@ const Login = () => {
     }
   };
 
-  const handleGuestLogin = async () => { // Handler for guest login
+  // Handles guest login UX only. Server must enforce guest permissions and access control.
+  const handleGuestLogin = async () => {
     setLoading(true); // Use the same loading state for guest login
     setError('');
     try {
@@ -50,6 +54,7 @@ const Login = () => {
     }
   };
 
+  // UX: Show loading spinner while checking authentication
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -58,13 +63,14 @@ const Login = () => {
     );
   }
 
+  // UX: Redirect authenticated users to dashboard
   if (isAuthenticated) {
-  // Redirect all authenticated users to the main dashboard for now
-  return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen w-full bg-black/90 overflow-hidden">
+      {/* Forge Constitution: This form is for client-side UX only. Credentials are sent to server for true authentication. */}
       {/* Hero image as background, zoomed out and darkened */}
       <img
         src="/src/assets/hero-logistics.jpg"
@@ -119,7 +125,7 @@ const Login = () => {
                 {t('login.signup', 'Sign up')}
               </Link>
             </div>
-            {/* Guest Login Button */}
+            {/* Guest Login Button (client-side only, server must enforce guest permissions) */}
             <div className="mt-4 text-center">
               <Button variant="outline" className="w-full bg-black/40 border-white/10 text-white hover:bg-black/60" onClick={handleGuestLogin} disabled={loading}>
                 {t('login.guest', 'Login as Guest')}

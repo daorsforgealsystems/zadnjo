@@ -1,15 +1,24 @@
+
+// Forge Constitution: Security boundary clarification
+// This context provides client-side authentication and RBAC helpers for UX only.
+// True authentication and authorization MUST be enforced server-side.
+// Architectural justification: Modular, typed context for frontend state and actions.
+// Trade-off: Improves user experience, but does NOT guarantee security or access control.
+// Security assessment: Never rely solely on this for sensitive actions or data protection.
+
 import { createContext } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { ROLES, Role, User as AppUser } from '@/lib/types';
 
+
 export interface AuthContextType {
-  // Session & user state
+  // Session & user state (client-side only)
   session: Session | null;
   user: (AppUser & { email?: string }) | null;
   loading: boolean;
   isAuthenticated: boolean;
 
-  // Actions
+  // Actions (client-side only)
   login: (email: string, password: string) => Promise<{ error?: { message: string } }>;
   signup: (
     email: string,
@@ -22,7 +31,7 @@ export interface AuthContextType {
   // Backwards-compatible alias many components expect
   logout: () => Promise<void>;
 
-  // Authz helpers
+  // Authz helpers (client-side only)
   hasRole: (roles: Role[]) => boolean;
 }
 
@@ -38,5 +47,6 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   hasRole: () => false,
 });
+
 
 export default AuthContext;
