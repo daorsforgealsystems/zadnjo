@@ -1,4 +1,7 @@
-module.exports = {
+import fs from 'fs';
+import path from 'path';
+
+export default {
   name: "Flow Motion Build Optimizer",
   onPreBuild: async ({ utils, inputs }) => {
     console.log('🚀 Starting Flow Motion build optimization...');
@@ -55,8 +58,6 @@ module.exports = {
     console.log('🎯 Running post-build optimizations...');
     
     try {
-      const fs = require('fs');
-      const path = require('path');
       
       // Generate build manifest
       const buildManifest = {
