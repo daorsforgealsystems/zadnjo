@@ -7,7 +7,6 @@ const getInput = (inputs, camelCaseKey, kebabCaseKey, defaultValue = undefined) 
 };
 
 export default {
-  name: "Flow Motion Build Optimizer",
   onPreBuild: async ({ utils, inputs }) => {
     console.log('🚀 Starting Flow Motion build optimization...');
     
