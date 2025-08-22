@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 
 // Lightweight debounce helper to avoid depending on lodash in the hook
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function debounce<T extends (...args: any[]) => void>(fn: T, wait = 200) {
   let timer: ReturnType<typeof setTimeout> | null = null;
   return (...args: Parameters<T>) => {

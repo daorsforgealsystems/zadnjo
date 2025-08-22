@@ -41,7 +41,7 @@ export const predictEta = (route: LiveRoute): { time: string, confidence: number
     const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
     const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
 
-    let baseMinutes = hours * 60 + minutes;
+    const baseMinutes = hours * 60 + minutes;
 
     let variability = 0; // in minutes
 

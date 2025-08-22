@@ -108,7 +108,7 @@ export const DynamicGridSystem: React.FC<DynamicGridSystemProps> = ({
             {/* Resize handles (only shown in customization mode) */}
             {customizing && component.resizable && (
               <>
-                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+                { }
                 <div
                   role="button"
                   tabIndex={0}
@@ -118,7 +118,7 @@ export const DynamicGridSystem: React.FC<DynamicGridSystemProps> = ({
                   onMouseUp={handleResizeEnd}
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleResizeStart(component.id)}
                 />
-                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+                { }
                 <div
                   role="button"
                   tabIndex={0}
@@ -128,7 +128,7 @@ export const DynamicGridSystem: React.FC<DynamicGridSystemProps> = ({
                   onMouseUp={handleResizeEnd}
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleResizeStart(component.id)}
                 />
-                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+                { }
                 <div
                   role="button"
                   tabIndex={0}

@@ -41,8 +41,8 @@ export const useDragDrop = (options: UseDragDropOptions = {}) => {
   ) => {
     event.preventDefault?.();
     
-  const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0;  
+  const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0;  
     
     const rect = element.getBoundingClientRect();
     const containerRect = containerRef?.current?.getBoundingClientRect();
@@ -83,8 +83,8 @@ export const useDragDrop = (options: UseDragDropOptions = {}) => {
 
     event.preventDefault();
     
-  const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const clientX = 'clientX' in event ? event.clientX : (event as any).touches[0]?.clientX || 0;  
+  const clientY = 'clientY' in event ? event.clientY : (event as any).touches[0]?.clientY || 0;  
 
     const containerRect = containerRef?.current?.getBoundingClientRect();
     if (!containerRect) return;
@@ -178,7 +178,7 @@ export const useDragDrop = (options: UseDragDropOptions = {}) => {
     },
     onTouchStart: (event: React.TouchEvent<HTMLElement>) => {
       // TouchEvent is adapted to the same handler; cast intentionally
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       handleDragStart(event as any, component, event.currentTarget);
     },
     onDragStart: (event: React.DragEvent) => {

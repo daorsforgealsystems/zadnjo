@@ -47,7 +47,7 @@ const PaginationLink = ({
   children,
   ...props
 }: PaginationLinkProps) => (
-  // eslint-disable-next-line jsx-a11y/anchor-has-content
+   
   <a
     aria-current={isActive ? "page" : undefined}
     className={cn(
