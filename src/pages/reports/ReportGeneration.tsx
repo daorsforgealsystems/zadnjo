@@ -3,7 +3,7 @@ import ResponsiveLayout from '@/components/ResponsiveLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
@@ -26,12 +26,7 @@ const reportSchema = z
 type ReportFormValues = z.infer<typeof reportSchema>;
 
 const ReportGeneration: React.FC = () => {
-  const {
-    control,
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm({
+  const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
     defaultValues: { reportType: 'kpi', format: 'pdf', fromDate: '', toDate: '', filter: '' },
   });
@@ -51,76 +46,102 @@ const ReportGeneration: React.FC = () => {
             <CardTitle>Report Generation</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Report Type</Label>
-                  <Controller
+            <Form {...form}>
+              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <FormField
+                    control={form.control}
                     name="reportType"
-                    control={control}
                     render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="kpi">KPI Summary</SelectItem>
-                          <SelectItem value="finance">Financial</SelectItem>
-                          <SelectItem value="routes">Routes</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormItem>
+                        <FormLabel>Report Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="kpi">KPI Summary</SelectItem>
+                            <SelectItem value="finance">Financial</SelectItem>
+                            <SelectItem value="routes">Routes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
-                  {errors.reportType && (
-                    <p className="text-xs text-red-500" role="alert">{errors.reportType.message}</p>
-                  )}
-                </div>
 
-                <div>
-                  <Label className="text-xs text-muted-foreground">Format</Label>
-                  <Controller
+                  <FormField
+                    control={form.control}
                     name="format"
-                    control={control}
                     render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="PDF" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pdf">PDF</SelectItem>
-                          <SelectItem value="csv">CSV</SelectItem>
-                          <SelectItem value="xlsx">Excel</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormItem>
+                        <FormLabel>Format</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="PDF" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="pdf">PDF</SelectItem>
+                            <SelectItem value="csv">CSV</SelectItem>
+                            <SelectItem value="xlsx">Excel</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
-                  {errors.format && (
-                    <p className="text-xs text-red-500" role="alert">{errors.format.message}</p>
-                  )}
+
+                  <FormField
+                    control={form.control}
+                    name="filter"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Filter (optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Search term, tag…" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                <div>
-                  <Label className="text-xs text-muted-foreground" htmlFor="filter">Filter (optional)</Label>
-                  <Input id="filter" placeholder="Search term, tag…" {...register('filter')} />
-                  {errors.filter && <p className="text-xs text-red-500" role="alert">{errors.filter.message}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="fromDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>From</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="toDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>To</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground" htmlFor="fromDate">From</Label>
-                  <Input id="fromDate" type="date" {...register('fromDate')} aria-invalid={!!errors.fromDate} />
-                  {errors.fromDate && <p className="text-xs text-red-500" role="alert">{errors.fromDate.message as string}</p>}
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground" htmlFor="toDate">To</Label>
-                  <Input id="toDate" type="date" {...register('toDate')} aria-invalid={!!errors.toDate} />
-                  {errors.toDate && <p className="text-xs text-red-500" role="alert">{errors.toDate.message as string}</p>}
-                </div>
-              </div>
-
-              <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Generating…' : 'Generate'}</Button>
-            </form>
+                <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'Generating…' : 'Generate'}</Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>

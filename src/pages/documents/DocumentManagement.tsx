@@ -3,7 +3,7 @@ import ResponsiveLayout from '@/components/ResponsiveLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,12 +27,7 @@ const documentSchema = z.object({
 type DocumentFormValues = z.infer<typeof documentSchema>;
 
 const DocumentManagement: React.FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    setValue,
-  } = useForm({
+  const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
     defaultValues: { title: '', description: '' },
   });
@@ -59,40 +54,64 @@ const DocumentManagement: React.FC = () => {
             <CardTitle>Document Management</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input id="title" {...register('title')} placeholder="e.g., Proof of Delivery" aria-invalid={!!errors.title} />
-                {errors.title && <p className="text-xs text-red-500" role="alert">{errors.title.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (optional)</Label>
-                <Input id="description" {...register('description')} placeholder="Short description" aria-invalid={!!errors.description} />
-                {errors.description && <p className="text-xs text-red-500" role="alert">{errors.description.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="file">File</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  accept=".pdf,.docx,.txt"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) setValue('file', f, { shouldValidate: true });
-                  }}
-                  aria-invalid={!!errors.file}
+            <Form {...form}>
+              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Proof of Delivery" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {errors.file && <p className="text-xs text-red-500" role="alert">{errors.file.message as string}</p>}
-              </div>
 
-              <div className="flex gap-2 items-center">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Uploading…' : 'Upload'}
-                </Button>
-              </div>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Short description" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="file"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>File</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept=".pdf,.docx,.txt"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) field.onChange(f);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-2 items-center">
+                  <Button type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? 'Uploading…' : 'Upload'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
 
             <div className="text-sm text-muted-foreground">Recent documents will appear here.</div>
           </CardContent>

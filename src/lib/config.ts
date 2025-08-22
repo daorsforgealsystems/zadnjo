@@ -54,7 +54,8 @@ export const config = {
     enablePerformanceMonitoring: import.meta.env.NODE_ENV === 'development',
     enableMemoryMonitoring: import.meta.env.NODE_ENV === 'development',
     chunkSize: 50, // For pagination
-    debounceDelay: 300, // For search inputs
+    debounceDelay: parseInt(import.meta.env.VITE_DEBOUNCE_DELAY) || 300,
+    autoSaveInterval: parseInt(import.meta.env.VITE_AUTO_SAVE_INTERVAL) || 30000,
   },
 
   // Security Settings
@@ -67,8 +68,20 @@ export const config = {
   // Development Settings
   development: {
     enableMockData: import.meta.env.VITE_ENABLE_MOCK_DATA === 'true',
+    enableDevMode: import.meta.env.VITE_DEV_MODE === 'true',
     enableDevTools: import.meta.env.NODE_ENV === 'development',
+    mockApi: import.meta.env.VITE_MOCK_API === 'true',
+    debugLayout: import.meta.env.VITE_DEBUG_LAYOUT === 'true',
     logLevel: import.meta.env.VITE_LOG_LEVEL || 'info',
+  },
+
+  // Services Configuration
+  services: {
+    userService: import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:4001/api',
+    inventoryService: import.meta.env.VITE_INVENTORY_SERVICE_URL || 'http://localhost:8000',
+    routingService: import.meta.env.VITE_ROUTING_SERVICE_URL || 'http://localhost:8002',
+    geolocationService: import.meta.env.VITE_GEOLOCATION_SERVICE_URL || 'http://localhost:8003',
+    notificationService: import.meta.env.VITE_NOTIFICATION_SERVICE_URL || 'http://localhost:8004',
   },
 } as const;
 

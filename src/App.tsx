@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import DebugOverlay from './components/DebugOverlay';
 import { debug } from './lib/debug';
 import { pageTransition, authFade, nestedFadeSlide } from './lib/motion-variants';
+import { EnhancedResponsiveLayout } from './components/layout/EnhancedResponsiveLayout';
 
 // Simple fallback component for lazy loading errors
 const LazyLoadingErrorFallback = () => (
@@ -210,18 +211,20 @@ const AppContent = () => {
                   path={path}
                   element={
                     <ErrorBoundary>
-                      <DashboardLayout>
-                        <motion.div
-                          key={location.pathname}
-                          variants={pageTransition}
-                          initial="initial"
-                          animate="animate"
-                          exit="exit"
-                          className="min-h-screen"
-                        >
-                          {element}
-                        </motion.div>
-                      </DashboardLayout>
+                      <EnhancedResponsiveLayout>
+                        <DashboardLayout>
+                          <motion.div
+                            key={location.pathname}
+                            variants={pageTransition}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            className="min-h-screen"
+                          >
+                            {element}
+                          </motion.div>
+                        </DashboardLayout>
+                      </EnhancedResponsiveLayout>
                     </ErrorBoundary>
                   }
                 />
@@ -276,18 +279,20 @@ const AppContent = () => {
                   path="/dashboard"
                   element={
                     <ErrorBoundary>
-                      <DashboardLayout>
-                        <motion.div
-                          key={location.pathname}
-                          variants={pageTransition}
-                          initial="initial"
-                          animate="animate"
-                          exit="exit"
-                          className="min-h-screen"
-                        >
-                          <MainDashboard />
-                        </motion.div>
-                      </DashboardLayout>
+                      <EnhancedResponsiveLayout>
+                        <DashboardLayout>
+                          <motion.div
+                            key={location.pathname}
+                            variants={pageTransition}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            className="min-h-screen"
+                          >
+                            <MainDashboard />
+                          </motion.div>
+                        </DashboardLayout>
+                      </EnhancedResponsiveLayout>
                     </ErrorBoundary>
                   }
                 />

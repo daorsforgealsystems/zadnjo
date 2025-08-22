@@ -3,10 +3,13 @@
 
 import { config } from '@/lib/config';
 
-const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-// The user service (NestJS) exposes a global prefix `/api` in development.
-// Ensure the default includes the prefix so apiClient builds correct URLs like http://localhost:4001/api/navigation/...
+// Microservice endpoints
+const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 const USER_SERVICE_BASE = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:4001/api';
+const INVENTORY_SERVICE_BASE = import.meta.env.VITE_INVENTORY_SERVICE_URL || 'http://localhost:8000';
+const ROUTING_SERVICE_BASE = import.meta.env.VITE_ROUTING_SERVICE_URL || 'http://localhost:8002';
+const GEOLOCATION_SERVICE_BASE = import.meta.env.VITE_GEOLOCATION_SERVICE_URL || 'http://localhost:8003';
+const NOTIFICATION_SERVICE_BASE = import.meta.env.VITE_NOTIFICATION_SERVICE_URL || 'http://localhost:8004';
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers || {});

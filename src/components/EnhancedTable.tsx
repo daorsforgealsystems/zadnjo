@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   Table,
   TableBody,
@@ -52,6 +53,8 @@ const EnhancedTable = <T extends object>({
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: 'asc' | 'desc' } | null>(null);
 
+  const parentRef = useRef<HTMLDivElement>(null);
+
   const sortedData = useMemo(() => {
     if (!sortConfig) return data;
 
@@ -77,6 +80,12 @@ const EnhancedTable = <T extends object>({
   }, [sortedData, currentPage, effectivePageSize]);
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  const rowVirtualizer = useVirtualizer({
+    count: paginatedData.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 50, // Adjust this to your average row height
+  });
 
   const handleSort = (key: keyof T) => {
     const column = columns.find(col => col.key === key);
@@ -113,8 +122,8 @@ const EnhancedTable = <T extends object>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="rounded-md border">
-        <Table>
+      <div ref={parentRef} className="rounded-md border overflow-auto h-[600px]">
+        <Table style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
@@ -134,33 +143,33 @@ const EnhancedTable = <T extends object>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.length > 0 ? (
-              paginatedData.map((row, index) => {
-                // Try to use a stable id if present, otherwise fall back to index
-                const possibleId = (row as unknown as { id?: string | number }).id;
-                const rowKey = (typeof possibleId === 'string' || typeof possibleId === 'number') ? possibleId : index;
-                const selected = isRowSelected ? isRowSelected(row) : false;
-                return (
-                  <TableRow
-                    key={rowKey}
-                    className={cn('cursor-pointer hover:bg-muted/50', selected && 'ring-2 ring-primary')}
-                    onClick={() => onRowClick?.(row)}
-                  >
-                    {columns.map((column) => (
-                      <TableCell key={`${rowKey}-${column.key as string}`}>
-                        {renderCell(row, column)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-8 text-muted-foreground">
-                  No data available
-                </TableCell>
-              </TableRow>
-            )}
+            {rowVirtualizer.getVirtualItems().map(virtualRow => {
+              const row = paginatedData[virtualRow.index];
+              const possibleId = (row as unknown as { id?: string | number }).id;
+              const rowKey = (typeof possibleId === 'string' || typeof possibleId === 'number') ? possibleId : virtualRow.index;
+              const selected = isRowSelected ? isRowSelected(row) : false;
+              return (
+                <TableRow
+                  key={rowKey}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  className={cn('cursor-pointer hover:bg-muted/50', selected && 'ring-2 ring-primary')}
+                  onClick={() => onRowClick?.(row)}
+                >
+                  {columns.map((column) => (
+                    <TableCell key={`${rowKey}-${column.key as string}`}>
+                      {renderCell(row, column)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
