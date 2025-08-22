@@ -140,13 +140,6 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
     setIsSearching(false);
   }, [filteredNavigationItems]);
 
-  // Clear search
-  const clearSearch = useCallback(() => {
-    setSearchQuery('');
-    setSearchResults([]);
-    setIsSearching(false);
-  }, []);
-
   // Get navigation state helpers
   const isActive = useCallback((item: NavigationItem): boolean => {
     if (item.href === location.pathname) {

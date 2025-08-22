@@ -557,3 +557,55 @@ AFTER UPDATE ON shipments
 FOR EACH ROW
 WHEN (OLD.status IS DISTINCT FROM NEW.status)
 EXECUTE FUNCTION update_order_on_shipment_change();
+
+-- ============================================================================
+-- Items Table (for frontend Items views)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    description TEXT,
+    status TEXT CHECK (status IN ('pending','in_transit','delivered','delayed')) DEFAULT 'pending',
+    route_id UUID REFERENCES routes(id),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Helpful indexes
+CREATE INDEX IF NOT EXISTS idx_items_status ON items(status);
+CREATE INDEX IF NOT EXISTS idx_items_route_id ON items(route_id);
+
+-- Enable RLS and basic policies
+ALTER TABLE items ENABLE ROW LEVEL SECURITY;
+
+-- Public read access (anon and authenticated)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE polname = 'items_read_all'
+    ) THEN
+        CREATE POLICY items_read_all
+            ON items FOR SELECT
+            USING (true);
+    END IF;
+END$$;
+
+-- Insert/update allowed for authenticated users
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE polname = 'items_insert_auth'
+    ) THEN
+        CREATE POLICY items_insert_auth
+            ON items FOR INSERT
+            WITH CHECK (auth.role() = 'authenticated');
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE polname = 'items_update_auth'
+    ) THEN
+        CREATE POLICY items_update_auth
+            ON items FOR UPDATE
+            USING (auth.role() = 'authenticated')
+            WITH CHECK (auth.role() = 'authenticated');
+    END IF;
+END$$;
