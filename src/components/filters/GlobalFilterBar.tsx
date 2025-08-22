@@ -107,7 +107,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
         </div>
 
         <div className="md:col-span-2">
-          <label className="text-xs text-muted-foreground">Date Range</label>
+          <span className="text-xs text-muted-foreground">Date Range</span>
           <DateRangePicker
             date={filters.dateRange}
             setDate={(dateRange: DateRange | undefined) => {

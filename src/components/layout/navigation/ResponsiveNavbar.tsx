@@ -1,6 +1,4 @@
-/*****
- eslint-disable jsx-a11y/no-static-element-interactions
- *****/
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Bell, Menu, User, Settings, LogOut } from 'lucide-react';
 import { NavigationConfig } from '@/types/navigation';
