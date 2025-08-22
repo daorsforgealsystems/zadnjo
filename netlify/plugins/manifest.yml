@@ -1,16 +1,16 @@
 name: "Build Optimizer"
 inputs:
-  cache-warm:
+  - name: cache-warm
     description: "Whether to trigger cache warming after successful build"
     type: boolean
     required: false
     default: true
-  health-check:
+  - name: health-check
     description: "Whether to generate a health check page"
     type: boolean
     required: false
     default: true
-  node-version-check:
+  - name: node-version-check
     description: "Whether to enforce minimum Node.js version"
     type: boolean
     required: false
