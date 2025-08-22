@@ -28,76 +28,76 @@ export default defineConfig({
 
     react(),
 
-    // Progressive Web App support
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'offline.html'],
-      manifest: {
-        name: 'Flow Motion Logistics',
-        short_name: 'FlowMotion',
-        description: 'Advanced logistics platform',
-        theme_color: '#1e293b',
-        background_color: '#0f172a',
-        display: 'standalone',
-        start_url: '/',
-        icons: [
-        ],
-      },
-      workbox: {
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        navigateFallback: '/offline.html',
-        runtimeCaching: [
-          {
-            // Cache image assets
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-              },
-            },
-          },
-          {
-            // Cache same-origin navigation/doc requests for offline
-            urlPattern: ({ request, sameOrigin }) => sameOrigin && request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'pages-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24, // 1 day
-              },
-              networkTimeoutSeconds: 3,
-              plugins: [
-                {
-                  handlerDidError: async () => Response.redirect('/offline.html', 302),
-                },
-              ],
-            },
-          },
-          {
-            // Cache API responses with network-first strategy (dynamic pattern based on env)
-            urlPattern: ({ url }) => {
-              const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
-              const baseUrl = new URL(apiBaseUrl).origin;
-              return url.origin === baseUrl || url.pathname.startsWith('/api/');
-            },
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60, // 1 hour
-              },
-              networkTimeoutSeconds: 5,
-            },
-          },
-        ],
-      },
-    }),
+  // Progressive Web App support (temporarily disabled to diagnose build resolver error)
+  // VitePWA({
+  //   registerType: 'autoUpdate',
+  //   includeAssets: ['favicon.ico', 'robots.txt', 'offline.html'],
+  //   manifest: {
+  //     name: 'Flow Motion Logistics',
+  //     short_name: 'FlowMotion',
+  //     description: 'Advanced logistics platform',
+  //     theme_color: '#1e293b',
+  //     background_color: '#0f172a',
+  //     display: 'standalone',
+  //     start_url: '/',
+  //     icons: [
+  //     ],
+  //   },
+  //   workbox: {
+  //     cleanupOutdatedCaches: true,
+  //     clientsClaim: true,
+  //     navigateFallback: '/offline.html',
+  //     runtimeCaching: [
+  //       {
+  //         // Cache image assets
+  //         urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+  //         handler: 'CacheFirst',
+  //         options: {
+  //           cacheName: 'images-cache',
+  //           expiration: {
+  //             maxEntries: 60,
+  //             maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+  //           },
+  //         },
+  //       },
+  //       {
+  //         // Cache same-origin navigation/doc requests for offline
+  //         urlPattern: ({ request, sameOrigin }) => sameOrigin && request.mode === 'navigate',
+  //         handler: 'NetworkFirst',
+  //         options: {
+  //           cacheName: 'pages-cache',
+  //           expiration: {
+  //             maxEntries: 50,
+  //             maxAgeSeconds: 60 * 60 * 24, // 1 day
+  //           },
+  //           networkTimeoutSeconds: 3,
+  //           plugins: [
+  //             {
+  //               handlerDidError: async () => Response.redirect('/offline.html', 302),
+  //             },
+  //           ],
+  //         },
+  //       },
+  //       {
+  //         // Cache API responses with network-first strategy (dynamic pattern based on env)
+  //         urlPattern: ({ url }) => {
+  //           const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+  //           const baseUrl = new URL(apiBaseUrl).origin;
+  //           return url.origin === baseUrl || url.pathname.startsWith('/api/');
+  //         },
+  //         handler: 'NetworkFirst',
+  //         options: {
+  //           cacheName: 'api-cache',
+  //           expiration: {
+  //             maxEntries: 100,
+  //             maxAgeSeconds: 60 * 60, // 1 hour
+  //           },
+  //           networkTimeoutSeconds: 5,
+  //         },
+  //       },
+  //     ],
+  //   },
+  // }),
   ],
   resolve: {
     alias: {
