@@ -76,6 +76,14 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
     return generateBreadcrumbs(filteredNavigationItems, location.pathname);
   }, [filteredNavigationItems, location.pathname]);
 
+
+  // Clear search
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearching(false);
+  }, []);
+
   // Handle navigation
   const navigateTo = useCallback((item: NavigationItem) => {
     // Clear any active search when navigating
