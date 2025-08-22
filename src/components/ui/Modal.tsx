@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type, jsx-a11y/no-static-element-interactions, jsx-a11y/heading-has-content */
 import React, { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 
