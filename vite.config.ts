@@ -15,16 +15,16 @@ export default defineConfig({
     }),
 
     // Build-time image optimization (jpg/png/webp/avif/svg)
-    ViteImageOptimizer({
-      includePublic: true, // also optimize images placed in /public
-      logStats: true,
-      // common quality presets; tweak as needed
-      jpg: { quality: 80, mozjpeg: false },
-      png: { quality: 80 },
-      webp: { quality: 75 },
-      avif: { quality: 50 },
-      svg: { multipass: true },
-    }),
+    // ViteImageOptimizer({
+    //   includePublic: true, // also optimize images placed in /public
+    //   logStats: true,
+    //   // common quality presets; tweak as needed
+    //   jpg: { quality: 80, mozjpeg: false },
+    //   png: { quality: 80 },
+    //   webp: { quality: 75 },
+    //   avif: { quality: 50 },
+    //   svg: { multipass: true },
+    // }),
 
     react(),
 
@@ -105,6 +105,9 @@ export default defineConfig({
     },
   },
   build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
     // Keep assets as external files (avoid base64 inlining for better caching)
     assetsInlineLimit: 0,
 
