@@ -125,17 +125,18 @@ export default defineConfig({
 
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Group framework libraries into a single vendor chunk
-          vendor: ["react", "react-dom", "react-router-dom"],
-          // Group UI libraries
-          ui: [/radix-ui/, /lucide-react/],
-          // Group charting libraries
-          charts: ["recharts"],
-          // Group mapping libraries
-          maps: ["leaflet", "react-leaflet"],
-          // Group internationalization libraries
-          i18n: [/i18next/],
+        // Use a function to assign modules to manual chunks by inspecting
+        // the module id string. This avoids passing RegExp objects into
+        // the resolver which can cause a type error during the commonjs
+        // resolution phase.
+        manualChunks(id: string) {
+          if (!id) return undefined;
+          if (id.includes('react') && id.includes('node_modules')) return 'vendor';
+          if (id.includes('radix-ui') || id.includes('lucide-react')) return 'ui';
+          if (id.includes('recharts')) return 'charts';
+          if (id.includes('leaflet') || id.includes('react-leaflet')) return 'maps';
+          if (id.includes('i18next') || id.includes('react-i18next')) return 'i18n';
+          return undefined;
         }
       }
     }
