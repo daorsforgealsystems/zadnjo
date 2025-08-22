@@ -119,9 +119,9 @@ const Reports: React.FC = () => {
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Report Type</label>
+            <label htmlFor="reports-type" className="text-sm font-medium">Report Type</label>
             <Select value={reportType} onValueChange={setReportType}>
-              <SelectTrigger>
+              <SelectTrigger id="reports-type" aria-label="Report Type">
                 <SelectValue placeholder="Select a report type" />
               </SelectTrigger>
               <SelectContent>
@@ -133,9 +133,9 @@ const Reports: React.FC = () => {
 
           {reportType === 'inventory' && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Filter by Status</label>
+              <label htmlFor="reports-inventory-status" className="text-sm font-medium">Filter by Status</label>
               <Select value={inventoryStatusFilter} onValueChange={setInventoryStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger id="reports-inventory-status" aria-label="Filter inventory by status">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -149,9 +149,9 @@ const Reports: React.FC = () => {
 
           {reportType === 'shipments' && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Filter by Status</label>
+              <label htmlFor="reports-shipments-status" className="text-sm font-medium">Filter by Status</label>
               <Select value={shipmentStatusFilter} onValueChange={setShipmentStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger id="reports-shipments-status" aria-label="Filter shipments by status">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>

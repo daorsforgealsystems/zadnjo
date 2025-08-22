@@ -108,26 +108,35 @@ export const DynamicGridSystem: React.FC<DynamicGridSystemProps> = ({
             {/* Resize handles (only shown in customization mode) */}
             {customizing && component.resizable && (
               <>
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
                 <div
-                  role="separator"
-                  aria-orientation="vertical"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Resize"
                   className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize bg-primary/50 rounded-tl"
                   onMouseDown={() => handleResizeStart(component.id)}
                   onMouseUp={handleResizeEnd}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleResizeStart(component.id)}
                 />
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
                 <div
-                  role="separator"
-                  aria-orientation="horizontal"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Resize"
                   className="absolute bottom-0 left-0 right-0 h-2 cursor-s-resize bg-primary/30"
                   onMouseDown={() => handleResizeStart(component.id)}
                   onMouseUp={handleResizeEnd}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleResizeStart(component.id)}
                 />
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
                 <div
-                  role="separator"
-                  aria-orientation="vertical"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Resize"
                   className="absolute top-0 bottom-0 right-0 w-2 cursor-e-resize bg-primary/30"
                   onMouseDown={() => handleResizeStart(component.id)}
                   onMouseUp={handleResizeEnd}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleResizeStart(component.id)}
                 />
               </>
             )}

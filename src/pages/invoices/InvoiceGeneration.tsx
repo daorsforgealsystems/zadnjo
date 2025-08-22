@@ -17,17 +17,17 @@ const InvoiceGeneration: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground">Customer</label>
-                <Input placeholder="Enter customer name" />
+                <label htmlFor="invoice-customer" className="text-xs text-muted-foreground">Customer</label>
+                <Input id="invoice-customer" placeholder="Enter customer name" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Order</label>
-                <Input placeholder="Order ID" />
+                <label htmlFor="invoice-order" className="text-xs text-muted-foreground">Order</label>
+                <Input id="invoice-order" placeholder="Order ID" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Currency</label>
+                <label htmlFor="invoice-currency" className="text-xs text-muted-foreground">Currency</label>
                 <Select defaultValue="USD">
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="invoice-currency" aria-label="Currency"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="USD">USD</SelectItem>
                     <SelectItem value="EUR">EUR</SelectItem>

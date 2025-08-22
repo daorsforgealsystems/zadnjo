@@ -55,8 +55,9 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
     <div className={cn('w-full bg-card/60 border border-border/60 rounded-xl p-3 md:p-4 shadow-sm backdrop-blur-md', className)}>
       <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
         <div className="md:col-span-2">
-          <label className="text-xs text-muted-foreground">Search</label>
+          <label htmlFor="global-filter-search" className="text-xs text-muted-foreground">Search</label>
           <Input
+            id="global-filter-search"
             placeholder="Search shipments, orders, customers..."
             value={filters.q}
             onChange={(e) => setFilters({ q: e.target.value })}
@@ -64,9 +65,9 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
         </div>
 
         <div>
-          <label className="text-xs text-muted-foreground">Status</label>
+          <label htmlFor="global-filter-status" className="text-xs text-muted-foreground">Status</label>
           <Select value={filters.status} onValueChange={(v) => setFilters({ status: v })}>
-            <SelectTrigger>
+            <SelectTrigger id="global-filter-status" aria-label="Status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -78,9 +79,9 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
         </div>
 
         <div>
-          <label className="text-xs text-muted-foreground">Region</label>
+          <label htmlFor="global-filter-region" className="text-xs text-muted-foreground">Region</label>
           <Select value={filters.region} onValueChange={(v) => setFilters({ region: v })}>
-            <SelectTrigger>
+            <SelectTrigger id="global-filter-region" aria-label="Region">
               <SelectValue placeholder="Region" />
             </SelectTrigger>
             <SelectContent>
@@ -92,9 +93,9 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
         </div>
 
         <div>
-          <label className="text-xs text-muted-foreground">Vehicle</label>
+          <label htmlFor="global-filter-vehicle" className="text-xs text-muted-foreground">Vehicle</label>
           <Select value={filters.vehicle} onValueChange={(v) => setFilters({ vehicle: v })}>
-            <SelectTrigger>
+            <SelectTrigger id="global-filter-vehicle" aria-label="Vehicle">
               <SelectValue placeholder="Vehicle" />
             </SelectTrigger>
             <SelectContent>

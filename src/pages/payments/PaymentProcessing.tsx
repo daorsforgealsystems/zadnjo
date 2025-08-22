@@ -16,17 +16,17 @@ const PaymentProcessing: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground">Invoice</label>
-                <Input placeholder="Invoice ID" />
+                <label htmlFor="payment-invoice" className="text-xs text-muted-foreground">Invoice</label>
+                <Input id="payment-invoice" placeholder="Invoice ID" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Amount</label>
-                <Input placeholder="Amount" />
+                <label htmlFor="payment-amount" className="text-xs text-muted-foreground">Amount</label>
+                <Input id="payment-amount" placeholder="Amount" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Method</label>
+                <label htmlFor="payment-method" className="text-xs text-muted-foreground">Method</label>
                 <Select defaultValue="card">
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="payment-method" aria-label="Method"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="card">Card</SelectItem>
                     <SelectItem value="bank">Bank Transfer</SelectItem>

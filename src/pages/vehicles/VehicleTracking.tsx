@@ -331,8 +331,9 @@ const VehicleTracking: React.FC = () => {
             className="bg-card p-4 rounded-lg shadow grid grid-cols-1 md:grid-cols-3 gap-4"
           >
             <div>
-              <label className="block text-sm font-medium mb-1">Status</label>
+              <label htmlFor="vehicle-filter-status" className="block text-sm font-medium mb-1">Status</label>
               <select 
+                id="vehicle-filter-status"
                 className="w-full p-2 border rounded-md"
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
@@ -345,8 +346,9 @@ const VehicleTracking: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Vehicle Type</label>
+              <label htmlFor="vehicle-filter-type" className="block text-sm font-medium mb-1">Vehicle Type</label>
               <select 
+                id="vehicle-filter-type"
                 className="w-full p-2 border rounded-md"
                 value={filters.type}
                 onChange={(e) => setFilters({ ...filters, type: e.target.value })}
@@ -357,8 +359,9 @@ const VehicleTracking: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Driver</label>
+              <label htmlFor="vehicle-filter-driver" className="block text-sm font-medium mb-1">Driver</label>
               <input 
+                id="vehicle-filter-driver"
                 type="text" 
                 className="w-full p-2 border rounded-md"
                 value={filters.driver}
