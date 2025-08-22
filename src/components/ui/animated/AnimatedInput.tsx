@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import anime from 'animejs';
+import anime from '../../lib/anime';
 import { Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 
 export interface AnimatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {

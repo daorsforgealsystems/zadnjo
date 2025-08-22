@@ -4,7 +4,7 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAnimations } from '@/hooks/useAnimations';
 import { cn } from '@/lib/utils';
-import anime from 'animejs';
+import anime from '../../lib/anime';
 
 export interface AnimatedCardProps {
   children: React.ReactNode;

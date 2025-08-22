@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import anime from 'animejs';
+import anime from '../../lib/anime';
 
 export interface AnimatedModalProps {
   isOpen: boolean;

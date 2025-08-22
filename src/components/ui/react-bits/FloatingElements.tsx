@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import anime from 'animejs';
+import anime from '../../lib/anime';
 
 export interface FloatingElementsProps {
   count?: number;

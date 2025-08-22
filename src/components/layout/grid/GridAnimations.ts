@@ -1,4 +1,4 @@
-import anime from 'animejs';
+import anime from '../../../lib/anime';
 
 export interface GridAnimationConfig {
   duration?: number;

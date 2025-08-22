@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { useAnimations } from '@/hooks/useAnimations';
 import { cn } from '@/lib/utils';
-import anime from 'animejs';
+import anime from '../../lib/anime';
 
 interface AnimatedButtonProps extends ButtonProps {
   animation?: 'pulse' | 'bounce' | 'shake' | 'glow' | 'slide' | 'rotate';
