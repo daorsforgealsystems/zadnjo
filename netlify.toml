@@ -97,7 +97,7 @@
 
 # Environment-specific redirects
 [context.production]
-  environment = { VITE_API_BASE_URL = "https://api.daorsflow.com" }
+  environment = { VITE_API_BASE_URL = "https://api.daorsflow.com", VITE_SUPABASE_URL = "https://aysikssfvptxeclfymlk.supabase.co", VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2lrc3NmdnB0eGVjbGZ5bWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0ODUwODcsImV4cCI6MjA3MDA2MTA4N30.MlhXvs_XZgSJxltCwMxn50FP0hZgOZDR8Jtl4SEDkOI" }
 
 [context.deploy-preview]
   environment = { VITE_API_BASE_URL = "https://staging-api.daorsflow.com" }
