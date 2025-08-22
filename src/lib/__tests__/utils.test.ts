@@ -8,8 +8,8 @@ describe('Utils Functions', () => {
     });
 
     it('should handle conditional classes', () => {
-      expect(cn('base-class', true && 'conditional-class')).toBe('base-class conditional-class');
-      expect(cn('base-class', false && 'conditional-class')).toBe('base-class');
+      expect(cn('base-class', { 'conditional-class': true })).toBe('base-class conditional-class');
+      expect(cn('base-class', { 'conditional-class': false })).toBe('base-class');
     });
 
     it('should handle conflicting Tailwind classes', () => {
