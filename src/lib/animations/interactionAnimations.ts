@@ -1,4 +1,4 @@
-import anime from 'animejs';
+import anime from '@/lib/anime';
 import { AnimationConfig, InteractionAnimations, EntranceAnimation } from '@/types/animations';
 
 export const interactionAnimationPresets: InteractionAnimations = {

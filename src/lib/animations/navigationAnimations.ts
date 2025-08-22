@@ -1,4 +1,4 @@
-import anime from 'animejs';
+import anime from '@/lib/anime';
 import { AnimationConfig, NavigationAnimations } from '@/types/animations';
 
 export const navigationAnimationPresets: NavigationAnimations = {

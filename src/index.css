@@ -1,10 +1,8 @@
 /* stylelint-disable at-rule-no-unknown */
 @import "leaflet/dist/leaflet.css";
 
-/* Use explicit Tailwind imports so generic CSS linters understand them */
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+/* Tailwind v4: single entry import */
+@import "tailwindcss";
 
 /* DaorsLink Design System - Modern Dark Supply Chain Theme
 All colors MUST be HSL for consistency and theming.
