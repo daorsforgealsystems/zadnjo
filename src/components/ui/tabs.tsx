@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import React, { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 /**

@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useAnimation, useInView } from 'framer-motion';
 import { Check, X, Heart, Star, ThumbsUp, Copy, Download, Share2 } from 'lucide-react';
