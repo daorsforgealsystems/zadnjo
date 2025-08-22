@@ -1,6 +1,7 @@
 import { useCallback, useRef, useEffect, useMemo } from 'react';
 import { useAnimation } from 'framer-motion';
-import anime, { AnimeInstance } from 'animejs';
+import anime from '@/lib/anime';
+import type { AnimeInstance } from 'animejs';
 import { 
   AnimationConfig, 
   AnimationContext, 

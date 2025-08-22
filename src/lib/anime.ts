@@ -1,4 +1,3 @@
-// Use the ESM build of animejs which provides a default export compatible with Rollup/Vite
-import anime from 'animejs/lib/anime.es.js';
-
+// Use the ESM build explicitly to avoid export shape issues
+import anime from 'animejs/lib/anime.esm.js';
 export default anime;
