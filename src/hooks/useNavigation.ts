@@ -78,12 +78,15 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
 
   // Handle navigation
   const navigateTo = useCallback((item: NavigationItem) => {
+    // Clear any active search when navigating
+    clearSearch();
+
     if (item.onClick) {
       item.onClick();
     } else if (item.href) {
       navigate(item.href);
     }
-  }, [navigate]);
+  }, [navigate, clearSearch]);
 
   // Handle search
   const performSearch = useCallback((query: string) => {
