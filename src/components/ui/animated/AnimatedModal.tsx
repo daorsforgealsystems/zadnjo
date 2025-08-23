@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants, Transition } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import anime from '../../lib/anime';
+import anime from '@/lib/anime';
 
 export interface AnimatedModalProps {
   isOpen: boolean;
@@ -45,19 +45,19 @@ const modalSizes = {
   full: 'max-w-full h-full'
 };
 
-const overlayVariants = {
+const overlayVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 }
 };
 
-const modalVariants = {
+const modalVariants: Record<string, Variants> = {
   default: {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
     visible: { 
       opacity: 1, 
       scale: 1, 
       y: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 30 }
+      transition: { type: 'spring', stiffness: 300, damping: 30 } as Transition
     },
     exit: { opacity: 0, scale: 0.95, y: 20 }
   },
@@ -67,7 +67,7 @@ const modalVariants = {
       opacity: 1, 
       scale: 1, 
       filter: 'blur(0px)',
-      transition: { duration: 0.3 }
+      transition: { duration: 0.3 } as Transition
     },
     exit: { opacity: 0, scale: 0.9, filter: 'blur(10px)' }
   },
@@ -76,7 +76,7 @@ const modalVariants = {
     visible: { 
       opacity: 1, 
       scale: 1,
-      transition: { type: 'spring', stiffness: 400, damping: 25 }
+      transition: { type: 'spring', stiffness: 400, damping: 25 } as Transition
     },
     exit: { opacity: 0, scale: 0.3 }
   },
@@ -86,7 +86,7 @@ const modalVariants = {
       opacity: 1, 
       x: 0, 
       y: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 30 }
+      transition: { type: 'spring', stiffness: 300, damping: 30 } as Transition
     },
     exit: { opacity: 0, y: '100%' }
   },
@@ -95,7 +95,7 @@ const modalVariants = {
     visible: { 
       opacity: 1, 
       rotateX: 0,
-      transition: { duration: 0.4, ease: 'easeOut' }
+      transition: { duration: 0.4, ease: 'easeOut' } as Transition
     },
     exit: { opacity: 0, rotateX: 90 }
   },
@@ -104,18 +104,18 @@ const modalVariants = {
     visible: { 
       opacity: 1, 
       scale: 1,
-      transition: { 
-        type: 'spring', 
-        stiffness: 200, 
+      transition: {
+        type: 'spring',
+        stiffness: 200,
         damping: 15,
         when: 'beforeChildren',
         staggerChildren: 0.1
-      }
+      } as Transition
     },
     exit: { 
       opacity: 0, 
       scale: 0,
-      transition: { duration: 0.2 }
+      transition: { duration: 0.2 } as Transition
     }
   },
   bounce: {
@@ -124,12 +124,7 @@ const modalVariants = {
       opacity: 1, 
       scale: 1, 
       y: 0,
-      transition: { 
-        type: 'spring', 
-        stiffness: 400, 
-        damping: 10,
-        bounce: 0.6
-      }
+      transition: { type: 'spring', stiffness: 400, damping: 10, bounce: 0.6 } as Transition
     },
     exit: { opacity: 0, scale: 0.3, y: 100 }
   },
@@ -137,7 +132,7 @@ const modalVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
-      transition: { duration: 0.2 }
+      transition: { duration: 0.2 } as Transition
     },
     exit: { opacity: 0 }
   }
@@ -310,10 +305,18 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            transition={{
-              type: animation,
-              duration: animation === 'linear' ? 0.2 : undefined
-            }}
+            transition={((): Transition | undefined => {
+              if (animation === 'spring') {
+                return { type: 'spring', stiffness: 300, damping: 30 } as Transition;
+              }
+
+              if (animation === 'linear') {
+                return { type: 'tween', ease: 'linear', duration: 0.2 } as Transition;
+              }
+
+              // 'ease' or any other string -> use a default tween with ease
+              return { type: 'tween', ease: 'easeOut', duration: 0.25 } as Transition;
+            })()}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? 'modal-title' : undefined}

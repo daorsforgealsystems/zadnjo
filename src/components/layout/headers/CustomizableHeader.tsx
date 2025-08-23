@@ -15,7 +15,7 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
-import anime from '../../lib/anime';
+import anime from '@/lib/anime';
 
 export interface HeaderAction {
   id: string;
