@@ -22,25 +22,21 @@ import { Item, LiveRoute } from '@/lib/types';
 
 const MainDashboard: React.FC = () => {
   // Fetch dashboard data
-  const { data: metrics, isLoading: isLoadingMetrics } = useQuery({
-    queryKey: ['metrics'],
-    queryFn: getMetricData
-  });
-  
-  const { data: shipmentData, isLoading: isLoadingShipments } = useQuery({
-    queryKey: ['shipmentData'],
-    queryFn: getShipmentData
-  });
-  
-  const { data: revenueData, isLoading: isLoadingRevenue } = useQuery({
-    queryKey: ['revenueData'],
-    queryFn: getRevenueData
-  });
-  
-  const { data: routeData, isLoading: isLoadingRoutes } = useQuery({
-    queryKey: ['routeData'],
-    queryFn: getRouteData
-  });
+  const metricsQuery = useQuery(['metrics'], () => getMetricData());
+  const metrics = metricsQuery.data as import('@/lib/types').MetricData | undefined;
+  const isLoadingMetrics = metricsQuery.isLoading;
+
+  const shipmentDataQuery = useQuery(['shipmentData'], () => getShipmentData());
+  const shipmentData = shipmentDataQuery.data as any;
+  const _isLoadingShipments = shipmentDataQuery.isLoading;
+
+  const revenueDataQuery = useQuery(['revenueData'], () => getRevenueData());
+  const revenueData = revenueDataQuery.data as any;
+  const _isLoadingRevenue = revenueDataQuery.isLoading;
+
+  const routeDataQuery = useQuery(['routeData'], () => getRouteData());
+  const routeData = routeDataQuery.data as any;
+  const _isLoadingRoutes = routeDataQuery.isLoading;
 
   // Animation variants for staggered loading
   const containerVariants = {
@@ -48,7 +44,7 @@ const MainDashboard: React.FC = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+  staggerChildren: 0.1
       }
     }
   };
@@ -58,17 +54,13 @@ const MainDashboard: React.FC = () => {
     visible: {
       y: 0,
       opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 100,
-        damping: 15
-      }
+  transition: ({ type: 'spring', stiffness: 100, damping: 15 } as any)
     }
   };
 
   // Use live data where available
-  const { data: items, isLoading: isLoadingItems } = useQuery({ queryKey: ['items'], queryFn: getItems });
-  const { data: liveRoutes, isLoading: isLoadingLiveRoutes } = useQuery({ queryKey: ['liveRoutes'], queryFn: getLiveRoutes });
+  const { data: items, isLoading: isLoadingItems } = useQuery<import('@/lib/types').Item[]>(['items'], () => getItems());
+  const { data: liveRoutes, isLoading: isLoadingLiveRoutes } = useQuery<import('@/lib/types').LiveRoute[]>(['liveRoutes'], () => getLiveRoutes());
 
   // Table columns for recent shipments
   // EnhancedTable expects columns with key, title, and optional render

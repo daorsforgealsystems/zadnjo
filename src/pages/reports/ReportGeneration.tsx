@@ -12,8 +12,8 @@ import DOMPurify from 'dompurify';
 
 const reportSchema = z
   .object({
-    reportType: z.enum(['kpi', 'finance', 'routes'], { required_error: 'Select a report type' }),
-    format: z.enum(['pdf', 'csv', 'xlsx'], { required_error: 'Select a format' }),
+    reportType: z.enum(['kpi', 'finance', 'routes'] as const),
+    format: z.enum(['pdf', 'csv', 'xlsx'] as const),
     fromDate: z.string().min(1, 'From date is required'),
     toDate: z.string().min(1, 'To date is required'),
     filter: z.string().max(200, 'Filter is too long').optional().transform((v) => (v == null ? '' : v.trim())),
@@ -27,7 +27,7 @@ type ReportFormValues = z.infer<typeof reportSchema>;
 
 const ReportGeneration: React.FC = () => {
   const form = useForm<ReportFormValues>({
-    resolver: zodResolver(reportSchema),
+    resolver: zodResolver(reportSchema) as any,
     defaultValues: { reportType: 'kpi', format: 'pdf', fromDate: '', toDate: '', filter: '' },
   });
 

@@ -28,7 +28,7 @@ type DocumentFormValues = z.infer<typeof documentSchema>;
 
 const DocumentManagement: React.FC = () => {
   const form = useForm<DocumentFormValues>({
-    resolver: zodResolver(documentSchema),
+    resolver: zodResolver(documentSchema) as any,
     defaultValues: { title: '', description: '' },
   });
 
