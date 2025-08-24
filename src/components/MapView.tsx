@@ -126,6 +126,7 @@ const LeafletMapView = memo(({
   if (coordinates) {
     return (
       <MapContainer
+        key={`map-${coordinates.lat}-${coordinates.lng}`}
         center={mapCenter}
         zoom={mapZoom}
         style={{ height: '100%', width: '100%' }}
@@ -148,6 +149,7 @@ const LeafletMapView = memo(({
 
   return (
     <MapContainer
+      key={`map-${vehicles?.length || 0}-${routes?.length || 0}`}
       center={mapCenter}
       zoom={mapZoom}
       style={{ height: '100%', width: '100%' }}

@@ -13,44 +13,44 @@ export type LeafletComponents = {
 };
 
 export const loadLeafletComponents = async (): Promise<LeafletComponents> => {
-  // Ensure React is available before loading react-leaflet
-  if (typeof (globalThis as any).React === 'undefined') {
-    const react = await import('react');
-    (globalThis as any).React = react.default || react;
+  try {
+    // Load leaflet first
+    const leaflet = await import('leaflet');
+    
+    // Load CSS
+    await import('leaflet/dist/leaflet.css');
+    
+    // Then load react-leaflet
+    const reactLeaflet = await import('react-leaflet');
+
+    const leafletModule = leaflet as unknown as typeof Leaflet;
+    const L = leafletModule;
+    const Icon = leafletModule.Icon;
+
+    // Fix for default icon issue with bundlers
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
+
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+
+    return {
+      MapContainer: reactLeaflet.MapContainer,
+      TileLayer: reactLeaflet.TileLayer,
+      Marker: reactLeaflet.Marker,
+      Popup: reactLeaflet.Popup,
+      Polyline: reactLeaflet.Polyline,
+      L,
+      Icon
+    };
+  } catch (error) {
+    console.error('Failed to load Leaflet components:', error);
+    throw new Error(`Failed to load map components: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const [reactLeaflet, leaflet] = await Promise.all([
-    import('react-leaflet'),
-    import('leaflet')
-  ]);
-
-  // Load CSS dynamically
-  await import('leaflet/dist/leaflet.css');
-
-  const leafletModule = leaflet as unknown as typeof Leaflet;
-  const L = leafletModule;
-  const Icon = leafletModule.Icon;
-
-  // Fix for default icon issue with bundlers
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
-
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  });
-
-  return {
-    MapContainer: reactLeaflet.MapContainer,
-    TileLayer: reactLeaflet.TileLayer,
-    Marker: reactLeaflet.Marker,
-    Popup: reactLeaflet.Popup,
-    Polyline: reactLeaflet.Polyline,
-    L,
-    Icon
-  };
 };
 
 export const preloadMapComponents = () => {

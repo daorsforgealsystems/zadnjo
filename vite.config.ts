@@ -133,6 +133,10 @@ export default defineConfig({
   // Drop console/debugger in production for smaller bundles
 
     rollupOptions: {
+      external: (id) => {
+        // Don't externalize React - keep it bundled
+        return false;
+      },
       output: {
         // Use a function to assign modules to manual chunks by inspecting
         // the module id string. This avoids passing RegExp objects into
