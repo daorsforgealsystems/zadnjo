@@ -179,13 +179,14 @@ const MainDashboard: React.FC = () => {
           variants={itemVariants}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-card p-6 rounded-lg shadow">
+      <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Shipment Status</h2>
             <AnimatedChart
               title="Shipment Status"
               type="donut"
-              data={shipmentData || []}
-              height={300}
+        data={shipmentData || []}
+        // prefer Tailwind-driven heights for responsive control
+        containerClassName="h-48 md:h-56 lg:h-72"
             />
           </div>
           <div className="bg-card p-6 rounded-lg shadow">
@@ -193,8 +194,8 @@ const MainDashboard: React.FC = () => {
             <AnimatedChart
               title="Revenue Trend"
               type="bar"
-              data={revenueData || []}
-              height={300}
+        data={revenueData || []}
+        containerClassName="h-48 md:h-56 lg:h-72"
             />
           </div>
         </motion.div>
@@ -206,7 +207,7 @@ const MainDashboard: React.FC = () => {
         >
           <div className="lg:col-span-2 bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Active Routes</h2>
-            <div className="h-[400px]">
+            <div className="h-64 md:h-80 lg:h-[400px]">
               { (isLoadingItems || isLoadingLiveRoutes) ? (
                 <div className="h-full w-full flex items-center justify-center">
                   <LoadingSpinner size="lg" text="Loading map data..." />
@@ -265,13 +266,13 @@ const MainDashboard: React.FC = () => {
 
         {/* Popular Routes */}
         <motion.div variants={itemVariants}>
-          <div className="bg-card p-6 rounded-lg shadow">
+      <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Popular Routes</h2>
               <AnimatedChart
                 title="Popular Routes"
                 type="bar"
-                data={routeData || []}
-                height={250}
+        data={routeData || []}
+        containerClassName="h-40 md:h-48 lg:h-56"
               />
           </div>
         </motion.div>

@@ -16,7 +16,11 @@ interface AnimatedChartProps {
   type?: "bar" | "line" | "donut";
   className?: string;
   delay?: number;
-  height?: number; // preferred chart height in px (default 200)
+  // Two ways to control chart height:
+  // - `containerClassName`: Tailwind classes (recommended, responsive)
+  // - `height`: numeric pixel fallback for callers that pass number
+  containerClassName?: string;
+  height?: number; // fallback chart height in px (default 200)
 }
 
 // Tooltip props type without importing runtime types from recharts
@@ -116,13 +120,20 @@ const AnimatedChart = ({
     return acc;
   }, {} as ChartConfig);
 
-  const loadingSkeleton = (
+  const loadingSkeleton = containerClassName ? (
+    <div className={cn('w-full animate-pulse rounded-md bg-muted', containerClassName)} />
+  ) : (
     <div className="w-full animate-pulse rounded-md bg-muted" style={{ height: chartHeight }} />
   );
 
   const renderBarChart = () =>
     R ? (
-      <ChartContainer config={chartConfig} className="w-full" style={{ height: chartHeight }}>
+      <ChartContainer
+        config={chartConfig}
+        // prefer containerClassName (Tailwind-driven); fallback to inline pixel height
+        className={containerClassName ? cn('w-full', containerClassName) : 'w-full'}
+        style={containerClassName ? undefined : { height: chartHeight }}
+      >
         <R.BarChart data={data}>
           <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
           <R.XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -141,7 +152,11 @@ const AnimatedChart = ({
 
   const renderLineChart = () =>
     R ? (
-      <ChartContainer config={chartConfig} className="w-full" style={{ height: chartHeight }}>
+      <ChartContainer
+        config={chartConfig}
+        className={containerClassName ? cn('w-full', containerClassName) : 'w-full'}
+        style={containerClassName ? undefined : { height: chartHeight }}
+      >
         <R.LineChart data={data}>
           <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
           <R.XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -178,7 +193,11 @@ const AnimatedChart = ({
     };
 
     return R ? (
-      <ChartContainer config={chartConfig} className="w-full" style={{ height: chartHeight }}>
+      <ChartContainer
+        config={chartConfig}
+        className={containerClassName ? cn('w-full', containerClassName) : 'w-full'}
+        style={containerClassName ? undefined : { height: chartHeight }}
+      >
         <R.PieChart>
           <R.Tooltip content={<CustomTooltip />} />
           <R.Pie
