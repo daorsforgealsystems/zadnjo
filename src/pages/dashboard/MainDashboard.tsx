@@ -4,7 +4,7 @@ import { getAnomalies } from '@/lib/api';
 import { Anomaly } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Package, DollarSign, Clock, Globe, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Package, DollarSign, Clock, Globe } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 // API functions
@@ -22,19 +22,19 @@ import { Item, LiveRoute } from '@/lib/types';
 
 const MainDashboard: React.FC = () => {
   // Fetch dashboard data
-  const metricsQuery = useQuery(['metrics'], () => getMetricData());
+  const metricsQuery = useQuery({ queryKey: ['metrics'], queryFn: () => getMetricData() });
   const metrics = metricsQuery.data as import('@/lib/types').MetricData | undefined;
   const isLoadingMetrics = metricsQuery.isLoading;
 
-  const shipmentDataQuery = useQuery(['shipmentData'], () => getShipmentData());
+  const shipmentDataQuery = useQuery({ queryKey: ['shipmentData'], queryFn: () => getShipmentData() });
   const shipmentData = shipmentDataQuery.data as any;
   const _isLoadingShipments = shipmentDataQuery.isLoading;
 
-  const revenueDataQuery = useQuery(['revenueData'], () => getRevenueData());
+  const revenueDataQuery = useQuery({ queryKey: ['revenueData'], queryFn: () => getRevenueData() });
   const revenueData = revenueDataQuery.data as any;
   const _isLoadingRevenue = revenueDataQuery.isLoading;
 
-  const routeDataQuery = useQuery(['routeData'], () => getRouteData());
+  const routeDataQuery = useQuery({ queryKey: ['routeData'], queryFn: () => getRouteData() });
   const routeData = routeDataQuery.data as any;
   const _isLoadingRoutes = routeDataQuery.isLoading;
 
@@ -59,8 +59,8 @@ const MainDashboard: React.FC = () => {
   };
 
   // Use live data where available
-  const { data: items, isLoading: isLoadingItems } = useQuery<import('@/lib/types').Item[]>(['items'], () => getItems());
-  const { data: liveRoutes, isLoading: isLoadingLiveRoutes } = useQuery<import('@/lib/types').LiveRoute[]>(['liveRoutes'], () => getLiveRoutes());
+  const { data: items, isLoading: isLoadingItems } = useQuery<import('@/lib/types').Item[]>({ queryKey: ['items'], queryFn: () => getItems() });
+  const { data: liveRoutes, isLoading: isLoadingLiveRoutes } = useQuery<import('@/lib/types').LiveRoute[]>({ queryKey: ['liveRoutes'], queryFn: () => getLiveRoutes() });
 
   // Table columns for recent shipments
   // EnhancedTable expects columns with key, title, and optional render

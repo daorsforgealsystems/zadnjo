@@ -1,4 +1,7 @@
-import { AnimeParams, AnimeInstance } from 'animejs';
+import type { AnimeParams } from 'animejs';
+import anime from '@/lib/anime';
+// Align instance type with our wrapper to avoid mismatches
+type AnimeInstance = ReturnType<typeof anime>;
 
 export interface AnimationConfig extends AnimeParams {
   duration: number;

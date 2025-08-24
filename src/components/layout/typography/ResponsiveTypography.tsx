@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 export interface ResponsiveTypographyProps {
   variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption' | 'overline';
-  component?: keyof JSX.IntrinsicElements;
+  component?: React.ElementType;
   children: React.ReactNode;
   className?: string;
   animate?: boolean;
@@ -74,9 +74,9 @@ export const ResponsiveTypography: React.FC<ResponsiveTypographyProps> = ({
 }) => {
   const { isMobile, isTablet } = useResponsiveLayout();
 
-  // Determine the component to render
-  type IntrinsicTag = keyof JSX.IntrinsicElements;
-  const Component: IntrinsicTag = component || (variant.startsWith('h') ? (variant as IntrinsicTag) : 'p');
+  // Determine the component to render without relying on global JSX namespace
+  const defaultTag = variant.startsWith('h') ? variant : 'p';
+  const Component = component ?? defaultTag;
 
   // Get responsive text size
   const getResponsiveSize = () => {
@@ -107,6 +107,8 @@ export const ResponsiveTypography: React.FC<ResponsiveTypographyProps> = ({
     }
   };
 
+  const elementProps = { className: baseClasses, ...(props as Record<string, any>) };
+
   if (animate) {
     return (
       <motion.div
@@ -114,12 +116,12 @@ export const ResponsiveTypography: React.FC<ResponsiveTypographyProps> = ({
         animate="visible"
         variants={animationVariants}
       >
-        {React.createElement(Component, { className: baseClasses, ...props }, children)}
+        {React.createElement(Component, elementProps, children)}
       </motion.div>
     );
   }
 
-  return React.createElement(Component, { className: baseClasses, ...props }, children);
+  return React.createElement(Component, elementProps, children);
 };
 
 // Predefined responsive typography components

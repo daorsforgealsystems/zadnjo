@@ -168,7 +168,7 @@ export const animateGridReveal = (
     el.style.transform = 'translateY(20px) scale(0.9)';
   });
 
-  let delayFunction: number | ((el: HTMLElement, i: number) => number) | undefined;
+  let delayFunction: number | ((el: HTMLElement, i: number, l: number) => number) | undefined;
   
   switch (pattern) {
     case 'sequence':
