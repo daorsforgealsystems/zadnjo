@@ -1,14 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import ReactCompatLayer, { ensureReactGlobals } from './components/ReactCompatLayer';
 
-// Ensure React is available globally for dynamic imports
-(globalThis as any).React = React;
-(globalThis as any).ReactDOM = { createRoot };
-
-// Also ensure React's createContext is available
-if (React.createContext) {
-  (globalThis as any).createContext = React.createContext;
-}
+// Initialize React compatibility layer
+ensureReactGlobals();
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
@@ -120,34 +115,36 @@ if (container) {
 
     root.render(
       <React.StrictMode>
-        <ErrorBoundary>
-          <QueryClientProvider client={queryClient}>
-            <ErrorBoundary>
-              <AuthProvider>
-                <ErrorBoundary>
-                  <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                  >
-                    <ErrorBoundary>
-                      <AnimationProvider>
-                        <LayoutProvider>
-                        <ReduxProvider store={store}>
-                          <Router>
-                            <App />
-                          </Router>
-                        </ReduxProvider>
-                        </LayoutProvider>
-                      </AnimationProvider>
-                    </ErrorBoundary>
-                  </ThemeProvider>
-                </ErrorBoundary>
-              </AuthProvider>
-            </ErrorBoundary>
-          </QueryClientProvider>
-        </ErrorBoundary>
+        <ReactCompatLayer>
+          <ErrorBoundary>
+            <QueryClientProvider client={queryClient}>
+              <ErrorBoundary>
+                <AuthProvider>
+                  <ErrorBoundary>
+                    <ThemeProvider
+                      attribute="class"
+                      defaultTheme="system"
+                      enableSystem
+                      disableTransitionOnChange
+                    >
+                      <ErrorBoundary>
+                        <AnimationProvider>
+                          <LayoutProvider>
+                          <ReduxProvider store={store}>
+                            <Router>
+                              <App />
+                            </Router>
+                          </ReduxProvider>
+                          </LayoutProvider>
+                        </AnimationProvider>
+                      </ErrorBoundary>
+                    </ThemeProvider>
+                  </ErrorBoundary>
+                </AuthProvider>
+              </ErrorBoundary>
+            </QueryClientProvider>
+          </ErrorBoundary>
+        </ReactCompatLayer>
       </React.StrictMode>
     );
     
