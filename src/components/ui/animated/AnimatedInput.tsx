@@ -119,6 +119,10 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
   
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // wrapper and label refs for animations/effects
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLLabelElement>(null);
+
   const setRefs = useCallback((node: HTMLInputElement) => {
     // Ref's from forwardRef are immutable, so we need to assign the node to them
     (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
@@ -254,8 +258,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
     variant === 'underline' && 'border-0 border-b-2 rounded-none bg-transparent px-0',
     variant === 'filled' && 'bg-muted border-0',
     variant === 'outlined' && 'border-2',
-    hasError && `border-red-500 focus:border-red-500`,
-    hasSuccess && `border-green-500 focus:border-green-500`,
+  // colors handled via inline styles (_errorColor / _successColor / focusColor)
     leftIcon && 'pl-10',
     (rightIcon || type === 'password' || showValidation) && 'pr-10',
     disabled && 'opacity-50 cursor-not-allowed',
@@ -272,8 +275,22 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
     variant === 'floating' && 'absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-muted-foreground',
     hasError && 'text-red-500',
     hasSuccess && 'text-green-500',
-    isFocused && variant !== 'floating' && 'text-blue-500'
+    // color handled via inline styles
   );
+
+  // Inline styles that respect the provided color props
+  const inputStyle: React.CSSProperties | undefined = {
+    borderColor: hasError ? errorColor : hasSuccess ? successColor : undefined,
+  };
+
+  const labelStyle: React.CSSProperties | undefined = {
+    color: hasError ? errorColor : hasSuccess ? successColor : (isFocused && variant !== 'floating') ? focusColor : undefined,
+  };
+
+  const iconErrorStyle: React.CSSProperties = { color: errorColor };
+  const iconSuccessStyle: React.CSSProperties = { color: successColor };
+
+  const underlineColor = hasError ? errorColor : hasSuccess ? successColor : focusColor;
 
   return (
     <motion.div
@@ -306,10 +323,11 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
           <label
             ref={labelRef}
             className={labelClassName}
+            style={labelStyle}
             htmlFor={props.id}
           >
             {label}
-            {validation?.required && <span className="text-red-500 ml-1">*</span>}
+            {validation?.required && <span className="ml-1">*</span>}
           </label>
         )}
 
@@ -320,8 +338,9 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <Input
-            ref={combinedRef}
+            ref={setRefs}
             className={inputClassName}
+            style={inputStyle}
             type={type === 'password' && showPassword ? 'text' : type}
             value={value}
             onChange={handleChange}
@@ -349,7 +368,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
                   exit={{ scale: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <AlertCircle className="h-4 w-4" style={iconErrorStyle} />
                 </motion.div>
               )}
               {hasSuccess && (
@@ -359,7 +378,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
                   exit={{ scale: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <CheckCircle className="h-4 w-4" style={iconSuccessStyle} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -396,14 +415,14 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
             className="mt-1"
           >
             {hasError && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
+              <p className="text-sm flex items-center gap-1" style={{ color: errorColor }}>
+                <AlertCircle className="h-3 w-3" style={iconErrorStyle} />
                 {currentError}
               </p>
             )}
             {hasSuccess && (
-              <p className="text-sm text-green-500 flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
+              <p className="text-sm flex items-center gap-1" style={{ color: successColor }}>
+                <CheckCircle className="h-3 w-3" style={iconSuccessStyle} />
                 {success}
               </p>
             )}
@@ -421,7 +440,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
           initial={{ scaleX: 0 }}
           animate={{ scaleX: isFocused ? 1 : 0 }}
           transition={{ duration: 0.2 }}
-          style={{ transformOrigin: 'left' }}
+          style={{ transformOrigin: 'left', background: underlineColor }}
         />
       )}
     </motion.div>
