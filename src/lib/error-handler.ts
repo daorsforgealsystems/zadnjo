@@ -1,4 +1,5 @@
 import { toast } from '@/lib/toast';
+import { isSupabaseTableMissingError, MIGRATION_HINTS } from './supabase-errors';
 
 export interface ApiError extends Error {
   status?: number;
@@ -43,6 +44,20 @@ export class ApiErrorHandler {
 
   private static showErrorToast(error: ApiError, context?: string) {
     let message = error.message;
+
+    // Detect Supabase/Postgrest missing-table errors and provide actionable hint
+    try {
+      const tb = isSupabaseTableMissingError(error.details || error);
+      if (tb) {
+        const table = tb.missingTable || 'unknown';
+        const hint = MIGRATION_HINTS[table] || 'Please apply the appropriate SQL migrations in the `database/` folder.';
+        message = `Database table missing: ${table}. ${hint}`;
+        // Also log original error for debug
+        console.warn('Supabase missing table detected:', { table, original: error });
+      }
+    } catch (e) {
+      // ignore detection errors
+    }
 
     // Customize messages based on error type
     if (error.status === 401) {
