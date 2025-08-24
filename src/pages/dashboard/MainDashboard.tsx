@@ -18,7 +18,7 @@ import AlertsPanel from '@/components/AlertsPanel';
 import MapView from '@/components/MapView';
 
 // Types
-import { Item, LiveRoute } from '@/lib/types';
+import { Item } from '@/lib/types';
 
 const MainDashboard: React.FC = () => {
   // Fetch dashboard data
