@@ -15,7 +15,7 @@ export type LeafletComponents = {
 export const loadLeafletComponents = async (): Promise<LeafletComponents> => {
   try {
     // Ensure React compatibility layer is loaded
-    const { ensureReactGlobals } = await import('./ReactCompatLayer');
+    const { ensureReactGlobals } = await import('../utils/reactCompatUtils');
     ensureReactGlobals();
     
     // Load leaflet first

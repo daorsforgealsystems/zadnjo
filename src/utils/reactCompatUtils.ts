@@ -95,6 +95,4 @@ export const suppressReact19Warnings = () => {
   }
 };
 
-// Initialize immediately
-ensureReactGlobals();
-suppressReact19Warnings();
+// Initialization will be handled by the ReactCompatLayer component

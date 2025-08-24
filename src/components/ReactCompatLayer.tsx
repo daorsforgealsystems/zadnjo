@@ -8,6 +8,7 @@ interface ReactCompatLayerProps {
 
 const ReactCompatLayer: React.FC<ReactCompatLayerProps> = ({ children }) => {
   React.useEffect(() => {
+    // Ensure React globals are available when the component mounts
     ensureReactGlobals();
     suppressReact19Warnings();
   }, []);

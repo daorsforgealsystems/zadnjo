@@ -3,11 +3,6 @@ import './react-init';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import ReactCompatLayer from './components/ReactCompatLayer';
-import { ensureReactGlobals, suppressReact19Warnings } from './utils/reactCompatUtils';
-
-// Initialize React compatibility layer
-ensureReactGlobals();
-suppressReact19Warnings();
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
