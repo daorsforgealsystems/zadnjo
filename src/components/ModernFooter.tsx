@@ -15,7 +15,7 @@ import {
   Shield
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+// ...existing code...
 import './ModernFooter.css';
 
 const ModernFooter = () => {
@@ -110,12 +110,9 @@ const ModernFooter = () => {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/10">
-                <img 
-                  src="/daorsforge-new-logo.jpg"
-                  alt="DaorsForge AI Systems"
-                  className="w-8 h-8 object-contain mix-blend-plus-lighter"
-                />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/10" aria-hidden="true">
+                {/* removed image on landing page; keep decorative block for layout */}
+                <div className="w-8 h-8 rounded-md bg-gradient-to-br from-cyan-400/20 to-blue-600/20" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">

@@ -57,10 +57,11 @@ const MediaBackground: React.FC<MediaBackgroundProps> = ({
       {/* Use native lazy loading and a descriptive alt for accessibility */}
       <img
         ref={mediaRef as React.RefObject<HTMLImageElement>}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover block"
         src={mediaSrc}
         alt="Logistics hero background showing transport vehicles and routes"
         loading="lazy"
+        decoding="async"
         onError={handleMediaError}
       />
       <div className="absolute inset-0 bg-background/70" />

@@ -123,7 +123,8 @@ All colors MUST be HSL for consistency and theming.
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-weight: 500; /* equivalent to Tailwind's font-medium */
-    overflow-x: hidden;
+  margin: 0; /* explicitly remove default browser margin to avoid visible page gutters */
+  overflow-x: hidden;
   }
 
   html {

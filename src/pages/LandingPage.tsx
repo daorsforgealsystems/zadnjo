@@ -112,14 +112,14 @@ const LandingPage = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              <Button asChild size="lg" className="group text-xl px-10 py-7 bg-gradient-primary hover:from-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full" aria-label={t('landing.cta.getStarted','Get Started') }>
+              <Button asChild size="lg" className="group text-xl px-10 py-3 bg-gradient-primary hover:from-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full" aria-label={t('landing.cta.getStarted','Get Started') }>
                 <Link to="/signup">
                   {t('landing.cta.getStarted', 'Get Started')}
                   <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               
-              <Button asChild variant="outline" size="lg" className="text-xl px-10 py-7 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full">
+              <Button asChild variant="outline" size="lg" className="text-xl px-10 py-3 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full">
                 <Link to="/login">
                   {t('landing.cta.login', 'Login')}
                 </Link>

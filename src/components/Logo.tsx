@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-const daorsforgeLogo = "/daorsforge-new-logo.jpg";
 
 
 interface LogoProps {
@@ -26,15 +25,8 @@ const Logo = ({ size = "md", showText = true, className, linkTo = null }: LogoPr
   const logoContent = (
     <div className={cn("flex items-center gap-3", className)}>
       <div className="relative">
-        <img 
-          src={daorsforgeLogo} 
-          alt="DAORSFORGE AI Systems" 
-          className={cn(
-            "rounded-lg object-cover transition-all duration-300",
-            sizeClasses[size]
-          )}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-lg"></div>
+        {/* image removed; decorative gradient block used instead to preserve layout */}
+        <div className={cn("rounded-lg transition-all duration-300 bg-gradient-to-br from-cyan-400/20 to-blue-600/20", sizeClasses[size])} aria-hidden="true" />
       </div>
       {showText && (
         <div className="flex flex-col">
