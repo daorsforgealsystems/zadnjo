@@ -1,22 +1,4 @@
-import { Route, Routes, useLocationfunction lazyWithErrorHandling<P extends object>(
-  importFn: () => Promise<{ default: React.ComponentType<P> }>
-): React.FC<P> {
-  const LazyComponent = lazy(importFn);
-
-  const componentName = importFn.toString().includes('DashboardLayout') ? 'DashboardLayout' : 'Unknown';
-
-  const WrappedComponent: React.FC<P> = (props) => (
-    <ErrorBoundary fallback={<LazyLoadingErrorFallback />}>
-      <Suspense fallback={<LoadingScreen />}>
-        <LazyComponent {...(props as P)} />
-      </Suspense>
-    </ErrorBoundary>
-  );
-
-  WrappedComponent.displayName = `lazyWithErrorHandling(${componentName})`;
-
-  return WrappedComponent;
-}er-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingScreen from './components/LoadingScreen';
@@ -51,27 +33,26 @@ const LazyLoadingErrorFallback = () => (
 );
 
 // Wrapper for lazy loaded components with error handling
-function lazyWithErrorHandling<P extends JSX.IntrinsicAttributes>(
-  importFn: () => Promise<{ default: React.ComponentType<P> } | { default: React.FC<any> }>
-): React.FC<P> {
-  const LazyComponent = lazy(async () => {
-    const module = await importFn();
-    return { default: module.default as React.ComponentType<P> };
-  });
+function lazyWithErrorHandling<P = any>(
+  importFn: () => Promise<{ default: React.ComponentType<P> }>
+): React.ComponentType<P> {
+  // Cast lazy() result to a typed LazyExoticComponent to keep TS happy
+  const LazyComponent = lazy(importFn) as React.LazyExoticComponent<React.ComponentType<P>>;
 
   const componentName = importFn.toString().includes('DashboardLayout') ? 'DashboardLayout' : 'Unknown';
 
-  const WrappedComponent: React.FC<P> = (props) => (
+  const WrappedComponent: React.FC<P> = (props: P) => (
     <ErrorBoundary fallback={<LazyLoadingErrorFallback />}>
       <Suspense fallback={<LoadingScreen />}>
-        <LazyComponent {...props} />
+        {/* cast props to any when passing to the lazy component to avoid strict JSX checks */}
+        <LazyComponent {...(props as any)} />
       </Suspense>
     </ErrorBoundary>
   );
 
   WrappedComponent.displayName = `lazyWithErrorHandling(${componentName})`;
 
-  return WrappedComponent;
+  return WrappedComponent as React.ComponentType<P>;
 }
 const Inventory = lazyWithErrorHandling(() => import('./pages/Inventory'));
 const ItemTracking = lazyWithErrorHandling(() => import('./pages/ItemTracking'));
@@ -90,7 +71,11 @@ const ProtectedRoute = lazyWithErrorHandling(() => import('./components/Protecte
 const CustomerPortalLayout = lazyWithErrorHandling(() => import('./components/CustomerPortalLayout'));
 const ModernFooter = lazyWithErrorHandling(() => import('./components/ModernFooter'));
 const ProfilePage = lazyWithErrorHandling(() => import('./pages/ProfilePage'));
-const DashboardLayout = lazyWithErrorHandling(() => import('./components/layout/DashboardLayout').then(m => ({ default: m.DashboardLayout })));
+// DashboardLayout typing can be exported shape-specific; use a safe any cast here to avoid
+// an inferred union type from different module shapes. Keep the wrapper generic as any.
+const DashboardLayout = lazyWithErrorHandling<any>(() =>
+  import('./components/layout/DashboardLayout').then((m) => ({ default: (m as any).DashboardLayout }))
+);
 const LandingPage = lazyWithErrorHandling(() => import('./pages/LandingPage'));
 const LoginPage = lazyWithErrorHandling(() => import('./pages/Login'));
 
@@ -188,7 +173,7 @@ const AppContent = () => {
               {/* Core app routes (dashboard etc.) */}
               {[
                 // Core app routes continue below; /dashboard is defined as a guarded route
-                { path: '/customer-dashboard', element: <CustomerDashboard /> },
+                { path: '/customer-dashboard', element: <MainDashboard /> },
                 { path: '/inventory', element: <Inventory /> },
                 { path: '/item-tracking', element: <ItemTracking /> },
                 { path: '/live-map', element: <LiveMap /> },
