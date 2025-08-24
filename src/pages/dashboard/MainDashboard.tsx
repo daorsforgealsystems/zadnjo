@@ -54,7 +54,7 @@ const MainDashboard: React.FC = () => {
     visible: {
       y: 0,
       opacity: 1,
-  transition: ({ type: 'spring', stiffness: 100, damping: 15 } as any)
+  transition: { type: 'spring', stiffness: 100, damping: 15 }
     }
   };
 
@@ -146,7 +146,7 @@ const MainDashboard: React.FC = () => {
                 : undefined
             }
             icon={DollarSign}
-            formatter={(val: number) => `$${val.toLocaleString()}`}
+            formatter={(val: number) => `${val.toLocaleString()}`}
             isLoading={isLoadingMetrics}
           />
           <MetricCard
