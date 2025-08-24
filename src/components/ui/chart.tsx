@@ -10,24 +10,26 @@ export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
     icon?: React.ComponentType
-  } & (
-    | { color?: string; theme?: never }
-    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+  return (
+    <ChartContext.Provider value={{ config }}>
+      <div
+        data-chart={chartId}
+        ref={ref}
+        // Allow parent/style to control exact height. Provide a sensible min-height
+        // instead of forcing an aspect ratio so charts respect explicit pixel heights.
+        className={cn(
+          "w-full flex justify-center text-xs min-h-[160px] [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          className
+        )}
+        {...props}
+      >
+        <ChartStyle id={chartId} config={config} />
+        <RechartsPrimitive.ResponsiveContainer>
+          {children}
+        </RechartsPrimitive.ResponsiveContainer>
+      </div>
+    </ChartContext.Provider>
   )
-}
-
-// Minimal Legend payload shape used by Recharts legend/tooltips in this file.
-type LegendPayload = {
-  value?: string | number | boolean | null
-  dataKey?: string
-  name?: string
-  color?: string
-  payload?: Record<string, unknown> | undefined
-}
-
-type ChartTooltipContentProps = {
-  active?: boolean
-  payload?: LegendPayload[]
   className?: string
   indicator?: "line" | "dot" | "dashed"
   hideLabel?: boolean
