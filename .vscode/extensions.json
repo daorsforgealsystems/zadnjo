@@ -1,5 +1,11 @@
 {
+    // Workspace recommended extensions. These will be suggested when someone opens
+    // the repo in VS Code. Keep this list focused and minimal for clear onboarding.
     "recommendations": [
-        "google.gemini-cli-vscode-ide-companion"
-    ]
+        "google.gemini-cli-vscode-ide-companion",
+        // Helpful developer tooling often used in this repo
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode"
+    ],
+    // Optional: a description field is allowed in JSONC for humans — VS Code ignores it.
 }

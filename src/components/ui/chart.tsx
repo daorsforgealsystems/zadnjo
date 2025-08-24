@@ -1,4 +1,4 @@
-import * as React from "react"
+import React, { forwardRef } from "react"
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
@@ -51,7 +51,7 @@ type ChartContainerProps = Omit<React.ComponentProps<"div">, "children"> & {
   children: React.ReactElement
 }
 
-const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(({ id, className, children, config, ...props }, ref) => {
+const ChartContainer = forwardRef<HTMLDivElement, ChartContainerProps>(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
@@ -120,7 +120,7 @@ type ChartTooltipContentProps = {
   labelKey?: string
 }
 
-const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContentProps>(
+const ChartTooltipContent = forwardRef<HTMLDivElement, ChartTooltipContentProps>(
   (
     {
       active,
@@ -221,7 +221,7 @@ ChartTooltipContent.displayName = "ChartTooltip"
 
 const ChartLegend = RechartsPrimitive.Legend
 
-const ChartLegendContent = React.forwardRef<
+const ChartLegendContent = forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & { payload?: LegendPayload[]; verticalAlign?: "top" | "bottom" | "middle"; hideIcon?: boolean; nameKey?: string }
 >(({ className, hideIcon = false, payload: legendPayload, verticalAlign = "bottom", nameKey }, ref) => {
