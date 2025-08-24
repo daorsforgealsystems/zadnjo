@@ -293,3 +293,21 @@ All colors MUST be HSL for consistency and theming.
     background: hsl(var(--primary-dark));
   }
 }
+
+/* Additional shadow utilities for hero text and CTAs */
+.shadow-xxl {
+  text-shadow: 0 6px 30px rgba(0,0,0,0.7);
+}
+
+.shadow-lg-strong {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+}
+
+.cta-hover-scale {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+}
+
+.cta-hover-scale:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 18px 60px rgba(14, 82, 255, 0.18);
+}

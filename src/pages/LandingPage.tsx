@@ -90,7 +90,7 @@ const LandingPage = () => {
           >
             <motion.h1 
               aria-label={t('landing.hero.title', 'Revolutionizing Logistics with AI')}
-              className="text-4xl md:text-7xl font-bold mb-6 gradient-text drop-shadow-2xl"
+              className="text-4xl md:text-7xl font-bold mb-6 gradient-text shadow-xxl"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -99,7 +99,7 @@ const LandingPage = () => {
             </motion.h1>
             
             <motion.p 
-              className="text-xl md:text-3xl text-foreground/95 mb-12 max-w-3xl mx-auto font-light drop-shadow-lg"
+              className="text-xl md:text-3xl text-foreground/95 mb-12 max-w-3xl mx-auto font-light shadow-xxl"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -117,7 +117,7 @@ const LandingPage = () => {
               <Link
                 to="/signup"
                 aria-label={t('landing.cta.getStarted','Get Started') }
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-primary-foreground hover:bg-primary/90 h-11 group text-xl px-10 py-3 bg-gradient-primary hover:from-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full"
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-primary-foreground hover:bg-primary/90 h-11 group text-xl px-10 py-3 bg-gradient-primary hover:from-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full cta-hover-scale"
               >
                 {t('landing.cta.getStarted', 'Get Started')}
                 <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
@@ -125,7 +125,7 @@ const LandingPage = () => {
 
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-input hover:text-accent-foreground h-11 text-xl px-10 py-3 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full"
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-input hover:text-accent-foreground h-11 text-xl px-10 py-3 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full cta-hover-scale"
               >
                 {t('landing.cta.login', 'Login')}
               </Link>

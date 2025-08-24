@@ -30,8 +30,8 @@ const MediaBackground: React.FC<MediaBackgroundProps> = ({
     return (
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="w-full h-full bg-gradient-to-br from-blue-900 via-blue-700 to-indigo-900" />
-    {/* slightly lighter overlay so hero content remains readable but the image is still visible */}
-    <div className="absolute inset-0 bg-background/40" />
+  {/* slightly darker overlay on small screens, lighter on larger screens to balance readability */}
+  <div className="absolute inset-0 bg-background/60 md:bg-background/40 lg:bg-background/30" />
       </div>
     );
   }
@@ -48,8 +48,8 @@ const MediaBackground: React.FC<MediaBackgroundProps> = ({
           playsInline
           onError={handleMediaError}
         />
-    {/* slightly lighter overlay for videos as well */}
-    <div className="absolute inset-0 bg-background/40" />
+  {/* responsive overlay for videos */}
+  <div className="absolute inset-0 bg-background/60 md:bg-background/40 lg:bg-background/30" />
       </div>
     );
   }

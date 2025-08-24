@@ -72,8 +72,8 @@ const ParticleBackground = () => {
       }
     }
 
-    // Lower particle count for mobile and when reduced motion is set
-    const baseCount = prefersReduced ? 8 : Math.max(8, Math.min(28, Math.floor(window.innerWidth / 60)));
+  // Lower particle count for mobile and when reduced motion is set; slightly fewer particles to reduce visual clutter
+  const baseCount = prefersReduced ? 6 : Math.max(6, Math.min(20, Math.floor(window.innerWidth / 70)));
 
     const particles: Particle[] = [];
     for (let i = 0; i < baseCount; i++) particles.push(new Particle());
@@ -115,9 +115,10 @@ const ParticleBackground = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
             ctx.save();
-            ctx.globalAlpha = ((100 - dist) / 100) * 0.06;
+            // make connecting lines even more subtle
+            ctx.globalAlpha = ((100 - dist) / 100) * 0.035;
             ctx.strokeStyle = primaryHsl ? `hsl(${primaryHsl})` : 'hsl(210,90%,48%)';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 0.9;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
