@@ -33,7 +33,18 @@ declare module 'animejs' {
   interface AnimeStatic {
     (params: AnimeParams): AnimeInstance;
     set(targets: NonNullable<AnimeParams["targets"]>, props: Partial<AnimeParams>): void;
-    stagger(val: number | string, params?: { start?: number; from?: string; direction?: string; easing?: string }): (el: HTMLElement, i: number) => number;
+    stagger(
+        val: number | string,
+        params?: {
+          start?: number;
+          from?: string;
+          direction?: string;
+          easing?: string;
+          grid?: [number, number];
+          // allow extra properties used by anime plugins/options without failing types
+          [key: string]: unknown;
+        }
+      ): (el: HTMLElement, i: number) => number;
     timeline(params?: AnimeParams): AnimeInstance;
     // Add more static methods as needed
   }

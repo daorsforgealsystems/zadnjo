@@ -75,7 +75,8 @@ export const ResponsiveTypography: React.FC<ResponsiveTypographyProps> = ({
   const { isMobile, isTablet } = useResponsiveLayout();
 
   // Determine the component to render
-  const Component = component || (variant.startsWith('h') ? variant as keyof JSX.IntrinsicElements : 'p');
+  type IntrinsicTag = keyof JSX.IntrinsicElements;
+  const Component: IntrinsicTag = component || (variant.startsWith('h') ? (variant as IntrinsicTag) : 'p');
 
   // Get responsive text size
   const getResponsiveSize = () => {
@@ -97,10 +98,10 @@ export const ResponsiveTypography: React.FC<ResponsiveTypographyProps> = ({
     className
   );
 
-  const animationVariants = {
+  const animationVariants: import('framer-motion').Variants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.5, ease: 'easeOut' }
     }
@@ -113,18 +114,12 @@ export const ResponsiveTypography: React.FC<ResponsiveTypographyProps> = ({
         animate="visible"
         variants={animationVariants}
       >
-        <Component className={baseClasses} {...props}>
-          {children}
-        </Component>
+        {React.createElement(Component, { className: baseClasses, ...props }, children)}
       </motion.div>
     );
   }
 
-  return (
-    <Component className={baseClasses} {...props}>
-      {children}
-    </Component>
-  );
+  return React.createElement(Component, { className: baseClasses, ...props }, children);
 };
 
 // Predefined responsive typography components

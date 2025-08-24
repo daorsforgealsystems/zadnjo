@@ -13,7 +13,7 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <ErrorBoundary>
       <AnimationProvider>
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Router>
           <AuthProvider>
             <LayoutProvider>
               {children}

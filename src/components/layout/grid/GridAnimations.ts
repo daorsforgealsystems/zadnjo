@@ -7,11 +7,7 @@ export interface GridAnimationConfig {
   autoplay?: boolean;
 }
 
-interface StaggerOptions {
-  grid?: [number, number];
-  from?: string;
-  direction?: string;
-}
+
 
 export const gridAnimationPresets = {
   gridReorder: {
@@ -172,25 +168,28 @@ export const animateGridReveal = (
     el.style.transform = 'translateY(20px) scale(0.9)';
   });
 
-  let delayFunction;
+  let delayFunction: number | ((el: HTMLElement, i: number) => number) | undefined;
   
   switch (pattern) {
     case 'sequence':
       delayFunction = anime.stagger(50);
       break;
-    case 'wave':
+    case 'wave': {
+      const size = Math.ceil(Math.sqrt(elements.length));
       delayFunction = anime.stagger(50, {
-        grid: [Math.ceil(Math.sqrt(elements.length)), Math.ceil(Math.sqrt(elements.length))], 
+        grid: [size, size] as [number, number],
         from: 'center'
-      } as StaggerOptions);
+      });
       break;
-    case 'spiral':
+    }
+    case 'spiral': {
+      const size = Math.ceil(Math.sqrt(elements.length));
       delayFunction = anime.stagger(50, {
-        grid: [Math.ceil(Math.sqrt(elements.length)), Math.ceil(Math.sqrt(elements.length))], 
-        from: 'center', 
-        direction: 'reverse'
-      } as StaggerOptions);
+        grid: [size, size] as [number, number],
+        from: 'center'
+      });
       break;
+    }
     case 'random':
       delayFunction = () => Math.random() * 300;
       break;
@@ -376,7 +375,7 @@ export const animateGridSort = (
   // Reorder (this would typically involve actual DOM manipulation)
   timeline.add({
     targets: elements,
-    translateY: (el, i) => {
+    translateY: (el: HTMLElement, i: number) => {
       const currentIndex = elements.indexOf(el);
       const newIndex = newOrder.indexOf(currentIndex);
       return (newIndex - currentIndex) * 100; // Assuming 100px height per item
