@@ -100,19 +100,26 @@ export const validateConfig = (): void => {
   // Only require that a Supabase URL and an ANON key exist (each may be provided under either prefix).
   const url = (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) || (import.meta.env.VITE_SUPABASE_URL as string);
   const anonKey = (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) || (import.meta.env.VITE_SUPABASE_ANON_KEY as string);
+  const apiBase = (import.meta.env.VITE_API_BASE_URL as string) || (import.meta.env.NEXT_PUBLIC_API_BASE_URL as string);
 
   const missing: string[] = [];
   if (!url) missing.push('SUPABASE_URL (NEXT_PUBLIC_* or VITE_*)');
   if (!anonKey) missing.push('SUPABASE_ANON_KEY (NEXT_PUBLIC_* or VITE_*)');
+  if (!apiBase) missing.push('API_BASE_URL (VITE_* or NEXT_PUBLIC_*)');
 
   if (missing.length > 0) {
+    // Log missing vars always
     console.warn('Missing environment variables:', missing);
-    // In production we should fail fast; in development continue using the defaults defined above.
-    if (import.meta.env.PROD) {
+
+    // Honor an explicit override to fail fast in non-production environments
+    const forceFail = (import.meta.env.VITE_FAIL_ON_MISSING_CONFIG === 'true');
+
+    if (import.meta.env.PROD || forceFail) {
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
     }
   }
 };
 
-// Initialize configuration validation
-validateConfig();
+// NOTE: validation is intentionally not run at module import time here.
+// Call `validateConfig()` explicitly from the application startup (for example: `src/main.tsx`) so the
+// app can render a controlled fallback UI on failure.

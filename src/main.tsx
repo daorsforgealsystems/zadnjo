@@ -13,6 +13,7 @@ import { LayoutProvider } from '@/components/providers/LayoutProvider';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './store';
 import { debug, initDebug } from './lib/debug';
+import { validateConfig } from './lib/config';
 
 // Create a client with more resilient configuration
 const queryClient = new QueryClient({
@@ -66,6 +67,22 @@ const container = document.getElementById('root');
 // Initialize debug system
 initDebug();
 debug('Application initialization started', 'info');
+
+// Validate runtime configuration early and fail-safe
+try {
+  validateConfig();
+  debug('Configuration validated successfully', 'info');
+} catch (error) {
+  debug('Configuration validation failed', 'critical', error);
+  // If validation fails, render the fallback UI and abort startup
+  if (container) {
+    renderFallbackUI(container, 'Invalid application configuration. Check environment variables.');
+  } else if (document.body) {
+    renderFallbackUI(document.body, 'Invalid application configuration. Check environment variables.');
+  }
+  // Stop further execution by rethrowing after rendering fallback UI
+  throw error;
+}
 
 if (container) {
   try {

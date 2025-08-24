@@ -1,6 +1,15 @@
 import winston from 'winston';
 import * as fs from 'fs';
 import * as path from 'path';
+// Optional YAML support; parse only if dependency is present
+let yamlParser: any = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  yamlParser = require('yaml');
+} catch (err) {
+  // yaml not installed; YAML files will not be supported until dependency is added
+  yamlParser = null;
+}
 
 // Configure logger for configuration management
 const logger = winston.createLogger({
@@ -148,9 +157,10 @@ export class ConfigurationManager {
       
       case '.yaml':
       case '.yml':
-        // Would need yaml parser: const yaml = require('yaml');
-        // return yaml.parse(content);
-        throw new Error('YAML configuration files not supported yet');
+        if (!yamlParser) {
+          throw new Error('YAML configuration files require the "yaml" package to be installed');
+        }
+        return yamlParser.parse(content);
       
       case '.env':
         return this.parseEnvFile(content);
@@ -301,7 +311,7 @@ export class ConfigurationManager {
   }
 
   // Public API
-  get<T = any>(key: string, defaultValue?: T): T {
+  get<T = any>(key: string, defaultValue?: T): T | undefined {
     const value = this.config[key];
     return value !== undefined ? value : defaultValue;
   }
