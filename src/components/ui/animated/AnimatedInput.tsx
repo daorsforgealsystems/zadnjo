@@ -299,7 +299,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
       initial="initial"
       animate="animate"
       variants={inputVariants[variant]}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+  transition={{ duration: 0.3, ease: 'easeOut' as const }}
     >
       {/* Label */}
       {label && variant !== 'floating' && (
@@ -335,7 +335,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
         <motion.div
           initial={animationVariants[animation].initial}
           animate={animationVariants[animation].animate}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 0.3, ease: 'easeOut' as const }}
         >
           <Input
             ref={setRefs}

@@ -170,7 +170,7 @@ export const CustomizableHeader: React.FC<CustomizableHeaderProps> = ({
       }}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+  transition={{ duration: 0.5, ease: 'easeOut' as const }}
     >
       <div className="h-full px-4 lg:px-6">
         <div className="flex items-center justify-between h-full">
@@ -480,7 +480,7 @@ export const SlideInHeader: React.FC<SlideInHeaderProps> = ({
     <motion.div
       initial={{ y: -100 }}
       animate={{ y: isVisible ? 0 : -100 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
+  transition={{ duration: 0.3, ease: 'easeInOut' as const }}
       className="fixed top-0 w-full z-50"
     >
       <CustomizableHeader {...props} sticky={false} />
@@ -517,7 +517,7 @@ export const ExpandableHeader: React.FC<ExpandableHeaderProps> = ({
       animate={{ 
         height: isExpanded ? expandedHeight : collapsedHeight 
       }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
+  transition={{ duration: 0.3, ease: 'easeInOut' as const }}
     >
       <CustomizableHeader 
         {...props} 

@@ -1,20 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Truck, Package, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { Loader2, Truck, Package, MapPin, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EnhancedSkeleton, SkeletonCard, SkeletonTable, SkeletonChart, SkeletonList } from './enhanced-skeleton';
 
-// Loading spinner variants
+// Small reusable loading spinner with variants
 export const LoadingSpinner: React.FC<{
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'dots' | 'pulse' | 'truck';
   className?: string;
 }> = ({ size = 'md', variant = 'default', className }) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
-  };
+  const sizeClasses = { sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-8 h-8' } as const;
 
   if (variant === 'dots') {
     return (
@@ -26,15 +22,8 @@ export const LoadingSpinner: React.FC<{
               'rounded-full bg-current',
               size === 'sm' ? 'w-1 h-1' : size === 'md' ? 'w-2 h-2' : 'w-3 h-3'
             )}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-              delay: i * 0.2,
-            }}
+            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
           />
         ))}
       </div>
@@ -45,14 +34,8 @@ export const LoadingSpinner: React.FC<{
     return (
       <motion.div
         className={cn('rounded-full bg-current', sizeClasses[size], className)}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.5, 1, 0.5],
-        }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-        }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
       />
     );
   }
@@ -67,28 +50,22 @@ export const LoadingSpinner: React.FC<{
           transition={{ duration: 1, repeat: Infinity }}
         >
           {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-1 h-1 bg-primary rounded-full opacity-60"
-            />
+            <div key={i} className="w-1 h-1 bg-primary rounded-full opacity-60" />
           ))}
         </motion.div>
       </motion.div>
     );
   }
 
-  return (
-    <Loader2 className={cn('animate-spin', sizeClasses[size], className)} />
-  );
+  return <Loader2 className={cn('animate-spin', sizeClasses[size], className)} />;
 };
 
-// Inline loading state
-export const InlineLoading: React.FC<{
-  text?: string;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'dots' | 'pulse' | 'truck';
-  className?: string;
-}> = ({ text = 'Loading...', size = 'md', variant = 'default', className }) => {
+export const InlineLoading: React.FC<{ text?: string; size?: 'sm' | 'md' | 'lg'; variant?: 'default' | 'dots' | 'pulse' | 'truck'; className?: string }> = ({
+  text = 'Loading...',
+  size = 'md',
+  variant = 'default',
+  className,
+}) => {
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <LoadingSpinner size={size} variant={variant} />
@@ -97,7 +74,6 @@ export const InlineLoading: React.FC<{
   );
 };
 
-// Full page loading with progress
 export const FullPageLoading: React.FC<{
   title?: string;
   subtitle?: string;
@@ -105,94 +81,38 @@ export const FullPageLoading: React.FC<{
   steps?: string[];
   currentStep?: number;
   className?: string;
-}> = ({
-  title = 'Loading',
-  subtitle = 'Please wait while we prepare your data...',
-  progress,
-  steps,
-  currentStep = 0,
-  className,
-}) => {
+}> = ({ title = 'Loading', subtitle = 'Please wait while we prepare your data...', progress = 0, steps, currentStep = 0, className }) => {
   return (
     <div className={cn('min-h-screen flex items-center justify-center bg-background', className)}>
       <div className="text-center space-y-6 max-w-md p-6">
-        {/* Logo/Icon */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring' as const, stiffness: 200 }}
-          className="mx-auto mb-6"
-        >
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' as const, stiffness: 200 }} className="mx-auto mb-6">
           <LoadingSpinner size="lg" variant="truck" />
         </motion.div>
 
-        {/* Title and subtitle */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-2xl font-semibold"
-          >
-            {title}
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-muted-foreground"
-          >
-            {subtitle}
-          </motion.p>
-        </div>
+        <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-2xl font-semibold">
+          {title}
+        </motion.h2>
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-muted-foreground">
+          {subtitle}
+        </motion.p>
 
-        {/* Progress bar */}
-        {progress !== undefined && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="space-y-2"
-          >
+        {typeof progress === 'number' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Progress</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="w-full bg-muted rounded-full h-2">
-              <motion.div
-                className="h-full bg-primary rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5 }}
-              />
+              <motion.div className="h-full bg-primary rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
             </div>
           </motion.div>
         )}
 
-        {/* Steps */}
         {steps && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="space-y-3"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="space-y-3">
             {steps.map((step, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'flex items-center gap-3 text-sm',
-                  index < currentStep && 'text-green-600',
-                  index === currentStep && 'text-primary',
-                  index > currentStep && 'text-muted-foreground'
-                )}
-              >
-                {index < currentStep ? (
-                  <CheckCircle className="w-4 h-4" />
-                ) : index === currentStep ? (
-                  <LoadingSpinner size="sm" />
-                ) : (
-                  <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30" />
-                )}
+              <div key={index} className={cn('flex items-center gap-3 text-sm', index < currentStep && 'text-green-600', index === currentStep && 'text-primary', index > currentStep && 'text-muted-foreground')}>
+                {index < currentStep ? <CheckCircle className="w-4 h-4" /> : index === currentStep ? <LoadingSpinner size="sm" /> : <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30" />}
                 <span>{step}</span>
               </div>
             ))}
@@ -203,7 +123,6 @@ export const FullPageLoading: React.FC<{
   );
 };
 
-// Card loading state
 export const CardLoading: React.FC<{
   variant?: 'default' | 'detailed' | 'minimal';
   className?: string;
@@ -218,22 +137,13 @@ export const CardLoading: React.FC<{
   }
 
   if (variant === 'detailed') {
-    return (
-      <SkeletonCard className={className} showHeader showFooter lines={4} />
-    );
+    return <SkeletonCard className={className} showHeader showFooter lines={4} />;
   }
 
-  return (
-    <SkeletonCard className={className} showHeader lines={3} />
-  );
+  return <SkeletonCard className={className} showHeader lines={3} />;
 };
 
-// Table loading state
-export const TableLoading: React.FC<{
-  rows?: number;
-  columns?: number;
-  className?: string;
-}> = ({ rows = 5, columns = 4, className }) => {
+export const TableLoading: React.FC<{ rows?: number; columns?: number; className?: string }> = ({ rows = 5, columns = 4, className }) => {
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex justify-between items-center">
@@ -245,24 +155,14 @@ export const TableLoading: React.FC<{
   );
 };
 
-// List loading state
-export const ListLoading: React.FC<{
-  items?: number;
-  showAvatar?: boolean;
-  className?: string;
-}> = ({ items = 5, showAvatar = true, className }) => {
+export const ListLoading: React.FC<{ items?: number; showAvatar?: boolean; className?: string }> = ({ items = 5, showAvatar = true, className }) => {
   return <SkeletonList items={items} showAvatar={showAvatar} className={className} />;
 };
 
-// Chart loading state
-export const ChartLoading: React.FC<{
-  type?: 'bar' | 'line' | 'pie';
-  className?: string;
-}> = ({ type = 'bar', className }) => {
+export const ChartLoading: React.FC<{ type?: 'bar' | 'line' | 'pie'; className?: string }> = ({ type = 'bar', className }) => {
   return <SkeletonChart type={type} className={className} />;
 };
 
-// Button loading state
 export const ButtonLoading: React.FC<{
   children: React.ReactNode;
   loading?: boolean;
@@ -281,18 +181,14 @@ export const ButtonLoading: React.FC<{
   onClick,
 }) => {
   const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background';
-  
+
   const variantClasses = {
     default: 'bg-primary text-primary-foreground hover:bg-primary/90',
     outline: 'border border-input hover:bg-accent hover:text-accent-foreground',
     ghost: 'hover:bg-accent hover:text-accent-foreground',
-  };
+  } as const;
 
-  const sizeClasses = {
-    sm: 'h-9 px-3 text-sm',
-    md: 'h-10 py-2 px-4',
-    lg: 'h-11 px-8',
-  };
+  const sizeClasses = { sm: 'h-9 px-3 text-sm', md: 'h-10 py-2 px-4', lg: 'h-11 px-8' } as const;
 
   return (
     <button
@@ -318,10 +214,7 @@ export const ButtonLoading: React.FC<{
   );
 };
 
-// Search loading state
-export const SearchLoading: React.FC<{
-  className?: string;
-}> = ({ className }) => {
+export const SearchLoading: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center gap-2">
@@ -340,11 +233,7 @@ export const SearchLoading: React.FC<{
   );
 };
 
-// Form loading state
-export const FormLoading: React.FC<{
-  fields?: number;
-  className?: string;
-}> = ({ fields = 4, className }) => {
+export const FormLoading: React.FC<{ fields?: number; className?: string }> = ({ fields = 4, className }) => {
   return (
     <div className={cn('space-y-6', className)}>
       {Array.from({ length: fields }).map((_, i) => (
@@ -361,10 +250,7 @@ export const FormLoading: React.FC<{
   );
 };
 
-// Logistics-specific loading states
-export const ShipmentLoading: React.FC<{
-  className?: string;
-}> = ({ className }) => {
+export const ShipmentLoading: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center gap-3">
@@ -383,9 +269,7 @@ export const ShipmentLoading: React.FC<{
   );
 };
 
-export const RouteLoading: React.FC<{
-  className?: string;
-}> = ({ className }) => {
+export const RouteLoading: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center gap-3">
@@ -397,9 +281,9 @@ export const RouteLoading: React.FC<{
       </div>
       <div className="pl-8 space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-muted" />
-            <EnhancedSkeleton className="h-3 w-40" variant="shimmer" />
+          <div key={i} className="space-y-2">
+            <EnhancedSkeleton className="h-3 w-full" variant="shimmer" />
+            <EnhancedSkeleton className="h-3 w-2/3" variant="shimmer" />
           </div>
         ))}
       </div>
@@ -407,17 +291,26 @@ export const RouteLoading: React.FC<{
   );
 };
 
-export const DeliveryStatusLoading: React.FC<{
-  className?: string;
-}> = ({ className }) => {
+export const RouteSummaryLoading: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <div className={cn('space-y-4', className)}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Clock className="w-5 h-5 text-muted-foreground" />
-          <EnhancedSkeleton className="h-4 w-32" variant="shimmer" />
-        </div>
-        <LoadingSpinner size="sm" />
+    <div className={cn('flex items-center gap-4', className)}>
+      <div className="flex-1 space-y-2">
+        <EnhancedSkeleton className="h-4 w-32" variant="shimmer" />
+        <EnhancedSkeleton className="h-3 w-24" variant="shimmer" />
+      </div>
+      <LoadingSpinner size="sm" />
+    </div>
+  );
+};
+
+export const EmptyStateLoading: React.FC<{ className?: string; message?: string }> = ({ className, message = 'No data yet' }) => {
+  return (
+    <div className={cn('flex flex-col items-center justify-center py-12', className)}>
+      <Loader2 className="animate-spin w-8 h-8 text-muted-foreground" />
+      <div className="mt-4 text-sm text-muted-foreground">{message}</div>
+    </div>
+  );
+};
       </div>
       <div className="space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (

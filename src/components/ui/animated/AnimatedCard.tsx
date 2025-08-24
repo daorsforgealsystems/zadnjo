@@ -234,7 +234,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
       transition={{
         duration: duration * intensityMultipliers[intensity],
         delay,
-        ease: 'easeOut'
+  ease: 'easeOut' as const
       }}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
@@ -331,7 +331,7 @@ export const FlipCardTwoSided: React.FC<FlipCardTwoSidedProps> = ({
         className="w-full h-full absolute backface-hidden"
         style={{ backfaceVisibility: 'hidden' }}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, ease: 'easeInOut' }}
+  transition={{ duration: 0.6, ease: 'easeInOut' as const }}
       >
         <AnimatedCard {...props}>{front}</AnimatedCard>
       </motion.div>
@@ -339,7 +339,7 @@ export const FlipCardTwoSided: React.FC<FlipCardTwoSidedProps> = ({
         className="w-full h-full absolute backface-hidden"
         style={{ backfaceVisibility: 'hidden', rotateY: 180 }}
         animate={{ rotateY: isFlipped ? 0 : -180 }}
-        transition={{ duration: 0.6, ease: 'easeInOut' }}
+  transition={{ duration: 0.6, ease: 'easeInOut' as const }}
       >
         <AnimatedCard {...props}>{back}</AnimatedCard>
       </motion.div>

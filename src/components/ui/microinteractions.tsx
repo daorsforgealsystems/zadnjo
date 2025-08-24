@@ -165,7 +165,7 @@ export const RippleEffect: React.FC<{
           key={ripple.id}
           initial={{ scale: 0, opacity: 0.6 }}
           animate={{ scale: 1, opacity: 0 }}
-          transition={{ duration: duration / 1000, ease: 'easeOut' }}
+          transition={{ duration: duration / 1000, ease: 'easeOut' as const }}
           className="absolute rounded-full pointer-events-none"
           style={{
             left: ripple.x,
@@ -354,7 +354,7 @@ export const AnimatedProgress: React.FC<{
           className={cn('h-full rounded-full', color)}
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          transition={{ duration: 0.8, ease: 'easeOut' as const }}
         />
       </div>
     </div>
