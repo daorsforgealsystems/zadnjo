@@ -140,7 +140,7 @@ export const getShipmentData = async (): Promise<ChartData[]> => {
 // In a real application, this data would be derived from database tables.
 
 export const getRevenueData = async (): Promise<ChartData[]> => {
-    console.warn("getRevenueData is returning mock data.");
+    if ((import.meta as any).env?.DEV) console.warn("getRevenueData: returning fallback/mock data (dev only).");
     return [
       { label: "Jan", value: 65, color: "bg-primary" },
       { label: "Feb", value: 78, color: "bg-primary" },
@@ -152,7 +152,7 @@ export const getRevenueData = async (): Promise<ChartData[]> => {
 };
 
 export const getRouteData = async (): Promise<ChartData[]> => {
-    console.warn("getRouteData is returning mock data.");
+    if ((import.meta as any).env?.DEV) console.warn("getRouteData: returning fallback/mock data (dev only).");
     return [
       { label: "Srbija-Bosna", value: 35, color: "bg-blue-500" },
       { label: "Hrvatska-Slovenija", value: 28, color: "bg-green-500" },
