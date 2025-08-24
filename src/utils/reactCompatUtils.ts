@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 // Ensure React APIs are available globally for libraries that might need them
 export const ensureReactGlobals = () => {
@@ -11,7 +11,7 @@ export const ensureReactGlobals = () => {
 useRef: React.useRef,
     useMemo: React.useMemo,
     useCallback: React.useCallback,
-    forwardRef: React.forwardRef,
+  forwardRef: forwardRef,
     memo: React.memo,
     createElement: React.createElement,
     Fragment: React.Fragment,
