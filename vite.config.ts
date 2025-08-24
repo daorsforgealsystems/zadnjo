@@ -81,11 +81,13 @@ export default defineConfig({
           },
         },
         {
-          // Cache API responses with network-first strategy (dynamic pattern based on env)
+          // Cache API responses with network-first strategy
           urlPattern: ({ url }) => {
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
-            const baseUrl = new URL(apiBaseUrl).origin;
-            return url.origin === baseUrl || url.pathname.startsWith('/api/');
+            // Use static patterns that work in service worker context
+            return url.pathname.startsWith('/api/') || 
+                   url.hostname === 'localhost' ||
+                   url.hostname.includes('daorsflow.com') ||
+                   url.hostname.includes('supabase.co');
           },
           handler: 'NetworkFirst',
           options: {
@@ -110,10 +112,23 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-leaflet", "leaflet"],
+    include: [
+      "react", 
+      "react-dom", 
+      "react-leaflet", 
+      "leaflet",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-popover"
+    ],
+    force: true,
   },
   define: {
     global: 'globalThis',
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
   },
   build: {
     commonjsOptions: {

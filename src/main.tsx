@@ -1,9 +1,12 @@
+// Import React initialization FIRST
+import './react-init';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import ReactCompatLayer, { ensureReactGlobals } from './components/ReactCompatLayer';
+import ReactCompatLayer, { ensureReactGlobals, suppressReact19Warnings } from './components/ReactCompatLayer';
 
 // Initialize React compatibility layer
 ensureReactGlobals();
+suppressReact19Warnings();
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';

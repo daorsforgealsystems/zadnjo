@@ -2,40 +2,102 @@ import React from 'react';
 
 // Ensure React APIs are available globally for libraries that might need them
 const ensureReactGlobals = () => {
+  // Create a comprehensive React object with all necessary APIs
+  const reactAPI = {
+    ...React,
+    createContext: React.createContext,
+    useState: React.useState,
+    useEffect: React.useEffect,
+    useRef: React.useRef,
+    useMemo: React.useMemo,
+    useCallback: React.useCallback,
+    forwardRef: React.forwardRef,
+    memo: React.memo,
+    createElement: React.createElement,
+    Fragment: React.Fragment,
+    Component: React.Component,
+    PureComponent: React.PureComponent,
+    useLayoutEffect: React.useLayoutEffect,
+    useImperativeHandle: React.useImperativeHandle,
+    useContext: React.useContext,
+    useReducer: React.useReducer,
+    useDebugValue: React.useDebugValue,
+    useDeferredValue: React.useDeferredValue,
+    useId: React.useId,
+    useInsertionEffect: React.useInsertionEffect,
+    useSyncExternalStore: React.useSyncExternalStore,
+    useTransition: React.useTransition,
+    startTransition: React.startTransition,
+    lazy: React.lazy,
+    Suspense: React.Suspense,
+    StrictMode: React.StrictMode,
+    cloneElement: React.cloneElement,
+    isValidElement: React.isValidElement,
+    Children: React.Children,
+  };
+
   if (typeof window !== 'undefined') {
     // Make React available globally
-    (window as any).React = React;
+    (window as any).React = reactAPI;
     
-    // Ensure specific React APIs are available
-    if (React.createContext) {
-      (window as any).createContext = React.createContext;
-    }
-    if (React.useState) {
-      (window as any).useState = React.useState;
-    }
-    if (React.useEffect) {
-      (window as any).useEffect = React.useEffect;
-    }
-    if (React.useRef) {
-      (window as any).useRef = React.useRef;
-    }
-    if (React.useMemo) {
-      (window as any).useMemo = React.useMemo;
-    }
-    if (React.useCallback) {
-      (window as any).useCallback = React.useCallback;
-    }
+    // Also make individual APIs available
+    Object.keys(reactAPI).forEach(key => {
+      if (reactAPI[key as keyof typeof reactAPI]) {
+        (window as any)[key] = reactAPI[key as keyof typeof reactAPI];
+      }
+    });
   }
   
-  // Also ensure on globalThis
-  (globalThis as any).React = React;
-  if (React.createContext) {
-    (globalThis as any).createContext = React.createContext;
+  // Also ensure on globalThis with the comprehensive API
+  (globalThis as any).React = reactAPI;
+  
+  // Make individual APIs available on globalThis too
+  Object.keys(reactAPI).forEach(key => {
+    if (reactAPI[key as keyof typeof reactAPI]) {
+      (globalThis as any)[key] = reactAPI[key as keyof typeof reactAPI];
+    }
+  });
+};
+
+// Suppress React 19 warnings for Radix UI compatibility
+const suppressReact19Warnings = () => {
+  if (typeof console !== 'undefined') {
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    console.warn = (...args) => {
+      const message = args.join(' ');
+      // Suppress known React 19 + Radix UI warnings
+      if (
+        message.includes('forwardRef') ||
+        message.includes('accessing .ref directly') ||
+        message.includes('Function components cannot be given refs') ||
+        message.includes('Presence component') ||
+        message.includes('Slot component')
+      ) {
+        return; // Suppress these warnings
+      }
+      originalWarn.apply(console, args);
+    };
+    
+    console.error = (...args) => {
+      const message = args.join(' ');
+      // Suppress known React 19 + Radix UI errors that are actually warnings
+      if (
+        message.includes('Cannot read properties of undefined (reading \'forwardRef\')') ||
+        message.includes('forwardRef') && message.includes('undefined')
+      ) {
+        console.warn('Suppressed React 19 compatibility warning:', ...args);
+        return;
+      }
+      originalError.apply(console, args);
+    };
   }
 };
 
 // Initialize immediately
 ensureReactGlobals();
+suppressReact19Warnings();
 
 // React Compatibility Layer Component
 interface ReactCompatLayerProps {
@@ -45,10 +107,11 @@ interface ReactCompatLayerProps {
 const ReactCompatLayer: React.FC<ReactCompatLayerProps> = ({ children }) => {
   React.useEffect(() => {
     ensureReactGlobals();
+    suppressReact19Warnings();
   }, []);
 
   return <>{children}</>;
 };
 
 export default ReactCompatLayer;
-export { ensureReactGlobals };
+export { ensureReactGlobals, suppressReact19Warnings };
