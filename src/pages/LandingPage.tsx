@@ -70,7 +70,7 @@ const LandingPage = () => {
 
   return (
     <div className="relative min-h-screen">
-      <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" />
+  <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" overlayOpacity={0.55} />
       <ParticleBackground />
       
       {/* Bring main content above background/particles */}

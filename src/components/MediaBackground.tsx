@@ -2,11 +2,14 @@ import React, { useRef, useEffect, useState } from 'react';
 
 interface MediaBackgroundProps {
   mediaSrc: string;
+  /** overlay opacity between 0 (transparent) and 1 (opaque) */
+  overlayOpacity?: number;
   type?: 'video' | 'image';
 }
 
 const MediaBackground: React.FC<MediaBackgroundProps> = ({ 
   mediaSrc, 
+  overlayOpacity = 0.4,
   type = 'image' /* default to image for hero backgrounds to avoid heavy video loads */
 }) => {
   const mediaRef = useRef<HTMLVideoElement | HTMLImageElement>(null);
@@ -25,13 +28,15 @@ const MediaBackground: React.FC<MediaBackgroundProps> = ({
     setMediaError(true);
   };
 
+  const overlayStyle: React.CSSProperties = { backgroundColor: `rgba(0,0,0,${overlayOpacity})` };
+
   if (mediaError) {
     // Fallback to a gradient background if media fails to load
     return (
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="w-full h-full bg-gradient-to-br from-blue-900 via-blue-700 to-indigo-900" />
-  {/* slightly darker overlay on small screens, lighter on larger screens to balance readability */}
-  <div className="absolute inset-0 bg-background/60 md:bg-background/40 lg:bg-background/30" />
+        {/* configurable overlay so callers can tune darkness */}
+        <div className="absolute inset-0" style={overlayStyle} />
       </div>
     );
   }
@@ -48,8 +53,8 @@ const MediaBackground: React.FC<MediaBackgroundProps> = ({
           playsInline
           onError={handleMediaError}
         />
-  {/* responsive overlay for videos */}
-  <div className="absolute inset-0 bg-background/60 md:bg-background/40 lg:bg-background/30" />
+        {/* configurable overlay for videos */}
+        <div className="absolute inset-0" style={overlayStyle} />
       </div>
     );
   }
@@ -66,7 +71,7 @@ const MediaBackground: React.FC<MediaBackgroundProps> = ({
         decoding="async"
         onError={handleMediaError}
       />
-      <div className="absolute inset-0 bg-background/70" />
+      <div className="absolute inset-0" style={overlayStyle} />
     </div>
   );
 };
