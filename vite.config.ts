@@ -108,7 +108,7 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ["react", "react-dom"],
+    include: ["react", "react-dom", "react-leaflet", "leaflet"],
   },
   build: {
     commonjsOptions: {
@@ -145,7 +145,8 @@ export default defineConfig({
             isNodeMod && /[\\/](react|react-dom|scheduler)[\\/]/.test(id)
           ) return 'vendor';
           if (isNodeMod && (/[\\/]@radix-ui[\\/]/.test(id) || /[\\/]lucide-react[\\/]/.test(id))) return 'ui';
-          if (isNodeMod && (/[\\/]leaflet[\\/]/.test(id) || /[\\/]react-leaflet[\\/]/.test(id))) return 'maps';
+          // Don't separate maps into their own chunk to avoid React context issues
+          // if (isNodeMod && (/[\\/]leaflet[\\/]/.test(id) || /[\\/]react-leaflet[\\/]/.test(id))) return 'maps';
           // Avoid isolating i18n libs into a separate chunk to prevent React being undefined at runtime
           // if (isNodeMod && (/[\\/]i18next[\\/]/.test(id) || /[\\/]react-i18next[\\/]/.test(id))) return 'i18n';
           return undefined;

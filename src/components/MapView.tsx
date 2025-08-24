@@ -1,5 +1,4 @@
-import { useMemo, memo, useState, useEffect, Suspense } from 'react';
-import type React from 'react';
+import React, { useMemo, memo, useState, useEffect, Suspense } from 'react';
 import type * as Leaflet from 'leaflet';
 import type { MapContainerProps, TileLayerProps, MarkerProps, PopupProps, PolylineProps } from 'react-leaflet';
 import LoadingSpinner from './LoadingSpinner';
