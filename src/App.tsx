@@ -1,4 +1,22 @@
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocationfunction lazyWithErrorHandling<P extends object>(
+  importFn: () => Promise<{ default: React.ComponentType<P> }>
+): React.FC<P> {
+  const LazyComponent = lazy(importFn);
+
+  const componentName = importFn.toString().includes('DashboardLayout') ? 'DashboardLayout' : 'Unknown';
+
+  const WrappedComponent: React.FC<P> = (props) => (
+    <ErrorBoundary fallback={<LazyLoadingErrorFallback />}>
+      <Suspense fallback={<LoadingScreen />}>
+        <LazyComponent {...(props as P)} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+
+  WrappedComponent.displayName = `lazyWithErrorHandling(${componentName})`;
+
+  return WrappedComponent;
+}er-dom';
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingScreen from './components/LoadingScreen';
@@ -33,7 +51,7 @@ const LazyLoadingErrorFallback = () => (
 );
 
 // Wrapper for lazy loaded components with error handling
-function lazyWithErrorHandling<P extends object>(
+function lazyWithErrorHandling<P extends JSX.IntrinsicAttributes>(
   importFn: () => Promise<{ default: React.ComponentType<P> }>
 ): React.FC<P> {
   const LazyComponent = lazy(importFn);
@@ -52,8 +70,6 @@ function lazyWithErrorHandling<P extends object>(
 
   return WrappedComponent;
 }
-
-const CustomerDashboard = lazyWithErrorHandling(() => import('./pages/CustomerDashboard'));
 const Inventory = lazyWithErrorHandling(() => import('./pages/Inventory'));
 const ItemTracking = lazyWithErrorHandling(() => import('./pages/ItemTracking'));
 const LiveMap = lazyWithErrorHandling(() => import('./pages/LiveMap'));
