@@ -17,12 +17,12 @@ export const authFade = {
   animate: { 
     opacity: 1, 
     scale: 1,
-    transition: { duration: 0.3, ease: 'easeOut' }
+  transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
   },
   exit: { 
     opacity: 0, 
     scale: 0.95,
-    transition: { duration: 0.2, ease: 'easeIn' }
+  transition: { duration: 0.2, ease: [0.4, 0, 1, 1] }
   }
 };
 
@@ -32,12 +32,12 @@ export const nestedFadeSlide = {
   animate: { 
     opacity: 1, 
     x: 0,
-    transition: { duration: 0.2, ease: 'easeOut' }
+  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
   },
   exit: { 
     opacity: 0, 
     x: -10,
-    transition: { duration: 0.15, ease: 'easeIn' }
+  transition: { duration: 0.15, ease: [0.4, 0, 1, 1] }
   }
 };
 
@@ -47,7 +47,7 @@ export const cardHover = {
   hover: { 
     scale: 1.03, 
     boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-    transition: { duration: 0.3, ease: 'easeOut' }
+  transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
   }
 };
 

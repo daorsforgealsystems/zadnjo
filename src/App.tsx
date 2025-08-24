@@ -57,10 +57,7 @@ function lazyWithErrorHandling<T extends Record<string, unknown> = Record<string
   );
 }
 
-// Lazy load components to improve initial load time
-const Dashboard = lazyWithErrorHandling(() => import('./pages/Dashboard'));
 const CustomerDashboard = lazyWithErrorHandling(() => import('./pages/CustomerDashboard'));
-const Index = lazyWithErrorHandling(() => import('./pages/Index'));
 const Inventory = lazyWithErrorHandling(() => import('./pages/Inventory'));
 const ItemTracking = lazyWithErrorHandling(() => import('./pages/ItemTracking'));
 const LiveMap = lazyWithErrorHandling(() => import('./pages/LiveMap'));
