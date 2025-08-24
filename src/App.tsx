@@ -52,9 +52,12 @@ const LazyLoadingErrorFallback = () => (
 
 // Wrapper for lazy loaded components with error handling
 function lazyWithErrorHandling<P extends JSX.IntrinsicAttributes>(
-  importFn: () => Promise<{ default: React.ComponentType<P> }>
+  importFn: () => Promise<{ default: React.ComponentType<P> } | { default: React.FC<any> }>
 ): React.FC<P> {
-  const LazyComponent = lazy(importFn);
+  const LazyComponent = lazy(async () => {
+    const module = await importFn();
+    return { default: module.default as React.ComponentType<P> };
+  });
 
   const componentName = importFn.toString().includes('DashboardLayout') ? 'DashboardLayout' : 'Unknown';
 
