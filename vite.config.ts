@@ -104,12 +104,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "react-i18next": "react-i18next/dist/es/index.js",
     },
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-i18next"],
+    include: ["react", "react-dom"],
   },
   build: {
     commonjsOptions: {
