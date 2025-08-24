@@ -139,7 +139,7 @@ export default defineConfig({
           if (!id) return undefined;
           const isNodeMod = id.includes('node_modules');
           // Put Recharts in its own chunk. Ensure this check runs before generic react check.
-          if (false && isNodeMod && /[\\/]recharts[\\/]/.test(id)) return 'charts';
+          // if (isNodeMod && /[\\/]recharts[\\/]/.test(id)) return 'charts';
           // Group core React libs only (avoid matching packages that just contain the word "react")
           if (
             isNodeMod && /[\\/](react|react-dom|scheduler)[\\/]/.test(id)
