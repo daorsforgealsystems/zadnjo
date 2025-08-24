@@ -171,8 +171,8 @@ export const animateLayoutShift = (
 ) => {
   return anime({
     targets: positions.map(p => p.element),
-    translateX: (el, i) => positions[i].x,
-    translateY: (el, i) => positions[i].y,
+    translateX: (_el: HTMLElement, i: number) => positions[i].x,
+    translateY: (_el: HTMLElement, i: number) => positions[i].y,
     duration: 400,
     easing: 'easeOutQuart',
   });

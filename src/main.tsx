@@ -109,7 +109,7 @@ if (container) {
                       <AnimationProvider>
                         <LayoutProvider>
                         <ReduxProvider store={store}>
-                          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                          <Router>
                             <App />
                           </Router>
                         </ReduxProvider>

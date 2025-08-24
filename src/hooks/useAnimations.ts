@@ -23,7 +23,7 @@ import {
 } from '@/lib/animations/navigationAnimations';
 
 export const useAnimations = (intensity: AnimationIntensity = 'medium') => {
-  const activeAnimations = useRef<AnimeInstance[]>([]);
+  const activeAnimations = useRef<ReturnType<typeof anime>[]>([]);
   const reducedMotion = useMemo(() => {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }, []);
@@ -255,7 +255,7 @@ export const useAnimations = (intensity: AnimationIntensity = 'medium') => {
     return cleanup;
   }, [cleanup]);
 
-  const context: AnimationContext = useMemo(() => ({
+  const context = useMemo(() => ({
     presets,
     intensity,
     reducedMotion,

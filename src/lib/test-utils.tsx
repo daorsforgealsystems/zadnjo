@@ -19,30 +19,28 @@ const mockQueryClient = new QueryClient({
   },
 });
 
-interface AllTheProvidersProps {
-  children: React.ReactNode;
-}
-
-const AllTheProviders = ({ children }: AllTheProvidersProps) => {
-  return (
-    <ErrorBoundary>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <QueryClientProvider client={mockQueryClient}>
-          <ThemeProvider defaultTheme="light" storageKey="test-theme">
-            <AuthProvider>
-              {children}
-            </AuthProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
-  );
-};
-
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: AllTheProviders, ...options });
+) => {
+  const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+    return (
+      <ErrorBoundary>
+        <BrowserRouter>
+          <QueryClientProvider client={mockQueryClient}>
+            <ThemeProvider defaultTheme="light" storageKey="test-theme">
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
+    );
+  };
+
+  return render(ui, { wrapper: AllTheProviders, ...options });
+};
 
 // Mock data generators
 export const mockUser = {
@@ -121,6 +119,14 @@ export const mockLocalStorage = () => {
   };
 };
 
-// Re-export everything from testing-library
-export * from '@testing-library/react';
+// Re-export commonly used testing utilities
+export { 
+  screen, 
+  waitFor, 
+  fireEvent, 
+  act, 
+  cleanup, 
+  within,
+  waitForElementToBeRemoved 
+} from '@testing-library/react';
 export { customRender as render };

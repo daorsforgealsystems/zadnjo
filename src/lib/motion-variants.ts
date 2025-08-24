@@ -3,13 +3,23 @@ import type { Variants, Easing } from 'framer-motion';
 // Page transition variants
 export const pageTransition: Variants = {
   initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 },
-  transition: { 
-    type: 'spring', 
-    stiffness: 300, 
-    damping: 30,
-    mass: 1
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      type: 'spring', 
+      stiffness: 300, 
+      damping: 30,
+      mass: 1
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    y: -20,
+    transition: { 
+      duration: 0.2, 
+      ease: 'easeInOut' 
+    }
   }
 };
 
