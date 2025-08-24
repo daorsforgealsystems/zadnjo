@@ -73,9 +73,21 @@ export class WarehouseService {
 
   static async createWarehouse(warehouse: Partial<Warehouse>): Promise<ApiResponse<Warehouse>> {
     try {
+      // Map camelCase fields to snake_case DB columns
+      const dbRecord: any = {
+        name: (warehouse as any).name,
+        code: (warehouse as any).code,
+        address: (warehouse as any).address,
+        location: (warehouse as any).location ?? null,
+        capacity: (warehouse as any).capacity,
+        operating_hours: (warehouse as any).operatingHours ?? null,
+        contact_info: (warehouse as any).contactInfo ?? null,
+        is_active: (warehouse as any).isActive ?? true,
+      };
+
       const { data, error } = await supabase
         .from('warehouses')
-        .insert(warehouse)
+        .insert(dbRecord)
         .select()
         .single();
 
@@ -200,7 +212,8 @@ export class InventoryService {
           *,
           item:inventory_items(*),
           warehouse:warehouses(*)
-        `);
+        `)
+        .order('updated_at', { ascending: false });
 
       if (warehouseId) {
         query = query.eq('warehouse_id', warehouseId);
@@ -289,18 +302,33 @@ export class InventoryService {
 
   static async recordStockMovement(movement: Partial<StockMovement>): Promise<ApiResponse<StockMovement>> {
     try {
+      // Map camelCase -> snake_case for DB
+      const dbRecord: any = {
+        item_id: (movement as any).itemId,
+        warehouse_id: (movement as any).warehouseId,
+        movement_type: (movement as any).movementType,
+        quantity: (movement as any).quantity,
+        reference_type: (movement as any).referenceType,
+        reference_id: (movement as any).referenceId,
+        from_location: (movement as any).fromLocation,
+        to_location: (movement as any).toLocation,
+        notes: (movement as any).notes,
+        performed_by: (movement as any).performedBy,
+      };
+
       const { data, error } = await supabase
         .from('stock_movements')
-        .insert(movement)
+        .insert(dbRecord)
         .select()
         .single();
 
       if (error) throw error;
 
-      // Update inventory level
-      if (movement.itemId && movement.warehouseId && movement.quantity) {
-        const adjustment = movement.movementType === 'inbound' ? movement.quantity : -movement.quantity;
-        
+      // Update inventory level via RPC
+      if (movement.itemId && movement.warehouseId && movement.quantity !== undefined) {
+        const adjustment = movement.movementType === 'inbound' || movement.movementType === 'return'
+          ? (movement.quantity || 0)
+          : -(movement.quantity || 0);
         await supabase.rpc('adjust_inventory_level', {
           p_item_id: movement.itemId,
           p_warehouse_id: movement.warehouseId,
@@ -317,6 +345,16 @@ export class InventoryService {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to record stock movement'
       };
+    }
+  }
+
+  static async seedDemoData(): Promise<ApiResponse<boolean>> {
+    try {
+      const { error } = await supabase.rpc('seed_demo_warehouse_inventory');
+      if (error) throw error;
+      return { success: true, data: true } as any;
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to seed demo data' };
     }
   }
 

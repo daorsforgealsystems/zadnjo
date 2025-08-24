@@ -202,6 +202,37 @@ const WarehouseManagement: React.FC = () => {
     }
   };
 
+  // Quick receive helper: +N inbound for a given item level
+  const quickReceive = async (level: InventoryLevel, quantity: number) => {
+    const res = await InventoryService.recordStockMovement({
+      itemId: level.itemId,
+      warehouseId: selectedWarehouse?.id,
+      movementType: 'inbound',
+      quantity,
+      referenceType: 'adjustment',
+      notes: `Quick receive +${quantity}`
+    });
+
+    if (res.success) {
+      toast.success(`Received +${quantity} for ${level.item?.name}`);
+      if (selectedWarehouse?.id) await fetchWarehouseData(selectedWarehouse.id);
+    } else {
+      toast.error(res.error || 'Failed to receive stock');
+    }
+  };
+
+  // Seed demo data via RPC, then refresh
+  const seedDemoData = async () => {
+    const res = await InventoryService.seedDemoData();
+    if (res.success) {
+      toast.success('Demo data seeded');
+      await fetchWarehouses();
+      if (selectedWarehouse?.id) await fetchWarehouseData(selectedWarehouse.id);
+    } else {
+      toast.error(res.error || 'Failed to seed demo data');
+    }
+  };
+
   const handleBarcodeScan = async (barcode: string) => {
     const response = await InventoryService.scanBarcode(barcode);
     if (response.success && response.data) {
@@ -231,6 +262,29 @@ const WarehouseManagement: React.FC = () => {
           <Skeleton className="h-48" />
           <Skeleton className="h-48" />
           <Skeleton className="h-48" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!loading && warehouses.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle>No warehouses yet</CardTitle>
+              <CardDescription>
+                Add your first warehouse to start tracking capacity and inventory levels.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => setShowAddWarehouse(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Warehouse
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -702,7 +756,13 @@ const WarehouseManagement: React.FC = () => {
                               <Badge variant="secondary">Normal</Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right space-x-2">
+                            <Button variant="outline" size="sm" onClick={() => quickReceive(level, 10)}>
+                              +10
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => quickReceive(level, 50)}>
+                              +50
+                            </Button>
                             <Button variant="ghost" size="sm">
                               View
                             </Button>
@@ -728,9 +788,9 @@ const WarehouseManagement: React.FC = () => {
                         <Download className="h-4 w-4 mr-2" />
                         Export
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={seedDemoData}>
                         <Upload className="h-4 w-4 mr-2" />
-                        Import
+                        Seed Demo Data
                       </Button>
                     </div>
                   </div>
