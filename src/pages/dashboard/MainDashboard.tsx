@@ -16,6 +16,7 @@ import AnimatedChart from '@/components/AnimatedChart';
 import EnhancedTable from '@/components/EnhancedTable';
 import AlertsPanel from '@/components/AlertsPanel';
 import MapWrapper from '@/components/MapWrapper';
+import MapTest from '@/components/MapTest';
 
 // Types
 import { Item } from '@/lib/types';
@@ -119,6 +120,7 @@ const MainDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <h1 className="text-3xl font-bold mb-2">Main Dashboard</h1>
           <p className="text-muted-foreground mb-6">Overview of logistics operations and key metrics</p>
+          <MapTest />
         </motion.div>
 
         {/* Metrics Row */}

@@ -3,6 +3,12 @@ import { createRoot } from 'react-dom/client';
 
 // Ensure React is available globally for dynamic imports
 (globalThis as any).React = React;
+(globalThis as any).ReactDOM = { createRoot };
+
+// Also ensure React's createContext is available
+if (React.createContext) {
+  (globalThis as any).createContext = React.createContext;
+}
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
