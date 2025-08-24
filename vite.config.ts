@@ -105,6 +105,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ["react", "react-dom"],
   },
   build: {
     commonjsOptions: {
@@ -133,11 +134,16 @@ export default defineConfig({
         // resolution phase.
         manualChunks(id: string) {
           if (!id) return undefined;
-          if (id.includes('react') && id.includes('node_modules')) return 'vendor';
-          if (id.includes('radix-ui') || id.includes('lucide-react')) return 'ui';
-          if (id.includes('recharts')) return 'charts';
-          if (id.includes('leaflet') || id.includes('react-leaflet')) return 'maps';
-          if (id.includes('i18next') || id.includes('react-i18next')) return 'i18n';
+          const isNodeMod = id.includes('node_modules');
+          // Put Recharts in its own chunk. Ensure this check runs before generic react check.
+          if (isNodeMod && /[\\/]recharts[\\/]/.test(id)) return 'charts';
+          // Group core React libs only (avoid matching packages that just contain the word "react")
+          if (
+            isNodeMod && /[\\/](react|react-dom|scheduler)[\\/]/.test(id)
+          ) return 'vendor';
+          if (isNodeMod && (/[\\/]@radix-ui[\\/]/.test(id) || /[\\/]lucide-react[\\/]/.test(id))) return 'ui';
+          if (isNodeMod && (/[\\/]leaflet[\\/]/.test(id) || /[\\/]react-leaflet[\\/]/.test(id))) return 'maps';
+          if (isNodeMod && (/[\\/]i18next[\\/]/.test(id) || /[\\/]react-i18next[\\/]/.test(id))) return 'i18n';
           return undefined;
         }
       }
