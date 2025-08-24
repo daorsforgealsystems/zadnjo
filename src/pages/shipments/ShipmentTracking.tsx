@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import MapView from '@/components/MapView';
+import MapWrapper from '@/components/MapWrapper';
 import { useQuery } from '@tanstack/react-query';
 import { GeoAPI } from '@/lib/api/gateway';
 
@@ -16,7 +16,7 @@ const ShipmentTracking: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="h-[480px]">
-            <MapView vehicles={vehicles} />
+            <MapWrapper vehicles={vehicles} />
           </div>
         </CardContent>
       </Card>

@@ -15,7 +15,7 @@ import MetricCard from '@/components/widgets/MetricCard';
 import AnimatedChart from '@/components/AnimatedChart';
 import EnhancedTable from '@/components/EnhancedTable';
 import AlertsPanel from '@/components/AlertsPanel';
-import MapView from '@/components/MapView';
+import MapWrapper from '@/components/MapWrapper';
 
 // Types
 import { Item } from '@/lib/types';
@@ -212,7 +212,7 @@ const MainDashboard: React.FC = () => {
                   <LoadingSpinner size="lg" text="Loading map data..." />
                 </div>
               ) : (
-                <MapView
+                <MapWrapper
                   routes={liveRoutes?.map((r) => ({ id: r.id, path: r.plannedRoute.map(p => [p.lat, p.lng] as [number, number]) }))}
                   vehicles={
                     [

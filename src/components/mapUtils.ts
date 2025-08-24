@@ -13,10 +13,15 @@ export type LeafletComponents = {
 };
 
 export const loadLeafletComponents = async (): Promise<LeafletComponents> => {
-  const [reactLeaflet, leaflet, react] = await Promise.all([
+  // Ensure React is available before loading react-leaflet
+  if (typeof (globalThis as any).React === 'undefined') {
+    const react = await import('react');
+    (globalThis as any).React = react.default || react;
+  }
+
+  const [reactLeaflet, leaflet] = await Promise.all([
     import('react-leaflet'),
-    import('leaflet'),
-    import('react')
+    import('leaflet')
   ]);
 
   // Load CSS dynamically

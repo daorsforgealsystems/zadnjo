@@ -4,7 +4,7 @@ import { motion, Variants } from 'framer-motion';
 import { Filter, RefreshCw, Truck, MapPin, AlertTriangle } from 'lucide-react';
 
 // Components
-import MapView from '@/components/MapView';
+import MapWrapper from '@/components/MapWrapper';
 import EnhancedTable from '@/components/EnhancedTable';
 import AlertsPanel from '@/components/AlertsPanel';
 
@@ -378,7 +378,7 @@ const VehicleTracking: React.FC = () => {
           <div className="lg:col-span-2 bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Live GPS Tracking</h2>
             <div className="h-[500px] relative">
-              <MapView 
+              <MapWrapper 
                 vehicles={vehicles.map(v => ({
                   id: v.id,
                   position: [v.currentLocation.lat, v.currentLocation.lng],

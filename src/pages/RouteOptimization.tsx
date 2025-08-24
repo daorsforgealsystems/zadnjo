@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMutation } from "@tanstack/react-query";
 import { RoutingAPI } from "@/lib/api/gateway";
 import { generateRouteOptions, RouteInfo } from "@/lib/route-optimizer";
-import MapView from "@/components/MapView";
+import MapWrapper from "@/components/MapWrapper";
 import { LatLngExpression } from "leaflet";
 
 interface Location {
@@ -220,7 +220,7 @@ const RouteOptimization = () => {
         <Card className="h-full">
           <CardContent className="h-full p-0 flex items-center justify-center">
             {routes.length > 0 ? (
-              <MapView routes={mapRoutes} center={mapCenter} zoom={7} />
+              <MapWrapper routes={mapRoutes} center={mapCenter} zoom={7} />
             ) : (
               <div className="text-center text-muted-foreground">
                 <p>Please select an origin and destination to see the optimized routes.</p>

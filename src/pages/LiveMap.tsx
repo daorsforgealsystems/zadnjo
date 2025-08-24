@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { pageTransition } from "@/lib/motion-variants";
 import { useTranslation } from "react-i18next";
 import { Map } from "lucide-react";
-import MapView, { Vehicle } from "@/components/MapView";
+import MapWrapper from "@/components/MapWrapper";
+import { Vehicle } from "@/components/MapView";
 import { LiveRoute, Anomaly } from "@/lib/types";
 import { predictEta } from "@/lib/eta-predictor";
 import { detectAnomalies } from "@/lib/anomaly-detector";
@@ -94,7 +95,7 @@ const LiveMap = () => {
         </h1>
       </header>
       <main className="flex-grow bg-muted relative">
-        <MapView
+        <MapWrapper
           vehicles={vehicles}
           routes={routes}
         />

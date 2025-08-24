@@ -110,6 +110,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ["react", "react-dom", "react-leaflet", "leaflet"],
   },
+  define: {
+    global: 'globalThis',
+  },
   build: {
     commonjsOptions: {
       transformMixedEsModules: true,

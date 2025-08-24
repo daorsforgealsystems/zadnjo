@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Tabs from "@/components/ui/tabs";
 import { Map, List, MessageSquare, FileText } from "lucide-react";
-import MapView from './MapView';
+import MapWrapper from './MapWrapper';
 import DocumentManager from './DocumentManager';
 import ShipmentChat from './ShipmentChat';
 import { Item } from "@/lib/types";
@@ -53,7 +53,7 @@ const ItemDetails = ({ item, onClose, onItemChange }: ItemDetailsProps) => {
                 <span>{item.location}</span>
               </div>
               <div className="h-64 rounded-md">
-                <MapView coordinates={item.coordinates} />
+                <MapWrapper coordinates={item.coordinates} />
               </div>
             </div>
           </Tabs.Content>
