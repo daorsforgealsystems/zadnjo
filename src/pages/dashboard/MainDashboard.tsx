@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getAnomalies } from '@/lib/api';
 import { Anomaly } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Package, DollarSign, Clock, Globe } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -39,7 +39,7 @@ const MainDashboard: React.FC = () => {
   const _isLoadingRoutes = routeDataQuery.isLoading;
 
   // Animation variants for staggered loading
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -49,12 +49,13 @@ const MainDashboard: React.FC = () => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-  transition: { type: 'spring', stiffness: 100, damping: 15 }
+      // Use duration/ease which align with framer-motion's Transition typing
+      transition: { duration: 0.45, ease: 'easeOut' }
     }
   };
 
