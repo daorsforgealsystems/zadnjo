@@ -120,14 +120,13 @@ export const FullPageLoading: React.FC<{
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 200 }}
+          transition={{ type: 'spring' as const, stiffness: 200 }}
           className="mx-auto mb-6"
         >
           <LoadingSpinner size="lg" variant="truck" />
         </motion.div>
 
         {/* Title and subtitle */}
-        <div className="space-y-2">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

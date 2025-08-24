@@ -7,7 +7,7 @@ export const pageTransition: Variants = {
     opacity: 1, 
     y: 0,
     transition: { 
-      type: 'spring', 
+      type: 'spring' as const, 
       stiffness: 300, 
       damping: 30,
       mass: 1
@@ -18,7 +18,7 @@ export const pageTransition: Variants = {
     y: -20,
     transition: { 
       duration: 0.2, 
-      ease: 'easeInOut' 
+      ease: 'easeInOut' as const 
     }
   }
 };
@@ -32,12 +32,12 @@ export const authFade: Variants = {
   animate: { 
     opacity: 1, 
     scale: 1,
-    transition: { duration: 0.3, ease: easeOut }
+  transition: { duration: 0.3, ease: easeOut }
   },
   exit: { 
     opacity: 0, 
     scale: 0.95,
-    transition: { duration: 0.2, ease: easeInOut }
+  transition: { duration: 0.2, ease: easeInOut }
   }
 };
 
@@ -47,12 +47,12 @@ export const nestedFadeSlide: Variants = {
   animate: { 
     opacity: 1, 
     x: 0,
-    transition: { duration: 0.2, ease: easeOut }
+  transition: { duration: 0.2, ease: easeOut }
   },
   exit: { 
     opacity: 0, 
     x: -10,
-    transition: { duration: 0.15, ease: easeInOut }
+  transition: { duration: 0.15, ease: easeInOut }
   }
 };
 

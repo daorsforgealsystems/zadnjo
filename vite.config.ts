@@ -106,7 +106,12 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+  "@": path.resolve(__dirname, "./src"),
+  "components": path.resolve(__dirname, "./src/components"),
+  "ui": path.resolve(__dirname, "./src/components/ui"),
+  "lib": path.resolve(__dirname, "./src/lib"),
+  "hooks": path.resolve(__dirname, "./src/hooks"),
+  "utils": path.resolve(__dirname, "./src/lib/utils"),
       "react": path.resolve(__dirname, "./node_modules/react"),
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
@@ -151,7 +156,7 @@ export default defineConfig({
   // Drop console/debugger in production for smaller bundles
 
     rollupOptions: {
-      external: (id) => {
+      external: (_id) => {
         // Don't externalize React - keep it bundled
         return false;
       },

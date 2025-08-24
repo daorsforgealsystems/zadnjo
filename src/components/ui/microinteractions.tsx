@@ -103,7 +103,7 @@ export const FloatingFeedback: React.FC<{
                 }}
                 transition={{ 
                   duration: 1.5,
-                  ease: 'easeOut'
+                  ease: 'easeOut' as const
                 }}
                 className={cn(
                   'absolute top-1/2 left-1/2 w-2 h-2 rounded-full pointer-events-none',
@@ -215,7 +215,7 @@ export const MagneticButton: React.FC<{
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       animate={{ x: position.x, y: position.y }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+  transition={{ type: 'spring' as const, stiffness: 300, damping: 30 }}
     >
       {children}
     </motion.div>
@@ -276,7 +276,7 @@ export const ElasticScale: React.FC<{
       className={className}
       whileHover={{ scale }}
       whileTap={{ scale: scale * 0.95 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+  transition={{ type: 'spring' as const, stiffness: 400, damping: 17 }}
     >
       {children}
     </motion.div>

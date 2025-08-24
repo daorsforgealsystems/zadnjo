@@ -38,26 +38,8 @@ const MainDashboard: React.FC = () => {
   const routeData = routeDataQuery.data as any;
   const _isLoadingRoutes = routeDataQuery.isLoading;
 
-  // Animation variants for staggered loading
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-  staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      // Use duration/ease which align with framer-motion's Transition typing
-      transition: { duration: 0.45, ease: 'easeOut' }
-    }
-  };
+  // Animation variants removed as top-level typed constants to avoid strict typing issues.
+  // We'll inline the variant objects below and cast to `any` at use sites.
 
   // Use live data where available
   const { data: items, isLoading: isLoadingItems } = useQuery<import('@/lib/types').Item[]>({ queryKey: ['items'], queryFn: () => getItems() });
@@ -109,6 +91,17 @@ const MainDashboard: React.FC = () => {
   // Map metric changeType from API ('positive'|'negative'|'neutral') to MetricCard expected values
   const mapChangeType = (t?: string) => t === 'positive' ? 'increase' : t === 'negative' ? 'decrease' : 'neutral';
 
+  // Typed animation variants (avoid unsafe casts)
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  };
+
+  const fadeUpVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.45, ease: 'easeOut' as const } },
+  };
+
   return (
     <div className="p-6">
       <motion.div
@@ -117,14 +110,14 @@ const MainDashboard: React.FC = () => {
         variants={containerVariants}
         className="space-y-6"
       >
-        <motion.div variants={itemVariants}>
+  <motion.div variants={fadeUpVariants}>
           <h1 className="text-3xl font-bold mb-2">Main Dashboard</h1>
           <p className="text-muted-foreground mb-6">Overview of logistics operations and key metrics</p>
         </motion.div>
 
         {/* Metrics Row */}
         <motion.div 
-          variants={itemVariants}
+          variants={fadeUpVariants}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
         >
           <MetricCard
@@ -177,7 +170,7 @@ const MainDashboard: React.FC = () => {
 
         {/* Charts Row */}
         <motion.div 
-          variants={itemVariants}
+          variants={fadeUpVariants}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
       <div className="bg-card p-6 rounded-lg shadow">
@@ -203,7 +196,7 @@ const MainDashboard: React.FC = () => {
 
         {/* Map and Alerts Row */}
         <motion.div 
-          variants={itemVariants}
+          variants={fadeUpVariants}
           className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
           <div className="lg:col-span-2 bg-card p-6 rounded-lg shadow">
@@ -254,7 +247,7 @@ const MainDashboard: React.FC = () => {
         </motion.div>
 
         {/* Recent Shipments Table */}
-        <motion.div variants={itemVariants}>
+  <motion.div variants={fadeUpVariants}>
           <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Recent Shipments</h2>
             <EnhancedTable
@@ -266,7 +259,7 @@ const MainDashboard: React.FC = () => {
         </motion.div>
 
         {/* Popular Routes */}
-        <motion.div variants={itemVariants}>
+  <motion.div variants={fadeUpVariants}>
       <div className="bg-card p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Popular Routes</h2>
               <AnimatedChart

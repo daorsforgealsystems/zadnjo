@@ -57,7 +57,7 @@ const modalVariants: Record<string, Variants> = {
       opacity: 1, 
       scale: 1, 
       y: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 30 } as Transition
+      transition: { type: 'spring' as const, stiffness: 300, damping: 30 }
     },
     exit: { opacity: 0, scale: 0.95, y: 20 }
   },
@@ -67,7 +67,7 @@ const modalVariants: Record<string, Variants> = {
       opacity: 1, 
       scale: 1, 
       filter: 'blur(0px)',
-      transition: { duration: 0.3 } as Transition
+      transition: { duration: 0.3 }
     },
     exit: { opacity: 0, scale: 0.9, filter: 'blur(10px)' }
   },
@@ -76,7 +76,7 @@ const modalVariants: Record<string, Variants> = {
     visible: { 
       opacity: 1, 
       scale: 1,
-      transition: { type: 'spring', stiffness: 400, damping: 25 } as Transition
+      transition: { type: 'spring' as const, stiffness: 400, damping: 25 }
     },
     exit: { opacity: 0, scale: 0.3 }
   },
@@ -86,7 +86,7 @@ const modalVariants: Record<string, Variants> = {
       opacity: 1, 
       x: 0, 
       y: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 30 } as Transition
+      transition: { type: 'spring' as const, stiffness: 300, damping: 30 }
     },
     exit: { opacity: 0, y: '100%' }
   },
@@ -95,7 +95,7 @@ const modalVariants: Record<string, Variants> = {
     visible: { 
       opacity: 1, 
       rotateX: 0,
-      transition: { duration: 0.4, ease: 'easeOut' } as Transition
+      transition: { duration: 0.4, ease: 'easeOut' as const }
     },
     exit: { opacity: 0, rotateX: 90 }
   },
@@ -105,17 +105,17 @@ const modalVariants: Record<string, Variants> = {
       opacity: 1, 
       scale: 1,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 200,
         damping: 15,
-        when: 'beforeChildren',
+        when: 'beforeChildren' as const,
         staggerChildren: 0.1
-      } as Transition
+      }
     },
     exit: { 
       opacity: 0, 
       scale: 0,
-      transition: { duration: 0.2 } as Transition
+  transition: { duration: 0.2 }
     }
   },
   bounce: {
@@ -124,7 +124,7 @@ const modalVariants: Record<string, Variants> = {
       opacity: 1, 
       scale: 1, 
       y: 0,
-      transition: { type: 'spring', stiffness: 400, damping: 10, bounce: 0.6 } as Transition
+  transition: { type: 'spring' as const, stiffness: 400, damping: 10, bounce: 0.6 }
     },
     exit: { opacity: 0, scale: 0.3, y: 100 }
   },
@@ -305,17 +305,17 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            transition={((): Transition | undefined => {
+            transition={(() => {
               if (animation === 'spring') {
-                return { type: 'spring', stiffness: 300, damping: 30 } as Transition;
+                return { type: 'spring' as const, stiffness: 300, damping: 30 };
               }
 
               if (animation === 'linear') {
-                return { type: 'tween', ease: 'linear', duration: 0.2 } as Transition;
+                return { type: 'tween' as const, ease: 'linear' as const, duration: 0.2 };
               }
 
               // 'ease' or any other string -> use a default tween with ease
-              return { type: 'tween', ease: 'easeOut', duration: 0.25 } as Transition;
+              return { type: 'tween' as const, ease: 'easeOut' as const, duration: 0.25 };
             })()}
             role="dialog"
             aria-modal="true"

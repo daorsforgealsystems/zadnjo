@@ -1,6 +1,8 @@
 /* stylelint-disable at-rule-no-unknown */
 @import "leaflet/dist/leaflet.css";
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Override Leaflet layer control icons to avoid local asset resolution at build */
 .leaflet-control-layers-toggle {

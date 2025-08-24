@@ -118,7 +118,7 @@ export const EnhancedError: React.FC<EnhancedErrorProps> = ({
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            transition={{ delay: 0.2, type: 'spring' as const, stiffness: 200 }}
             className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10"
           >
             <IconComponent className={cn('h-8 w-8', iconColor)} />
