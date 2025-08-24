@@ -87,6 +87,7 @@ const AnimatedChart = ({
   className,
   delay = 0,
   height,
+  containerClassName,
 }: AnimatedChartProps) => {
   const [isVisible, setIsVisible] = useState(false);
   // Dynamically loaded recharts to avoid SSR/initial bundle cost
