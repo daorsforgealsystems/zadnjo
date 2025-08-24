@@ -1,8 +1,10 @@
-/* stylelint-disable at-rule-no-unknown */
 @import "leaflet/dist/leaflet.css";
+
+/* stylelint-disable at-rule-no-unknown */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* stylelint-enable at-rule-no-unknown */
 
 /* Override Leaflet layer control icons to avoid local asset resolution at build */
 .leaflet-control-layers-toggle {
@@ -291,5 +293,3 @@ All colors MUST be HSL for consistency and theming.
     background: hsl(var(--primary-dark));
   }
 }
-
-/* stylelint-enable at-rule-no-unknown */
