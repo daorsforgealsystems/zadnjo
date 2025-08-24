@@ -33,6 +33,7 @@ export default defineConfig({
   // Progressive Web App support
   VitePWA({
     registerType: 'autoUpdate',
+    disable: process.env.NODE_ENV === 'development', // Disable PWA in development
     includeAssets: ['favicon.ico', 'robots.txt', 'offline.html'],
     manifest: {
       name: 'Flow Motion Logistics',
