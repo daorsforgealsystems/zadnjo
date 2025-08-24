@@ -17,6 +17,8 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './store';
 import { debug, initDebug } from './lib/debug';
 import { validateConfig } from './lib/config';
+import { supabase } from './lib/supabaseClient';
+import { isSupabaseTableMissingError, MIGRATION_HINTS } from './lib/supabase-errors';
 
 // Create a client with more resilient configuration
 const queryClient = new QueryClient({
@@ -86,6 +88,42 @@ try {
   // Stop further execution by rethrowing after rendering fallback UI
   throw error;
 }
+
+// Lightweight startup probe: check essential DB tables once and log a single helpful warning if missing.
+(async () => {
+  try {
+    const checkTables = ['orders', 'delivery_routes', 'anomalies'];
+    const missing: string[] = [];
+
+    // We'll probe by attempting a single minimal select on each table.
+    await Promise.all(checkTables.map(async (t) => {
+      try {
+        const res = await supabase.from(t).select('id').limit(1);
+        // Supabase client returns { data, error }
+        // Some SDK versions return the tuple, handle both shapes
+        if ((res as any).error) {
+          const err = (res as any).error;
+          const parsed = isSupabaseTableMissingError(err);
+          if (parsed) missing.push(t);
+        }
+      } catch (e) {
+        // If a network/404 occurs, check message
+        const parsed = isSupabaseTableMissingError(e);
+        if (parsed) missing.push(t);
+      }
+    }));
+
+    if (missing.length > 0) {
+      const hints = missing.map(t => `${t}: ${MIGRATION_HINTS[t] || 'Run SQL migrations in database/ folder'}`).join('\n');
+      debug('Database missing tables detected at startup', 'warn', { missing, hints });
+      // Show a single console warning to avoid noisy repeated errors from components
+      console.warn('DAORS: Missing DB tables detected:', missing.join(', '));
+      console.warn('Apply migrations (in repo `database/`) to fix:', '\n' + hints);
+    }
+  } catch (err) {
+    debug('Startup DB probe failed (non-fatal)', 'info', err);
+  }
+})();
 
 if (container) {
   try {

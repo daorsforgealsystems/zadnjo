@@ -182,3 +182,19 @@ After setting up the database:
 3. Verify that different user roles see appropriate data
 4. Test the real-time features (if implemented)
 5. Configure any additional integrations (maps, notifications, etc.)
+
+## Quick fix for missing frontend tables (common issue)
+
+If you see PostgREST errors like "Could not find the table 'public.orders' in the schema cache" or the frontend logs 404s for `orders`, `delivery_routes`, or `anomalies`, run the following in your Supabase SQL editor in this order:
+
+1. `logicore-schema.sql` — creates core LogiCore tables (including `orders`, `delivery_routes`, `vehicles`, `route_stops`).
+2. `add-frontend-tables-to-logicore.sql` — adds `items`, `anomalies`, `notifications`, `chat_messages` and related indexes.
+3. If only `orders` is required or missing, you can run `add-orders-table.sql`.
+
+Verify with:
+
+```sql
+SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN ('orders','delivery_routes','anomalies');
+```
+
+The frontend contains a startup probe that will log a single warning if these tables are missing and provide pointers to the SQL files.

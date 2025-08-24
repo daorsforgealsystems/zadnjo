@@ -236,3 +236,44 @@ jobs:
             echo "- Security: ${{ needs.security-scan.result }}"
             exit 1
           fi
+
+      # Optional job: apply database migrations to a DEV Supabase instance
+      # This job runs only when a DB connection string secret is present.
+      # Required secrets to provide in repository settings for automatic migrations:
+      # - DEV_SUPABASE_DB_URL : Full Postgres connection string for the dev DB (e.g. postgres://user:pass@host:5432/dbname)
+      # Optional (used by the app elsewhere):
+      # - DEV_SUPABASE_URL and DEV_SUPABASE_ANON_KEY (already used in build job)
+      apply-migrations:
+        runs-on: ubuntu-latest
+        needs: setup
+        # Only run the job when the dev DB connection secret is provided
+        if: ${{ secrets.DEV_SUPABASE_DB_URL != '' }}
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+
+          - name: Install psql (postgres client)
+            run: |
+              sudo apt-get update
+              sudo apt-get install -y postgresql-client
+
+          - name: Apply SQL migrations to DEV Supabase DB
+            env:
+              DEV_SUPABASE_DB_URL: ${{ secrets.DEV_SUPABASE_DB_URL }}
+            run: |
+              echo "Applying SQL migrations to dev DB"
+              set -e
+              SQL_DIR="${{ github.workspace }}/database"
+              if [ -f "$SQL_DIR/logicore-schema.sql" ]; then
+                echo "-- running logicore-schema.sql"
+                psql "$DEV_SUPABASE_DB_URL" -f "$SQL_DIR/logicore-schema.sql"
+              fi
+              if [ -f "$SQL_DIR/add-frontend-tables-to-logicore.sql" ]; then
+                echo "-- running add-frontend-tables-to-logicore.sql"
+                psql "$DEV_SUPABASE_DB_URL" -f "$SQL_DIR/add-frontend-tables-to-logicore.sql"
+              fi
+              if [ -f "$SQL_DIR/add-orders-table.sql" ]; then
+                echo "-- running add-orders-table.sql"
+                psql "$DEV_SUPABASE_DB_URL" -f "$SQL_DIR/add-orders-table.sql"
+              fi
+              echo "Migrations applied."
