@@ -29,6 +29,23 @@ function useChart() {
   return ctx
 }
 
+// Helper: safely extract string-like fields from a LegendPayload or its inner payload.
+function extractStringFromPayload(item: LegendPayload | undefined, key: string): string | undefined {
+  if (!item || typeof item !== "object") return undefined
+  const anyItem = item as any
+  // direct property on the legend payload
+  if (key in anyItem && typeof anyItem[key] === "string") return anyItem[key]
+  // special 'name' property which may live on payload or top-level
+  if (typeof anyItem.name === "string") return anyItem.name
+  // check nested payload
+  if (anyItem.payload && typeof anyItem.payload === "object") {
+    const p = anyItem.payload as Record<string, unknown>
+    if (key in p && typeof p[key] === "string") return p[key] as string
+    if (typeof p.name === "string") return p.name
+  }
+  return undefined
+}
+
 type ChartContainerProps = Omit<React.ComponentProps<"div">, "children"> & {
   config: ChartConfig
   children: React.ReactElement
@@ -50,8 +67,8 @@ const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(({ 
         )}
         {...props}
       >
-        <ChartStyle id={chartId} config={config} />
-  <RechartsPrimitive.ResponsiveContainer>{children as React.ReactElement}</RechartsPrimitive.ResponsiveContainer>
+  <ChartStyle id={chartId} config={config} />
+  <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   )
@@ -127,8 +144,9 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
 
     const tooltipLabel = React.useMemo(() => {
       if (hideLabel || !payloadItems?.length) return null
-      const item = payloadItems[0]
-          const key = `${labelKey || item.dataKey || (item as any).name || "value"}`
+  const item = payloadItems[0]
+  const firstName = extractStringFromPayload(item, "name")
+  const key = `${labelKey || item.dataKey || firstName || "value"}`
       const itemConfig = getPayloadConfigFromPayload(config, item, key)
       const value = !labelKey && typeof label === "string" ? config[label as keyof typeof config]?.label || label : itemConfig?.label
 
@@ -146,7 +164,8 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
           {payloadItems.map((item: LegendPayload, index: number) => {
-            const key = `${nameKey || (item as any).name || item.dataKey || "value"}`
+            const itemName = extractStringFromPayload(item, "name")
+            const key = `${nameKey || itemName || item.dataKey || "value"}`
             const itemConfig = getPayloadConfigFromPayload(config, item, key)
             const payloadObj = (item.payload as Record<string, unknown> | undefined) ?? undefined
             const indicatorColor = color || (payloadObj && (payloadObj["fill"] as string | undefined)) || (item.color as string | undefined)
@@ -156,8 +175,8 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
                 key={String(item.dataKey ?? index)}
                 className={cn("flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground", indicator === "dot" && "items-center")}
               >
-                {formatter && item.value !== undefined && item.value !== null && (item as any).name ? (
-                  formatter(item.value as string | number | boolean, (item as any).name as string, item, index, payloadItems)
+                {formatter && item.value !== undefined && item.value !== null && extractStringFromPayload(item, "name") ? (
+                  formatter(item.value as string | number | boolean, extractStringFromPayload(item, "name") as string, item, index, payloadItems)
                 ) : (
                   <>
                     {itemConfig?.icon ? (
@@ -182,7 +201,7 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
                     <div className={cn("flex flex-1 justify-between leading-none", nestLabel ? "items-end" : "items-center")}>
                       <div className="grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
-                        <span className="text-muted-foreground">{itemConfig?.label || (item as any).name}</span>
+                        <span className="text-muted-foreground">{itemConfig?.label || extractStringFromPayload(item, "name")}</span>
                       </div>
                       {item.value !== undefined && item.value !== null && (
                         <span className="font-mono font-medium tabular-nums text-foreground">{String(item.value)}</span>

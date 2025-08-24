@@ -81,7 +81,7 @@ const resolveColor = (color: string): string => {
 };
 
 const AnimatedChart = (props: AnimatedChartProps) => {
-  const { title, data, type = "bar", className, delay = 0, height, containerClassName } = props
+  const { title, data, type = "bar", className, delay = 0, height } = props
   const [isVisible, setIsVisible] = useState(false);
   // Dynamically loaded recharts to avoid SSR/initial bundle cost
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,8 +114,8 @@ const AnimatedChart = (props: AnimatedChartProps) => {
     return acc;
   }, {} as ChartConfig);
 
-  const loadingSkeleton = containerClassName ? (
-    <div className={cn('w-full animate-pulse rounded-md bg-muted', containerClassName)} />
+  const loadingSkeleton = props.containerClassName ? (
+    <div className={cn('w-full animate-pulse rounded-md bg-muted', props.containerClassName)} />
   ) : (
     <div className="w-full animate-pulse rounded-md bg-muted" style={{ height: chartHeight }} />
   );
@@ -125,8 +125,8 @@ const AnimatedChart = (props: AnimatedChartProps) => {
       <ChartContainer
         config={chartConfig}
         // prefer containerClassName (Tailwind-driven); fallback to inline pixel height
-        className={containerClassName ? cn('w-full', containerClassName) : 'w-full'}
-        style={containerClassName ? undefined : { height: chartHeight }}
+  className={props.containerClassName ? cn('w-full', props.containerClassName) : 'w-full'}
+  style={props.containerClassName ? undefined : { height: chartHeight }}
       >
         <R.BarChart data={data}>
           <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
@@ -148,8 +148,8 @@ const AnimatedChart = (props: AnimatedChartProps) => {
     R ? (
       <ChartContainer
         config={chartConfig}
-        className={containerClassName ? cn('w-full', containerClassName) : 'w-full'}
-        style={containerClassName ? undefined : { height: chartHeight }}
+  className={props.containerClassName ? cn('w-full', props.containerClassName) : 'w-full'}
+  style={props.containerClassName ? undefined : { height: chartHeight }}
       >
         <R.LineChart data={data}>
           <R.CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/.2)" />
@@ -189,8 +189,8 @@ const AnimatedChart = (props: AnimatedChartProps) => {
     return R ? (
       <ChartContainer
         config={chartConfig}
-        className={containerClassName ? cn('w-full', containerClassName) : 'w-full'}
-        style={containerClassName ? undefined : { height: chartHeight }}
+  className={props.containerClassName ? cn('w-full', props.containerClassName) : 'w-full'}
+  style={props.containerClassName ? undefined : { height: chartHeight }}
       >
         <R.PieChart>
           <R.Tooltip content={<CustomTooltip />} />
