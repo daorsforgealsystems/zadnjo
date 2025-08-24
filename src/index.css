@@ -1,6 +1,6 @@
 @import "leaflet/dist/leaflet.css";
 
-/* stylelint-disable at-rule-no-unknown */
+/* stylelint-disable at-rule-no-unknown -- Tailwind CSS directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
