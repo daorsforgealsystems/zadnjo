@@ -4,7 +4,6 @@ import { type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/lib/ui-variants"
-import { animateButtonHover } from "@/lib/animation-utils"
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -16,44 +15,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     
-    const buttonRef = React.useRef<HTMLButtonElement>(null)
-    const [isHovered, setIsHovered] = React.useState(false)
-    
-    React.useEffect(() => {
-      const el = buttonRef.current
-      if (!el) return
-      
-      const startAnimation = () => {
-        setIsHovered(true)
-        animateButtonHover(el)
-      }
-      
-      const endAnimation = () => {
-        setIsHovered(false)
-      }
-      
-      el.addEventListener('mouseenter', startAnimation)
-      el.addEventListener('mouseleave', endAnimation)
-      
-      return () => {
-        el.removeEventListener('mouseenter', startAnimation)
-        el.removeEventListener('mouseleave', endAnimation)
-      }
-    }, [])
-    
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
-ref={(node) => {
-  buttonRef.current = node
-  if (typeof ref === 'function') {
-    ref(node)
-  } else if (ref) {
-    // Create a new object instead of modifying ref.current
-    const newRef = { current: node }
-    Object.assign(ref, newRef)
-  }
-}}
+        ref={ref}
         {...props}
       />
     )

@@ -33,28 +33,24 @@ const LazyLoadingErrorFallback = () => (
 );
 
 // Wrapper for lazy loaded components with error handling
-function lazyWithErrorHandling<T extends Record<string, unknown> = Record<string, unknown>>(
-  importFn: () => Promise<unknown>
-): React.ComponentType<T> {
-  const LazyComponent = lazy(() =>
-    importFn()
-      .then((mod) => {
-        // prefer default export
-        const maybe = mod as Record<string, unknown> | React.ComponentType<T>;
-        const resolved: React.ComponentType<T> = maybe && 'default' in maybe ? (maybe as { default: React.ComponentType<T> }).default : (maybe as React.ComponentType<T>);
-        return { default: resolved };
-      })
-      .catch((error: Error) => {
-        console.error('Error loading component:', error);
-        return { default: LazyLoadingErrorFallback as React.ComponentType<T> };
-      })
-  );
+function lazyWithErrorHandling<P extends object>(
+  importFn: () => Promise<{ default: React.ComponentType<P> }>
+): React.FC<P> {
+  const LazyComponent = lazy(importFn);
 
-  return (props: T) => (
+  const componentName = importFn.toString().includes('DashboardLayout') ? 'DashboardLayout' : 'Unknown';
+
+  const WrappedComponent: React.FC<P> = (props) => (
     <ErrorBoundary fallback={<LazyLoadingErrorFallback />}>
-      <LazyComponent {...(props as T)} />
+      <Suspense fallback={<LoadingScreen />}>
+        <LazyComponent {...props} />
+      </Suspense>
     </ErrorBoundary>
   );
+
+  WrappedComponent.displayName = `lazyWithErrorHandling(${componentName})`;
+
+  return WrappedComponent;
 }
 
 const CustomerDashboard = lazyWithErrorHandling(() => import('./pages/CustomerDashboard'));

@@ -118,18 +118,16 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(({
   const [hasInteracted, setHasInteracted] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
-  const labelRef = useRef<HTMLLabelElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Combine refs
-  const combinedRef = (node: HTMLInputElement) => {
-    inputRef.current = node;
+  const setRefs = useCallback((node: HTMLInputElement) => {
+    // Ref's from forwardRef are immutable, so we need to assign the node to them
+    (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
     if (typeof ref === 'function') {
       ref(node);
     } else if (ref) {
-      ref.current = node;
+      (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
     }
-  };
+  }, [ref]);
 
   // Validation logic
   const validateInput = useCallback((inputValue: string) => {
