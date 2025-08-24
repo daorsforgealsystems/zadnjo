@@ -80,15 +80,8 @@ const resolveColor = (color: string): string => {
   }
 };
 
-const AnimatedChart = ({
-  title,
-  data,
-  type = "bar",
-  className,
-  delay = 0,
-  height,
-  containerClassName,
-}: AnimatedChartProps) => {
+const AnimatedChart = (props: AnimatedChartProps) => {
+  const { title, data, type = "bar", className, delay = 0, height, containerClassName } = props
   const [isVisible, setIsVisible] = useState(false);
   // Dynamically loaded recharts to avoid SSR/initial bundle cost
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

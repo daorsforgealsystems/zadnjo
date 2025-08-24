@@ -29,10 +29,12 @@ function useChart() {
   return ctx
 }
 
-const ChartContainer = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div"> & { config: ChartConfig; children: React.ReactElement }
->(({ id, className, children, config, ...props }, ref) => {
+type ChartContainerProps = Omit<React.ComponentProps<"div">, "children"> & {
+  config: ChartConfig
+  children: React.ReactElement
+}
+
+const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
