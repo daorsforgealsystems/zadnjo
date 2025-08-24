@@ -1,5 +1,12 @@
 /* stylelint-disable at-rule-no-unknown */
 @import "leaflet/dist/leaflet.css";
+/* Override Leaflet layer control icons to avoid local asset resolution at build */
+.leaflet-control-layers-toggle {
+  background-image: url('https://unpkg.com/leaflet@1.9.4/dist/images/layers.png') !important;
+}
+.leaflet-retina .leaflet-control-layers-toggle {
+  background-image: url('https://unpkg.com/leaflet@1.9.4/dist/images/layers-2x.png') !important;
+}
 
 /* Tailwind v4: single entry import */
 @import "tailwindcss";
