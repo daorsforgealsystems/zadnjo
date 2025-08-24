@@ -2,6 +2,41 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { NavigationAnalytics, NavigationItem, UserRole } from '@/lib/api/navigation-api';
 import { NavigationAPI } from '@/lib/api/navigation-api';
 
+// Typed shape for permissions returned by the API (or nested under { permissions: ... })
+type NavigationPermissions = {
+  actions: string[];
+  restrictedComponents: string[];
+  landingPage?: string;
+  menuStructure?: Array<{ href: string }>; // optional when only actions/restrictedComponents provided
+};
+
+// Exact shape used in the Redux store
+type StorePermissions = {
+  actions: string[];
+  restrictedComponents: string[];
+  landingPage: string;
+};
+
+function isNavigationPermissions(obj: unknown): obj is NavigationPermissions {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return Array.isArray(o.actions) && Array.isArray(o.restrictedComponents);
+}
+
+function isWrappedPermissions(obj: unknown): obj is { permissions: NavigationPermissions } {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return 'permissions' in o && isNavigationPermissions(o.permissions);
+}
+
+function sanitizePermissions(p: Partial<NavigationPermissions> | undefined): StorePermissions {
+  return {
+    actions: Array.isArray(p?.actions) ? (p!.actions as string[]) : [],
+    restrictedComponents: Array.isArray(p?.restrictedComponents) ? (p!.restrictedComponents as string[]) : [],
+    landingPage: typeof p?.landingPage === 'string' ? (p!.landingPage as string) : '/dashboard',
+  };
+}
+
 export interface NavigationState {
   menu: NavigationItem[];
   permissions: {
@@ -87,7 +122,8 @@ export const loadNavigationState = createAsyncThunk(
 export const checkRouteAccess = createAsyncThunk(
   'navigation/checkRouteAccess',
   async ({ userId, route, role }: { userId: string; route: string; role: UserRole }) => {
-    return await NavigationAPI.checkRouteAccess(userId, route, role);
+    const result = await NavigationAPI.checkRouteAccess(userId, route, role);
+    return result.hasAccess; // Return boolean as documented
   }
 );
 
@@ -286,11 +322,19 @@ const navigationSlice = createSlice({
       .addCase(loadNavigationState.fulfilled, (state, action) => {
         const { menu, permissions, customization, analytics } = action.payload;
           state.menu = menu;
-          // permissions may be nested (permissions.permissions) or already the shape we need
-          if (permissions && (permissions as any).permissions) {
-            state.permissions = (permissions as any).permissions;
-          } else if (permissions) {
-            state.permissions = permissions as any;
+          // permissions may be nested under { permissions } or already the shape we need
+          if (permissions) {
+            if (isWrappedPermissions(permissions)) {
+              state.permissions = sanitizePermissions(permissions.permissions);
+            } else if (isNavigationPermissions(permissions)) {
+              state.permissions = sanitizePermissions(permissions);
+            } else {
+              // Unknown shape: try best-effort extraction or leave defaults
+              // If there's a top-level 'permissions' field that didn't match the type guard,
+              // attempt a shallow extraction to avoid runtime crashes.
+              const p = (permissions as any)?.permissions ?? permissions as any;
+              state.permissions = sanitizePermissions(p);
+            }
           }
           state.customization = customization || state.customization;
           state.analytics = analytics || state.analytics;
