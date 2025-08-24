@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Globe } from 'lucide-react';
+import { springFirm } from '@/lib/motion-transitions';
 
 const LanguageChangeNotification = () => {
   const [notification, setNotification] = useState<{ language: string } | null>(null);
 
   useEffect(() => {
-    const handleLanguageChange = (event: CustomEvent) => {
-      setNotification({ language: event.detail.language });
+    const handleLanguageChange = (event: Event) => {
+      const custom = event as CustomEvent<{ language: string }>;
+      setNotification({ language: custom.detail.language });
       
       // Auto-hide after 3 seconds
       setTimeout(() => {
@@ -15,10 +17,10 @@ const LanguageChangeNotification = () => {
       }, 3000);
     };
 
-    window.addEventListener('language-changed', handleLanguageChange as EventListener);
+    window.addEventListener('language-changed', handleLanguageChange);
     
     return () => {
-      window.removeEventListener('language-changed', handleLanguageChange as EventListener);
+      window.removeEventListener('language-changed', handleLanguageChange);
     };
   }, []);
 
@@ -29,7 +31,7 @@ const LanguageChangeNotification = () => {
           initial={{ opacity: 0, y: -50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -50, scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          transition={springFirm}
           className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] pointer-events-none"
         >
           <div className="bg-background/90 backdrop-blur-lg border border-border/50 rounded-full px-6 py-3 shadow-lg flex items-center gap-3">

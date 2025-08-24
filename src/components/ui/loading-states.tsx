@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, Truck, Package, MapPin, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { springSoft } from '@/lib/motion-transitions';
 import { EnhancedSkeleton, SkeletonCard, SkeletonTable, SkeletonChart, SkeletonList } from './enhanced-skeleton';
 
 // Small reusable loading spinner with variants
@@ -85,7 +86,7 @@ export const FullPageLoading: React.FC<{
   return (
     <div className={cn('min-h-screen flex items-center justify-center bg-background', className)}>
       <div className="text-center space-y-6 max-w-md p-6">
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' as const, stiffness: 200 }} className="mx-auto mb-6">
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={springSoft} className="mx-auto mb-6">
           <LoadingSpinner size="lg" variant="truck" />
         </motion.div>
 
@@ -308,21 +309,6 @@ export const EmptyStateLoading: React.FC<{ className?: string; message?: string 
     <div className={cn('flex flex-col items-center justify-center py-12', className)}>
       <Loader2 className="animate-spin w-8 h-8 text-muted-foreground" />
       <div className="mt-4 text-sm text-muted-foreground">{message}</div>
-    </div>
-  );
-};
-      </div>
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <EnhancedSkeleton className="w-3 h-3" variant="pulse" rounded="full" />
-            <div className="flex-1 space-y-1">
-              <EnhancedSkeleton className="h-3 w-full" variant="shimmer" />
-              <EnhancedSkeleton className="h-2 w-2/3" variant="shimmer" />
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

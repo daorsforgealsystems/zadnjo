@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { springFirm } from '@/lib/motion-transitions';
 import { Globe, Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+
+
 
 interface Language {
   code: string;
@@ -173,7 +176,7 @@ const LanguageSwitcher = ({ variant = 'default', className }: LanguageSwitcherPr
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        transition={springFirm}
                       >
                         <Check className="h-4 w-4 text-primary" />
                       </motion.div>

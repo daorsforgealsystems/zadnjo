@@ -1,4 +1,5 @@
-import type { Variants, Easing } from 'framer-motion';
+import type { Variants } from 'framer-motion';
+import { springMedium, quickEaseInOut, easeOut, easeInOut } from './motion-transitions';
 
 // Page transition variants
 export const pageTransition: Variants = {
@@ -6,38 +7,27 @@ export const pageTransition: Variants = {
   animate: { 
     opacity: 1, 
     y: 0,
-    transition: { 
-      type: 'spring' as const, 
-      stiffness: 300, 
-      damping: 30,
-      mass: 1
-    }
+    transition: springMedium,
   },
   exit: { 
     opacity: 0, 
     y: -20,
-    transition: { 
-      duration: 0.2, 
-      ease: 'easeInOut' as const 
-    }
+    transition: quickEaseInOut,
   }
 };
 
 // Auth page transition variants
-const easeOut: Easing = [0.22, 1, 0.36, 1];
-const easeInOut: Easing = [0.4, 0, 1, 1];
-
 export const authFade: Variants = {
   initial: { opacity: 0, scale: 0.95 },
   animate: { 
     opacity: 1, 
     scale: 1,
-  transition: { duration: 0.3, ease: easeOut }
+    transition: { duration: 0.3, ease: easeOut }
   },
   exit: { 
     opacity: 0, 
     scale: 0.95,
-  transition: { duration: 0.2, ease: easeInOut }
+    transition: { duration: 0.2, ease: easeInOut }
   }
 };
 
@@ -47,12 +37,12 @@ export const nestedFadeSlide: Variants = {
   animate: { 
     opacity: 1, 
     x: 0,
-  transition: { duration: 0.2, ease: easeOut }
+    transition: { duration: 0.2, ease: easeOut }
   },
   exit: { 
     opacity: 0, 
     x: -10,
-  transition: { duration: 0.15, ease: easeInOut }
+    transition: { duration: 0.15, ease: easeInOut }
   }
 };
 
