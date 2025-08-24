@@ -418,7 +418,7 @@ const App = () => {
       debug('Prefetching critical routes', 'info');
       // Trigger dynamic imports for commonly visited routes
       // These match lazy-loaded modules above
-      import('./pages/Index');
+      import('./pages/LandingPage');
       import('./pages/Inventory');
       import('./pages/LiveMap');
       import('./pages/tracking/LiveTracking');
