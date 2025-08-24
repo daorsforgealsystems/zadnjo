@@ -2,7 +2,8 @@
 import './react-init';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import ReactCompatLayer, { ensureReactGlobals, suppressReact19Warnings } from './components/ReactCompatLayer';
+import ReactCompatLayer from './components/ReactCompatLayer';
+import { ensureReactGlobals, suppressReact19Warnings } from './utils/reactCompatUtils';
 
 // Initialize React compatibility layer
 ensureReactGlobals();
