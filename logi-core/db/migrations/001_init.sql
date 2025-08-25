@@ -1,24 +1,48 @@
 -- 001_init.sql
--- Raw SQL migrations for core tables (subset)
+-- T-SQL migrations for core tables (SQL Server)
 
-CREATE TABLE IF NOT EXISTS warehouses (
-  id UUID PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  location GEOGRAPHY(POINT),
-  capacity JSONB NOT NULL
-);
+-- Warehouses
+IF NOT EXISTS (
+  SELECT 1 FROM sys.tables t
+  WHERE t.name = 'warehouses' AND t.schema_id = SCHEMA_ID('dbo')
+)
+BEGIN
+  CREATE TABLE dbo.warehouses (
+    id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    location GEOGRAPHY NULL, -- use geography::Point(lat, lon, 4326) when inserting
+    capacity NVARCHAR(MAX) NOT NULL
+  );
+END;
 
-CREATE TABLE IF NOT EXISTS items (
-  id UUID PRIMARY KEY,
-  sku VARCHAR(50) UNIQUE NOT NULL,
-  dimensions JSONB NOT NULL,
-  weight_kg DECIMAL(10,2)
-);
+-- Items
+IF NOT EXISTS (
+  SELECT 1 FROM sys.tables t
+  WHERE t.name = 'items' AND t.schema_id = SCHEMA_ID('dbo')
+)
+BEGIN
+  CREATE TABLE dbo.items (
+    id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    sku VARCHAR(50) NOT NULL,
+    dimensions NVARCHAR(MAX) NOT NULL, -- JSON stored as text in SQL Server
+    weight_kg DECIMAL(10,2) NULL,
+    CONSTRAINT UQ_items_sku UNIQUE (sku)
+  );
+END;
 
-CREATE TABLE IF NOT EXISTS inventory (
-  id UUID PRIMARY KEY,
-  item_id UUID REFERENCES items(id),
-  warehouse_id UUID REFERENCES warehouses(id),
-  quantity INTEGER NOT NULL,
-  location_code VARCHAR(20)
-);
+-- Inventory
+IF NOT EXISTS (
+  SELECT 1 FROM sys.tables t
+  WHERE t.name = 'inventory' AND t.schema_id = SCHEMA_ID('dbo')
+)
+BEGIN
+  CREATE TABLE dbo.inventory (
+    id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    item_id UNIQUEIDENTIFIER NOT NULL,
+    warehouse_id UNIQUEIDENTIFIER NOT NULL,
+    quantity INT NOT NULL,
+    location_code VARCHAR(20) NULL,
+    CONSTRAINT FK_inventory_item FOREIGN KEY (item_id) REFERENCES dbo.items(id),
+    CONSTRAINT FK_inventory_warehouse FOREIGN KEY (warehouse_id) REFERENCES dbo.warehouses(id)
+  );
+END;
