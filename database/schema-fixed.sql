@@ -38,9 +38,12 @@ CREATE TABLE items (
     name TEXT NOT NULL,
     description TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
-    current_location GEOGRAPHY(Point, 4326),
-    origin GEOGRAPHY(Point, 4326),
-    destination GEOGRAPHY(Point, 4326),
+    current_location_lat DOUBLE PRECISION,
+    current_location_lng DOUBLE PRECISION,
+    origin_lat DOUBLE PRECISION,
+    origin_lng DOUBLE PRECISION,
+    destination_lat DOUBLE PRECISION,
+    destination_lng DOUBLE PRECISION,
     route_id UUID REFERENCES routes(id),
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
@@ -59,7 +62,8 @@ CREATE TABLE item_history (
     item_id UUID REFERENCES items(id) ON DELETE CASCADE,
     timestamp TIMESTAMPTZ NOT NULL,
     status TEXT NOT NULL,
-    location GEOGRAPHY(Point, 4326),
+    location_lat DOUBLE PRECISION,
+    location_lng DOUBLE PRECISION,
     notes TEXT
 );
 
@@ -78,7 +82,8 @@ CREATE TABLE route_waypoints (
     route_id UUID REFERENCES routes(id) ON DELETE CASCADE,
     item_id UUID REFERENCES items(id), -- Can be null if it's just a stop
     waypoint_order INTEGER NOT NULL,
-    location GEOGRAPHY(Point, 4326) NOT NULL,
+    location_lat DOUBLE PRECISION NOT NULL,
+    location_lng DOUBLE PRECISION NOT NULL,
     estimated_arrival TIMESTAMPTZ,
     actual_arrival TIMESTAMPTZ,
     status TEXT NOT NULL DEFAULT 'pending' -- e.g., pending, completed
