@@ -7,7 +7,9 @@ DROP TABLE IF EXISTS user_items;
 DROP TABLE IF EXISTS chat_messages;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS delivery_routes;
 DROP TABLE IF EXISTS routes;
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS users;
 
 -- Create users table
@@ -17,6 +19,29 @@ CREATE TABLE users (
     full_name TEXT,
     role TEXT NOT NULL DEFAULT 'CLIENT',
     created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create orders table
+CREATE TABLE orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_number TEXT NOT NULL UNIQUE,
+    customer_id UUID REFERENCES users(id),
+    status TEXT NOT NULL DEFAULT 'pending',
+    total_amount DECIMAL(10,2),
+    currency TEXT DEFAULT 'USD',
+    pickup_address TEXT,
+    delivery_address TEXT,
+    pickup_lat DOUBLE PRECISION,
+    pickup_lng DOUBLE PRECISION,
+    delivery_lat DOUBLE PRECISION,
+    delivery_lng DOUBLE PRECISION,
+    estimated_pickup TIMESTAMPTZ,
+    estimated_delivery TIMESTAMPTZ,
+    actual_pickup TIMESTAMPTZ,
+    actual_delivery TIMESTAMPTZ,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Create routes table (moved before items to fix foreign key reference)
@@ -30,6 +55,28 @@ CREATE TABLE routes (
     actual_departure TIMESTAMPTZ,
     actual_arrival TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create delivery_routes table
+CREATE TABLE delivery_routes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    route_name TEXT NOT NULL,
+    order_id UUID REFERENCES orders(id),
+    driver_id UUID REFERENCES users(id),
+    vehicle_id TEXT,
+    status TEXT NOT NULL DEFAULT 'planned', -- e.g., planned, active, completed, cancelled
+    start_location_lat DOUBLE PRECISION,
+    start_location_lng DOUBLE PRECISION,
+    end_location_lat DOUBLE PRECISION,
+    end_location_lng DOUBLE PRECISION,
+    estimated_distance_km DOUBLE PRECISION,
+    estimated_duration_minutes INTEGER,
+    actual_distance_km DOUBLE PRECISION,
+    actual_duration_minutes INTEGER,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Create items table
@@ -122,6 +169,12 @@ CREATE TABLE chat_messages (
 );
 
 -- Add indexes for performance
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_order_number ON orders(order_number);
+CREATE INDEX idx_delivery_routes_order_id ON delivery_routes(order_id);
+CREATE INDEX idx_delivery_routes_driver_id ON delivery_routes(driver_id);
+CREATE INDEX idx_delivery_routes_status ON delivery_routes(status);
 CREATE INDEX idx_user_items_user_id ON user_items(user_id);
 CREATE INDEX idx_user_items_item_id ON user_items(item_id);
 CREATE INDEX idx_item_history_item_id ON item_history(item_id);
