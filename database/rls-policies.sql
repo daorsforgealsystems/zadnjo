@@ -166,9 +166,10 @@ CREATE POLICY "Users can read own notifications" ON public.notifications
 CREATE POLICY "Users can update own notifications" ON public.notifications
     FOR UPDATE USING (user_id = auth.uid());
 
--- System can create notifications for users
+-- System can create notifications for users (service role only)
 CREATE POLICY "System can create notifications" ON public.notifications
-    FOR INSERT WITH CHECK (true);
+    FOR INSERT
+    WITH CHECK ((auth.jwt() ->> 'role') = 'service_role');
 
 -- CHAT MESSAGES TABLE POLICIES
 -- Users can read chat messages for accessible shipments
