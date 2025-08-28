@@ -42,9 +42,16 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             // New content is available, notify user
-            console.log('New content available! Please refresh.');
+            console.log('New content available! Refreshing to activate update.');
             
-            // You can dispatch a custom event here to show a notification
+            // Attempt a seamless update: skip waiting and reload when activated
+            registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+            // Give the SW a brief moment to take control, then reload
+            setTimeout(() => {
+              window.location.reload();
+            }, 400);
+            
+            // Also emit an event in case the app wants to handle it differently
             window.dispatchEvent(new CustomEvent('sw-update-available', {
               detail: { registration }
             }));
