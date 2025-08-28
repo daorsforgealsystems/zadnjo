@@ -32,9 +32,10 @@ export default defineConfig({
 
   // Progressive Web App support
   VitePWA({
-    registerType: 'autoUpdate',
+    registerType: 'prompt',
     disable: process.env.NODE_ENV === 'development', // Disable PWA in development
     includeAssets: ['favicon.ico', 'robots.txt', 'offline.html'],
+    injectRegister: false, // We'll handle registration manually
     manifest: {
       name: 'Flow Motion Logistics',
       short_name: 'FlowMotion',
@@ -128,7 +129,12 @@ export default defineConfig({
       "@radix-ui/react-dropdown-menu",
       "@radix-ui/react-select",
       "@radix-ui/react-dialog",
-      "@radix-ui/react-popover"
+      "@radix-ui/react-popover",
+      "@radix-ui/react-alert-dialog",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-button",
+      "@radix-ui/react-card",
+      "@radix-ui/react-label"
     ],
     force: true,
   },

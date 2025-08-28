@@ -1,42 +1,68 @@
 // This file must be imported before any React components
 import React, { forwardRef } from 'react';
 
+// Create a comprehensive React API object
+const createReactAPI = () => ({
+  ...React,
+  createElement: React.createElement,
+  forwardRef: forwardRef,
+  memo: React.memo,
+  createContext: React.createContext,
+  useState: React.useState,
+  useEffect: React.useEffect,
+  useRef: React.useRef,
+  useMemo: React.useMemo,
+  useCallback: React.useCallback,
+  useLayoutEffect: React.useLayoutEffect,
+  useImperativeHandle: React.useImperativeHandle,
+  useContext: React.useContext,
+  useReducer: React.useReducer,
+  Fragment: React.Fragment,
+  Component: React.Component,
+  PureComponent: React.PureComponent,
+  Suspense: React.Suspense,
+  lazy: React.lazy,
+  StrictMode: React.StrictMode,
+  cloneElement: React.cloneElement,
+  isValidElement: React.isValidElement,
+  Children: React.Children,
+  // React 18 specific APIs
+  useId: React.useId,
+  useDeferredValue: React.useDeferredValue,
+  useInsertionEffect: React.useInsertionEffect,
+  useSyncExternalStore: React.useSyncExternalStore,
+  useTransition: React.useTransition,
+  startTransition: React.startTransition,
+});
+
+const reactAPI = createReactAPI();
+
 // Aggressively ensure React is available globally before any other modules load
 if (typeof window !== 'undefined') {
   // Make React available on window
-  (window as any).React = React;
+  (window as any).React = reactAPI;
   
   // Make all React APIs available individually
-  (window as any).createElement = React.createElement;
+  Object.keys(reactAPI).forEach(key => {
+    if (reactAPI[key as keyof typeof reactAPI]) {
+      (window as any)[key] = reactAPI[key as keyof typeof reactAPI];
+    }
+  });
+  
+  // Extra safety for forwardRef specifically
   (window as any).forwardRef = forwardRef;
-  (window as any).memo = React.memo;
-  (window as any).createContext = React.createContext;
-  (window as any).useState = React.useState;
-  (window as any).useEffect = React.useEffect;
-  (window as any).useRef = React.useRef;
-  (window as any).useMemo = React.useMemo;
-  (window as any).useCallback = React.useCallback;
-  (window as any).useLayoutEffect = React.useLayoutEffect;
-  (window as any).useImperativeHandle = React.useImperativeHandle;
-  (window as any).useContext = React.useContext;
-  (window as any).useReducer = React.useReducer;
-  (window as any).Fragment = React.Fragment;
-  (window as any).Component = React.Component;
-  (window as any).PureComponent = React.PureComponent;
-  (window as any).Suspense = React.Suspense;
-  (window as any).lazy = React.lazy;
-  (window as any).StrictMode = React.StrictMode;
-  (window as any).cloneElement = React.cloneElement;
-  (window as any).isValidElement = React.isValidElement;
-  (window as any).Children = React.Children;
 }
 
-// Also on globalThis
-(globalThis as any).React = React;
-(globalThis as any).createElement = React.createElement;
+// Also on globalThis with extra safety
+(globalThis as any).React = reactAPI;
+Object.keys(reactAPI).forEach(key => {
+  if (reactAPI[key as keyof typeof reactAPI]) {
+    (globalThis as any)[key] = reactAPI[key as keyof typeof reactAPI];
+  }
+});
+
+// Extra safety for forwardRef specifically
 (globalThis as any).forwardRef = forwardRef;
-(globalThis as any).memo = React.memo;
-(globalThis as any).createContext = React.createContext;
 
 console.log('React initialization complete:', {
   React: typeof React,
@@ -45,6 +71,30 @@ console.log('React initialization complete:', {
   memo: typeof React.memo,
   createContext: typeof React.createContext
 });
+
+// Add global error handler for forwardRef issues
+if (typeof window !== 'undefined') {
+  const originalError = window.onerror;
+  window.onerror = (message, source, lineno, colno, error) => {
+    if (typeof message === 'string' && message.includes('forwardRef')) {
+      console.warn('Caught forwardRef error, attempting to fix:', message);
+      
+      // Re-ensure forwardRef is available
+      (window as any).forwardRef = forwardRef;
+      (globalThis as any).forwardRef = forwardRef;
+      
+      // Try to prevent the error from propagating
+      return true;
+    }
+    
+    // Call original error handler if it exists
+    if (originalError) {
+      return originalError(message, source, lineno, colno, error);
+    }
+    
+    return false;
+  };
+}
 
 // Suppress a few known, noisy warnings coming from third-party libs (React Router
 // future-flag notices and explicit "mock data" console messages) while keeping

@@ -8,6 +8,7 @@ import App from './App';
 import './index.css';
 import './i18n';
 import ErrorBoundary from './components/ErrorBoundary';
+import ReactErrorBoundary from './components/ReactErrorBoundary';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from './components/ui/theme-provider';
@@ -21,6 +22,7 @@ import { debug, initDebug } from './lib/debug';
 import { validateConfig } from './lib/config';
 import { supabase } from './lib/supabaseClient';
 import { isSupabaseTableMissingError, MIGRATION_HINTS } from './lib/supabase-errors';
+import './registerSW'; // Import service worker registration
 
 // Create a client with more resilient configuration
 const queryClient = new QueryClient({
@@ -157,34 +159,36 @@ if (container) {
         <ReactCompatLayer>
           <ErrorBoundary>
             <QueryClientProvider client={queryClient}>
-              <ErrorBoundary>
-                <AuthProvider>
-                  <AuthLoadingScreen>
-                    <AuthErrorBoundary>
-                      <ErrorBoundary>
-                        <ThemeProvider
-                          attribute="class"
-                          defaultTheme="system"
-                          enableSystem
-                          disableTransitionOnChange
-                        >
-                          <ErrorBoundary>
-                            <AnimationProvider>
-                              <LayoutProvider>
-                              <ReduxProvider store={store}>
-                                <Router>
-                                  <App />
-                                </Router>
-                              </ReduxProvider>
-                              </LayoutProvider>
-                            </AnimationProvider>
-                          </ErrorBoundary>
-                        </ThemeProvider>
-                      </ErrorBoundary>
-                    </AuthErrorBoundary>
-                  </AuthLoadingScreen>
-                </AuthProvider>
-              </ErrorBoundary>
+              <ReactErrorBoundary>
+                <ErrorBoundary>
+                  <AuthProvider>
+                    <AuthLoadingScreen>
+                      <AuthErrorBoundary>
+                        <ErrorBoundary>
+                          <ThemeProvider
+                            attribute="class"
+                            defaultTheme="system"
+                            enableSystem
+                            disableTransitionOnChange
+                          >
+                            <ErrorBoundary>
+                              <AnimationProvider>
+                                <LayoutProvider>
+                                <ReduxProvider store={store}>
+                                  <Router>
+                                    <App />
+                                  </Router>
+                                </ReduxProvider>
+                                </LayoutProvider>
+                              </AnimationProvider>
+                            </ErrorBoundary>
+                          </ThemeProvider>
+                        </ErrorBoundary>
+                      </AuthErrorBoundary>
+                    </AuthLoadingScreen>
+                  </AuthProvider>
+                </ErrorBoundary>
+              </ReactErrorBoundary>
             </QueryClientProvider>
           </ErrorBoundary>
         </ReactCompatLayer>
