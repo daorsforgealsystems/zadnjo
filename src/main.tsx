@@ -13,6 +13,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { AnimationProvider } from '@/components/providers';
 import { LayoutProvider } from '@/components/providers/LayoutProvider';
+import AuthLoadingScreen from '@/components/auth/AuthLoadingScreen';
+import AuthErrorBoundary from '@/components/auth/AuthErrorBoundary';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './store';
 import { debug, initDebug } from './lib/debug';
@@ -157,26 +159,30 @@ if (container) {
             <QueryClientProvider client={queryClient}>
               <ErrorBoundary>
                 <AuthProvider>
-                  <ErrorBoundary>
-                    <ThemeProvider
-                      attribute="class"
-                      defaultTheme="system"
-                      enableSystem
-                      disableTransitionOnChange
-                    >
+                  <AuthLoadingScreen>
+                    <AuthErrorBoundary>
                       <ErrorBoundary>
-                        <AnimationProvider>
-                          <LayoutProvider>
-                          <ReduxProvider store={store}>
-                            <Router>
-                              <App />
-                            </Router>
-                          </ReduxProvider>
-                          </LayoutProvider>
-                        </AnimationProvider>
+                        <ThemeProvider
+                          attribute="class"
+                          defaultTheme="system"
+                          enableSystem
+                          disableTransitionOnChange
+                        >
+                          <ErrorBoundary>
+                            <AnimationProvider>
+                              <LayoutProvider>
+                              <ReduxProvider store={store}>
+                                <Router>
+                                  <App />
+                                </Router>
+                              </ReduxProvider>
+                              </LayoutProvider>
+                            </AnimationProvider>
+                          </ErrorBoundary>
+                        </ThemeProvider>
                       </ErrorBoundary>
-                    </ThemeProvider>
-                  </ErrorBoundary>
+                    </AuthErrorBoundary>
+                  </AuthLoadingScreen>
                 </AuthProvider>
               </ErrorBoundary>
             </QueryClientProvider>

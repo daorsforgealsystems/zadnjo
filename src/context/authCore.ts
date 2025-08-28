@@ -33,6 +33,11 @@ export interface AuthContextType {
 
   // Authz helpers (client-side only)
   hasRole: (roles: Role[]) => boolean;
+
+  // Enhanced UX properties (optional for backward compatibility)
+  authState?: 'initializing' | 'authenticated' | 'guest' | 'error';
+  initError?: string | null;
+  retryAuth?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({

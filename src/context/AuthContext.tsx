@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { ROLES, Role, User as AppUser } from '@/lib/types';
 import { mapSupabaseUserToAppUser } from './authUtils';
@@ -6,115 +6,112 @@ import AuthContext, { AuthContextType } from './authCore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
+// Auth initialization states for better UX
+type AuthState = 'initializing' | 'authenticated' | 'guest' | 'error';
 
-// mapSupabaseUserToAppUser moved to ./authUtils to keep this file exporting only components/hooks
-
-// AuthContext and AuthContextType are defined in ./authCore to keep this file exporting only components/hooks
+// Consistent guest user object
+const GUEST_USER: AppUser & { email?: string } = {
+  id: 'guest',
+  username: 'Guest User',
+  role: ROLES.GUEST,
+  associatedItemIds: []
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<(AppUser & { email?: string }) | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authState, setAuthState] = useState<AuthState>('initializing');
+  const [initError, setInitError] = useState<string | null>(null);
 
-  // Restore guest session if any
-  useEffect(() => {
-    const guest = localStorage.getItem('df_guest_session');
-    if (guest === 'true') {
-      setUser({ id: 'guest', username: 'guest', role: ROLES.GUEST });
-      setLoading(false);
-    }
+  // Helper to set guest mode consistently
+  const setGuestMode = useCallback(() => {
+    setUser(GUEST_USER);
+    setSession(null);
+    setAuthState('guest');
+    setLoading(false);
+    localStorage.setItem('df_guest_session', 'true');
   }, []);
 
-  // Initialize from Supabase current session with timeout
+  // Helper to clear auth state
+  const clearAuthState = useCallback(() => {
+    setUser(null);
+    setSession(null);
+    setAuthState('initializing');
+    setInitError(null);
+    localStorage.removeItem('df_guest_session');
+  }, []);
+
+  // Initialize authentication with improved error handling
   useEffect(() => {
     let isMounted = true;
-    let initCompleted = false;
-    
-    // Set a timeout to prevent hanging indefinitely — don't reference `loading` here so deps can stay []
-    const initTimeout = setTimeout(() => {
-      if (isMounted && !initCompleted) {
-        if (import.meta.env.DEV) {
-          console.info('Auth initialization timed out, proceeding as guest');
-        }
-        // Ensure we mark loading false and provide a guest fallback
-        setLoading(false);
-        setUser({ id: 'timeout-guest', username: 'Guest User', role: ROLES.GUEST });
-      }
-    }, 15000); // 15s hard cap for init
+    let initTimeout: NodeJS.Timeout;
     
     const initializeAuth = async () => {
       try {
-        // Check if we're already in a guest session
-        const guest = localStorage.getItem('df_guest_session');
-        if (guest === 'true') {
-          setUser({ id: 'guest', username: 'guest', role: ROLES.GUEST });
-          setLoading(false);
+        // Check for existing guest session first
+        const isGuestSession = localStorage.getItem('df_guest_session') === 'true';
+        if (isGuestSession) {
+          if (isMounted) {
+            setGuestMode();
+          }
           return;
         }
 
-        // Try to get session with increased timeout and better error handling
-        let sessionData = null;
-        try {
-          // Resolve to null on timeout instead of throwing
-          const sessionResult = await Promise.race([
-            supabase.auth.getSession().then(({ data }) => data?.session ?? null),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000))
-          ]);
-          sessionData = sessionResult;
-        } catch (sessionError) {
-          console.warn('Session fetch failed (non-fatal):', sessionError);
-          // Continue with null session
-        }
+        // Set a reasonable timeout for initialization
+        initTimeout = setTimeout(() => {
+          if (isMounted && loading) {
+            console.warn('Auth initialization timed out, falling back to guest mode');
+            setInitError('Authentication service is taking too long to respond');
+            setGuestMode();
+          }
+        }, 10000); // Reduced to 10s for better UX
+
+        // Try to get current session
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         
         if (!isMounted) return;
         
-        setSession(sessionData);
-        
-        // Only try to get user if we have a session
-        if (sessionData) {
-          let userData = null;
-          try {
-            // Resolve to null on timeout instead of throwing
-            const userResult = await Promise.race([
-              supabase.auth.getUser().then(({ data }) => data?.user ?? null),
-              new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000))
-            ]);
-            userData = userResult;
-          } catch (userError) {
-            console.warn('User fetch failed:', userError);
-            // Continue with null user data, will be handled below
-          }
+        if (sessionError) {
+          console.warn('Session fetch error:', sessionError);
+          setInitError('Failed to restore previous session');
+          setGuestMode();
+          return;
+        }
+
+        const currentSession = sessionData?.session;
+        setSession(currentSession);
+
+        if (currentSession) {
+          // We have a session, get user data
+          const { data: userData, error: userError } = await supabase.auth.getUser();
           
           if (!isMounted) return;
           
-          setUser(mapSupabaseUserToAppUser(userData));
-        } else {
-          // No session, check if we should proceed as guest
-          setUser({ id: 'no-session-guest', username: 'Guest User', role: ROLES.GUEST });
-        }
-      } catch (e) {
-        console.warn('Auth initialization error:', e);
-        // Non-fatal; fallback to guest/local state
-        if (isMounted) {
-          setUser({ id: 'error-guest', username: 'Guest User', role: ROLES.GUEST });
-          
-          // Try to recover by checking localStorage for any previous session info
-          try {
-            const storedSession = localStorage.getItem('daorsforge-auth-storage');
-            if (storedSession) {
-              console.log('Found stored session, attempting recovery...');
-              // This might trigger the auth state change listener which will update the state
-            }
-          } catch (storageError) {
-            console.warn('Failed to check localStorage:', storageError);
+          if (userError || !userData?.user) {
+            console.warn('User fetch error:', userError);
+            setInitError('Failed to load user information');
+            setGuestMode();
+            return;
           }
-        }
-      } finally {
-        if (isMounted) {
-          initCompleted = true;
+
+          const appUser = mapSupabaseUserToAppUser(userData.user);
+          setUser(appUser);
+          setAuthState('authenticated');
           setLoading(false);
-          clearTimeout(initTimeout);
+        } else {
+          // No session, proceed as guest
+          setGuestMode();
+        }
+        
+        clearTimeout(initTimeout);
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        if (isMounted) {
+          setInitError('Authentication system encountered an error');
+          setAuthState('error');
+          setLoading(false);
         }
       }
     };
@@ -123,53 +120,85 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     return () => {
       isMounted = false;
-      clearTimeout(initTimeout);
-    };
-  }, []);
-
-  // Listen to session changes
-  useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      setSession(newSession);
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        setUser(mapSupabaseUserToAppUser(userData?.user ?? null));
-        // Clear guest flag if a real session exists
-        if (newSession?.access_token) {
-          localStorage.removeItem('df_guest_session');
-        }
-      } catch (_) {
-        setUser(null);
+      if (initTimeout) {
+        clearTimeout(initTimeout);
       }
-      setLoading(false);
+    };
+  }, [loading, setGuestMode]);
+
+  // Listen to session changes with improved handling
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log('Auth state change:', event, !!newSession);
+      
+      setSession(newSession);
+      
+      if (newSession) {
+        // User signed in
+        try {
+          const { data: userData, error } = await supabase.auth.getUser();
+          if (error || !userData?.user) {
+            console.warn('Failed to get user data after auth change:', error);
+            setGuestMode();
+            return;
+          }
+          
+          const appUser = mapSupabaseUserToAppUser(userData.user);
+          setUser(appUser);
+          setAuthState('authenticated');
+          setLoading(false);
+          setInitError(null);
+          
+          // Clear guest session flag
+          localStorage.removeItem('df_guest_session');
+        } catch (error) {
+          console.error('Error handling auth state change:', error);
+          setGuestMode();
+        }
+      } else {
+        // User signed out or session expired
+        if (event === 'SIGNED_OUT') {
+          clearAuthState();
+          setGuestMode();
+        }
+      }
     });
+    
     return () => {
       data.subscription.unsubscribe();
     };
-  }, []);
+  }, [setGuestMode, clearAuthState]);
 
-  const isAuthenticated = useMemo(() => !!user && (user.role ? true : !!session), [user, session]);
+  // Computed values
+  const isAuthenticated = useMemo(() => {
+    return authState === 'authenticated' && !!user && !!session;
+  }, [authState, user, session]);
 
-  // React Query mutation for login (minimal wrapper)
+  // Enhanced login with better error handling
   const loginMutation = useMutation({
     mutationKey: ['auth', 'login'],
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      setInitError(null);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       return data;
     },
     onSuccess: async () => {
+      // Clear any cached data and refresh
       await queryClient.invalidateQueries();
-      const { data: userData } = await supabase.auth.getUser();
-      setUser(mapSupabaseUserToAppUser(userData?.user ?? null));
-      localStorage.removeItem('df_guest_session');
+      setAuthState('authenticated');
+      setInitError(null);
     },
+    onError: (error: any) => {
+      console.error('Login failed:', error);
+      setInitError(error?.message || 'Login failed');
+    }
   });
 
   const login = async (email: string, password: string) => {
     try {
       await loginMutation.mutateAsync({ email, password });
-      return { };
+      return {};
     } catch (err) {
       const error = err as { message?: string };
       return { error: { message: error?.message || 'Login failed' } };
@@ -183,6 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: Role = ROLES.CLIENT
   ) => {
     try {
+      setInitError(null);
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -194,34 +224,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return {};
     } catch (err) {
       const error = err as { message?: string };
-      return { error: { message: error?.message || 'Signup failed' } };
+      const errorMessage = error?.message || 'Signup failed';
+      setInitError(errorMessage);
+      return { error: { message: errorMessage } };
     }
   };
 
   const loginAsGuest = async () => {
     try {
-      // Client-side ephemeral guest session
-      localStorage.setItem('df_guest_session', 'true');
-      setUser({ id: 'guest', username: 'guest', role: ROLES.GUEST });
-      setSession(null);
+      setGuestMode();
+      setInitError(null);
       return {};
     } catch (err) {
       const error = err as { message?: string };
-      return { error: { message: error?.message || 'Guest login failed' } };
+      const errorMessage = error?.message || 'Guest login failed';
+      setInitError(errorMessage);
+      return { error: { message: errorMessage } };
     }
   };
 
   const signOut = async () => {
-    localStorage.removeItem('df_guest_session');
-    await supabase.auth.signOut();
-    setSession(null);
-    setUser(null);
+    try {
+      clearAuthState();
+      await supabase.auth.signOut();
+      setGuestMode();
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Even if signOut fails, clear local state
+      clearAuthState();
+      setGuestMode();
+    }
   };
 
   const hasRole = (roles: Role[]) => {
-    if (!user) return false;
+    if (!user || authState !== 'authenticated') return false;
     return roles.includes(user.role);
   };
+
+  // Retry authentication (useful for error recovery)
+  const retryAuth = useCallback(async () => {
+    setLoading(true);
+    setInitError(null);
+    setAuthState('initializing');
+    
+    try {
+      const { data: sessionData, error } = await supabase.auth.getSession();
+      if (error || !sessionData?.session) {
+        setGuestMode();
+        return;
+      }
+      
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        setGuestMode();
+        return;
+      }
+      
+      const appUser = mapSupabaseUserToAppUser(userData.user);
+      setUser(appUser);
+      setSession(sessionData.session);
+      setAuthState('authenticated');
+      setLoading(false);
+    } catch (error) {
+      console.error('Auth retry failed:', error);
+      setInitError('Failed to reconnect to authentication service');
+      setAuthState('error');
+      setLoading(false);
+    }
+  }, [setGuestMode]);
 
   const value: AuthContextType = {
     session,
@@ -231,10 +301,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     signup,
     loginAsGuest,
-  signOut,
-  // alias for components expecting `logout`
-  logout: signOut,
+    signOut,
+    // alias for components expecting `logout`
+    logout: signOut,
     hasRole,
+    // Additional properties for enhanced UX
+    authState,
+    initError,
+    retryAuth,
+  } as AuthContextType & {
+    authState: AuthState;
+    initError: string | null;
+    retryAuth: () => Promise<void>;
   };
 
   return (
