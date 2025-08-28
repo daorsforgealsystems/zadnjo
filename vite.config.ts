@@ -180,7 +180,9 @@ export default defineConfig({
           if (
             isNodeMod && /[\\/](react|react-dom|scheduler)[\\/]/.test(id)
           ) return 'vendor';
-          if (isNodeMod && (/[\\/]@radix-ui[\\/]/.test(id) || /[\\/]lucide-react[\\/]/.test(id))) return 'ui';
+          // Merge UI libraries (Radix, lucide-react) into the default chunk to avoid circular helper imports
+          // that can cause runtime issues like React being undefined in split chunks.
+          // if (isNodeMod && (/[\\/]@radix-ui[\\/]/.test(id) || /[\\/]lucide-react[\\/]/.test(id))) return 'ui';
           // Don't separate maps into their own chunk to avoid React context issues
           // if (isNodeMod && (/[\\/]leaflet[\\/]/.test(id) || /[\\/]react-leaflet[\\/]/.test(id))) return 'maps';
           // Avoid isolating i18n libs into a separate chunk to prevent React being undefined at runtime
