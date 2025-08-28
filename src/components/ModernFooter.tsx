@@ -18,7 +18,12 @@ import { Separator } from '@/components/ui/separator';
 // ...existing code...
 import './ModernFooter.css';
 
-const ModernFooter = () => {
+interface ModernFooterProps {
+  // Hide the top features strip when not desired (e.g., on the landing page to avoid duplication)
+  showHighlights?: boolean;
+}
+
+const ModernFooter: React.FC<ModernFooterProps> = ({ showHighlights = true }) => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
@@ -84,26 +89,28 @@ const ModernFooter = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
-        {/* Features Highlight */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {features.map((feature, index) => {
-            const IconComponent = feature.icon;
-            return (
-              <div 
-                key={index}
-                className="flex items-start gap-4 p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg"
-              >
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <IconComponent className="h-6 w-6" />
+        {/* Features Highlight (optional to prevent duplication with landing features) */}
+        {showHighlights && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <div 
+                  key={index}
+                  className="flex items-start gap-4 p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg"
+                >
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <IconComponent className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1">{feature.title}</h4>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-1">{feature.title}</h4>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">

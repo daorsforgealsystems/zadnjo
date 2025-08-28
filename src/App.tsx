@@ -395,7 +395,8 @@ const AppContent = () => {
       {!shouldHideFooter && (
         <ErrorBoundary>
           <Suspense fallback={<div className="h-20" />}>
-            <ModernFooter />
+            {/* On the landing page we hide the highlights to avoid duplication with the page's own features */}
+            <ModernFooter showHighlights={location.pathname !== '/'} />
           </Suspense>
         </ErrorBoundary>
       )}
