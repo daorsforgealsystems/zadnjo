@@ -82,7 +82,7 @@ const LandingPage = () => {
         {/* Main Content - This will grow to fill available space */}
         <main className="flex-1">
           {/* Hero Section */}
-          <section className="min-h-screen flex flex-col justify-center items-center px-4 py-12 text-center backdrop-blur-sm bg-background/10">
+          <section className="min-h-screen flex flex-col justify-center items-center px-4 py-12 text-center hero-section">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
@@ -91,7 +91,7 @@ const LandingPage = () => {
           >
             <motion.h1 
               aria-label={t('landing.hero.title', { defaultValue: 'Revolutionizing Logistics with AI' })}
-              className="text-4xl md:text-7xl font-bold mb-6 gradient-text shadow-xxl"
+              className="text-4xl md:text-7xl font-bold mb-6 gradient-text hero-text"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -100,7 +100,7 @@ const LandingPage = () => {
             </motion.h1>
             
             <motion.p 
-              className="text-xl md:text-3xl text-foreground/95 mb-12 max-w-3xl mx-auto font-light shadow-xxl"
+              className="text-xl md:text-3xl text-foreground/95 mb-12 max-w-3xl mx-auto font-light hero-text"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -114,22 +114,18 @@ const LandingPage = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              {/* Use Link with button styling instead of Button asChild to avoid unexpected DOM nesting/styling issues */}
-              <Link
-                to="/signup"
-                aria-label={t('landing.cta.getStarted', { defaultValue: 'Get Started' })}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-primary-foreground hover:bg-primary/90 h-11 group text-xl px-10 py-3 bg-gradient-primary hover:from-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full cta-hover-scale"
-              >
-                {t('landing.cta.getStarted', { defaultValue: 'Get Started' })}
-                <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
-              </Link>
+              <Button asChild size="lg" className="group text-xl px-10 py-6 bg-gradient-primary hover:shadow-xl transition-all duration-300 rounded-full cta-hover-scale">
+                <Link to="/signup" aria-label={t('landing.cta.getStarted', { defaultValue: 'Get Started' })}>
+                  {t('landing.cta.getStarted', { defaultValue: 'Get Started' })}
+                  <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
 
-              <Link
-                to="/login"
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-input hover:text-accent-foreground h-11 text-xl px-10 py-3 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full cta-hover-scale"
-              >
-                {t('landing.cta.login', { defaultValue: 'Login' })}
-              </Link>
+              <Button asChild variant="outline" size="lg" className="text-xl px-10 py-6 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full cta-hover-scale">
+                <Link to="/login">
+                  {t('landing.cta.login', { defaultValue: 'Login' })}
+                </Link>
+              </Button>
             </motion.div>
           </motion.div>
           
@@ -192,7 +188,7 @@ const LandingPage = () => {
                   whileHover={{ y: -10 }}
                   className="h-full"
                 >
-                  <Card className="h-full bg-background/30 backdrop-blur-sm border-border/50 hover:shadow-xl transition-all duration-300">
+                  <Card className="h-full feature-card">
                     <CardContent className="p-6 flex flex-col items-center text-center">
                       <div className="bg-primary/10 p-3 rounded-full mb-4">
                         <feature.icon className="h-8 w-8 text-primary" />
@@ -222,14 +218,14 @@ const LandingPage = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" className="group text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
+                <Button asChild size="lg" className="group text-lg px-8 py-6 bg-gradient-primary hover:shadow-xl transition-all duration-300">
                   <Link to="/signup">
                     {t('landing.cta.startTrial', { defaultValue: 'Start Free Trial' })}
                     <CheckCircle className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 
-                <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 border-2">
+                <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50">
                   <Link to="/contact">
                     {t('landing.cta.contactSales', { defaultValue: 'Contact Sales' })}
                   </Link>
