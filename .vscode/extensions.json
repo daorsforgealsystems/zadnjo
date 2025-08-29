@@ -1,4 +1,9 @@
 {
+  "recommendations": [
+    "denoland.vscode-deno"
+  ]
+}
+{
     // Workspace recommended extensions. These will be suggested when someone opens
     // the repo in VS Code. Keep this list focused and minimal for clear onboarding.
     "recommendations": [
