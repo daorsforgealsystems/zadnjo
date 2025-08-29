@@ -40,7 +40,7 @@ export default defineConfig({
       name: 'Flow Motion Logistics',
       short_name: 'FlowMotion',
       description: 'Advanced logistics platform',
-      theme_color: '#1e293b',
+      theme_color: '#3b82f6',
       background_color: '#0f172a',
       display: 'standalone',
       start_url: '/',
