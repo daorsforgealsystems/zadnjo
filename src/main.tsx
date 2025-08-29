@@ -1,3 +1,11 @@
+// Development environment warning for locatorjs
+if (import.meta.env.DEV) {
+  console.warn(
+    '[locatorjs] Development warning: This is expected when using @testing-library/dom in development mode. ' +
+    'This warning does not affect production builds.'
+  );
+}
+
 // Import React initialization FIRST
 import './react-init';
 import React from 'react';
