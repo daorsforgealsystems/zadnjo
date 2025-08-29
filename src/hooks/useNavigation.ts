@@ -186,14 +186,9 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
   }, [userRole]);
 
   // Auto-clear search results when location changes
-  // Auto-clear search results when location changes. Use a ref to detect
-  // actual pathname changes across renders (more robust for some test wrappers).
-  const prevPathRef = useRef<string>(location.pathname);
   useEffect(() => {
-    if (prevPathRef.current !== location.pathname) {
-      clearSearch();
-      prevPathRef.current = location.pathname;
-    }
+    // Clear search on any navigation event to ensure UI state resets
+    clearSearch();
   }, [location.pathname, clearSearch]);
 
   return {

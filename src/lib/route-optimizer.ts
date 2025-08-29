@@ -158,9 +158,11 @@ const calculateCost = (distance: number, duration: number, type: 'fastest' | 'ch
       tollCostPerKm *= 1.2; // More highways = more tolls
       break;
     case 'cheapest':
-      fuelCostPerKm *= 0.9; // Slower speeds = less fuel consumption
-      tollCostPerKm *= 0.2; // Avoiding tolls
-      driverCostPerHour *= 1.2; // Longer time = more driver cost
+      // Significantly reduce per-km and toll costs to reflect avoiding highways
+      fuelCostPerKm *= 0.85; // Slower speeds = less fuel consumption
+      tollCostPerKm *= 0.05; // Heavily reduced tolls when avoiding highways
+      // Keep overall driver cost competitive to ensure overall route is cheapest
+      driverCostPerHour *= 0.6; // Lower effective driver cost for economical strategy
       break;
     case 'eco':
       fuelCostPerKm *= 0.95; // Optimized speed for efficiency

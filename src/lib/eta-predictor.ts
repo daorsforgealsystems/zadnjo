@@ -30,8 +30,9 @@ export const predictEta = (route: LiveRoute): { time: string, confidence: number
 
     // Convert ETA string (e.g., "2s 15m") to minutes
     // "s" is treated as hours, "m" as minutes per test conventions
-    const hoursMatch = route.eta.match(/(\d+)\s*s/);
-    const minutesMatch = route.eta.match(/(\d+)\s*m/);
+    // Avoid matching words like "seconds" or "minutes" by ensuring the token ends
+    const hoursMatch = route.eta.match(/(\d+)\s*s(?![a-zA-Z])/);
+    const minutesMatch = route.eta.match(/(\d+)\s*m(?![a-zA-Z])/);
 
     // If the string doesn't contain recognizable patterns, return as-is
     if (!hoursMatch && !minutesMatch) {
