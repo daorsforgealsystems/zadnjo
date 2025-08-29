@@ -101,7 +101,7 @@ const NaviBar = () => {
                 >
                   <Link to="/login">
                     <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    {t('navbar.login', 'Login')}
+                    {t('navbar.login')}
                   </Link>
                 </Button>
                 <Button 
@@ -110,17 +110,17 @@ const NaviBar = () => {
                 >
                   <Link to="/signup">
                     <UserPlus className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-                    {t('navbar.signup', 'Sign Up')}
+                    {t('navbar.signup')}
                   </Link>
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link to="/dashboard">{t('navbar.dashboard', 'Dashboard')}</Link>
+                  <Link to="/dashboard">{t('navbar.dashboard')}</Link>
                 </Button>
                 <Button variant="outline" onClick={handleLogout}>
-                  {t('navbar.logout', 'Logout')}
+                  {t('navbar.logout')}
                 </Button>
               </>
             )}
@@ -161,7 +161,7 @@ const NaviBar = () => {
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <LogIn className="h-5 w-5 text-primary" />
-                        <span className="font-medium">{t('navbar.login', 'Login')}</span>
+                        <span className="font-medium">{t('navbar.login')}</span>
                       </Link>
                       <Link 
                         to="/signup" 
@@ -169,7 +169,7 @@ const NaviBar = () => {
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <UserPlus className="h-5 w-5" />
-                        <span>{t('navbar.signup', 'Sign Up')}</span>
+                        <span>{t('navbar.signup')}</span>
                       </Link>
                     </>
                   ) : (
@@ -179,7 +179,7 @@ const NaviBar = () => {
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <span className="font-medium">{t('navbar.dashboard', 'Dashboard')}</span>
+                        <span className="font-medium">{t('navbar.dashboard')}</span>
                       </Link>
                       <Button 
                         variant="outline" 
