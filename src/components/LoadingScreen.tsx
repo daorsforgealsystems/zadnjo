@@ -74,8 +74,8 @@ const LoadingScreen = ({ timeout = 15000, useEnhanced = true }: LoadingScreenPro
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-6 max-w-md p-6">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-md p-6 bg-background rounded-md">
           <div className="relative">
             <Truck className="h-12 w-12 text-destructive mx-auto" />
           </div>
@@ -127,19 +127,21 @@ const LoadingScreen = ({ timeout = 15000, useEnhanced = true }: LoadingScreenPro
     );
 
     return (
-      <FullPageLoading
-        title="DAORS Flow Motion"
-        subtitle="Preparing your logistics platform..."
-        progress={(loadingTime / timeout) * 100}
-        steps={stages}
-        currentStep={currentStepIndex}
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <FullPageLoading
+          title="DAORS Flow Motion"
+          subtitle="Preparing your logistics platform..."
+          progress={(loadingTime / timeout) * 100}
+          steps={stages}
+          currentStep={currentStepIndex}
+        />
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center space-y-4 max-w-md p-6">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center space-y-4 max-w-md p-6 bg-background rounded-md">
         <div className="relative">
           <Truck className="h-12 w-12 text-primary mx-auto animate-bounce" />
           <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
