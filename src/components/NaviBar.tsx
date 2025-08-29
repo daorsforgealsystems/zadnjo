@@ -13,7 +13,6 @@ import Logo from '@/components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { motion } from 'framer-motion';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useAuth } from '@/context/useAuth';
 
 const NaviBar = () => {
@@ -93,8 +92,6 @@ const NaviBar = () => {
           </NavigationMenu>
           
           <div className="flex items-center gap-3">
-            <LanguageSwitcher variant="compact" />
-            
             {!isAuthenticated ? (
               <>
                 <Button 
@@ -156,9 +153,6 @@ const NaviBar = () => {
                   transition={{ duration: 0.3 }}
                   className="flex flex-col gap-4"
                 >
-                  <div className="flex justify-center mb-4">
-                    <LanguageSwitcher variant="default" />
-                  </div>
                   {!isAuthenticated ? (
                     <>
                       <Link 

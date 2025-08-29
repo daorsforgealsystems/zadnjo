@@ -2,7 +2,6 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingScreen from './components/LoadingScreen';
-import LanguageChangeNotification from './components/LanguageChangeNotification';
 import ErrorBoundary from './components/ErrorBoundary';
 import DebugOverlay from './components/DebugOverlay';
 import { debug } from './lib/debug';
@@ -146,10 +145,6 @@ const AppContent = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <ErrorBoundary>
-        <LanguageChangeNotification />
-      </ErrorBoundary>
-      
       <AnimatePresence mode="wait" initial={false}>
         <Suspense fallback={<LoadingScreen />}>
           <ErrorBoundary>
