@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavigationItem } from '@/types/navigation';
 
@@ -186,8 +186,14 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
   }, [userRole]);
 
   // Auto-clear search results when location changes
+  // Auto-clear search results when location changes. Use a ref to detect
+  // actual pathname changes across renders (more robust for some test wrappers).
+  const prevPathRef = useRef<string>(location.pathname);
   useEffect(() => {
-    clearSearch();
+    if (prevPathRef.current !== location.pathname) {
+      clearSearch();
+      prevPathRef.current = location.pathname;
+    }
   }, [location.pathname, clearSearch]);
 
   return {

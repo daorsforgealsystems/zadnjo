@@ -63,8 +63,15 @@ export const predictEta = (route: LiveRoute): { time: string, confidence: number
     const outHours = Math.floor(newEtaMinutes / 60);
     const outMinutes = Math.round(newEtaMinutes % 60);
 
-    // Always include hours component to satisfy tests parsing on 's'
-    const newEtaString = `${outHours}s ${outMinutes}m`;
+    // If original string was minutes-only (no 's' token), return minutes-only format
+    const originalHadHours = /\d+\s*s/.test(route.eta);
+    let newEtaString: string;
+    if (!originalHadHours && outHours === 0) {
+        newEtaString = `${outMinutes}m`;
+    } else {
+        // Preserve hour token 's' used in tests to indicate hours
+        newEtaString = `${outHours}s ${outMinutes}m`;
+    }
 
     return {
         time: newEtaString.trim(),
