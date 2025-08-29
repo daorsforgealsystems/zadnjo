@@ -195,6 +195,10 @@ export default defineConfig({
   },
   server: {
     // Open the default browser automatically when the dev server starts
-    open: true
+    open: true,
+    // Allow Netlify dev server preview host
+    allowedHosts: [
+      'devserver-preview--daorsflow.netlify.app'
+    ]
   }
 });
