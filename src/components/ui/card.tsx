@@ -1,10 +1,11 @@
-import React from 'react'
+import type { HTMLAttributes, FC, ReactNode } from 'react'
 
-type CardProps = React.HTMLAttributes<HTMLDivElement> & {
+type UiCardProps = HTMLAttributes<HTMLDivElement> & {
   accent?: boolean
+  children?: ReactNode
 }
 
-export const Card: React.FC<CardProps> = ({ className = '', children, accent = false, ...rest }) => {
+export const UiCard: FC<UiCardProps> = ({ className = '', children, accent = false, ...rest }) => {
   const base = 'rounded-lg p-4 bg-card shadow-card border border-border'
   const accentClass = accent ? 'bg-gradient-card text-card-foreground' : ''
 
@@ -15,7 +16,7 @@ export const Card: React.FC<CardProps> = ({ className = '', children, accent = f
   )
 }
 
-export default Card
+export default UiCard
 /* eslint-disable jsx-a11y/heading-has-content */
 import React, { forwardRef } from "react"
 

@@ -1,10 +1,11 @@
-import React from 'react'
+import type { ButtonHTMLAttributes, FC, ReactNode } from 'react'
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type UiButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'ghost'
+  children?: ReactNode
 }
 
-export const Button: React.FC<ButtonProps> = ({ variant = 'primary', className = '', children, ...rest }) => {
+export const UiButton: FC<UiButtonProps> = ({ variant = 'primary', className = '', children, ...rest }) => {
   const base = 'inline-flex items-center justify-center px-4 py-2 rounded-md font-medium transition duration-150 ease-in-out'
   const variants: Record<string, string> = {
     primary: `${base} bg-primary text-primary-foreground hover:opacity-95 focus:ring-2 focus:ring-primary/30 shadow-sm`,
@@ -18,7 +19,7 @@ export const Button: React.FC<ButtonProps> = ({ variant = 'primary', className =
   )
 }
 
-export default Button
+export default UiButton
 import React, { forwardRef } from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { type VariantProps } from "class-variance-authority"

@@ -1,16 +1,16 @@
 import React from 'react'
 import { render } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
-import { Card } from './Card'
+import { UiCard } from './Card'
 
 describe('Card', () => {
   it('renders children', () => {
-    const { getByText } = render(<Card>Content</Card>)
+  const { getByText } = render(<UiCard>Content</UiCard>)
     expect(getByText('Content')).toBeTruthy()
   })
 
   it('applies accent styles when requested', () => {
-    const { container } = render(<Card accent>Accent</Card>)
+  const { container } = render(<UiCard accent>Accent</UiCard>)
     expect(container.firstChild).toBeTruthy()
   })
 })
