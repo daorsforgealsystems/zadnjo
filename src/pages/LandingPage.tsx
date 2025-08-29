@@ -71,7 +71,7 @@ const LandingPage = () => {
 
   return (
     <div className="relative min-h-screen">
-  <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" overlayOpacity={0.65} />
+  <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" overlayOpacity={0.32} />
       <ParticleBackground />
       
       {/* Bring main content above background/particles */}
@@ -91,7 +91,7 @@ const LandingPage = () => {
           >
             <motion.h1 
               aria-label={t('landing.hero.title', { defaultValue: 'Revolutionizing Logistics with AI' })}
-              className="text-4xl md:text-7xl font-bold mb-6 gradient-text hero-text"
+              className="text-4xl md:text-7xl font-bold mb-6 gradient-text hero-text shadow-xxl"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -108,13 +108,13 @@ const LandingPage = () => {
               {t('landing.hero.subtitle', { defaultValue: 'Intelligent supply chain solutions that predict, optimize, and automate your logistics operations.' })}
             </motion.p>
             
-            <motion.div
+              <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              <Button asChild size="lg" className="group text-xl px-10 py-6 bg-gradient-primary hover:shadow-xl transition-all duration-300 rounded-full cta-hover-scale">
+              <Button asChild size="lg" className="group text-xl px-10 py-6 bg-gradient-primary hover:shadow-lg-strong transition-all duration-300 rounded-full cta-hover-scale">
                 <Link to="/signup" aria-label={t('landing.cta.getStarted', { defaultValue: 'Get Started' })}>
                   {t('landing.cta.getStarted', { defaultValue: 'Get Started' })}
                   <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />

@@ -151,8 +151,9 @@ const ParticleBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ background: "transparent" }}
+      // move particles above the image but still behind main UI
+      className="fixed inset-0 pointer-events-none z-10"
+      style={{ background: "transparent", opacity: 0.6 }}
     />
   );
 };

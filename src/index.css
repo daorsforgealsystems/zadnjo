@@ -327,7 +327,8 @@ All colors MUST be HSL for consistency and theming.
 
 /* Landing page specific improvements */
 .hero-section {
-  background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%);
+  /* lighter overlay so the background image shows through while keeping text readable */
+  background: linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.12) 100%);
 }
 
 /* Better text shadows for readability */
