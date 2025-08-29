@@ -1,17 +1,8 @@
 {
+  "deno.path": "C:\\Users\\User\\AppData\\Local\\deno\\bin\\deno.exe",
   "deno.enable": false,
   "deno.enablePaths": [
     "netlify/edge-functions"
   ],
-  "deno.suggest.imports.hosts": {
-    "https://deno.land": true,
-    "https://cdn.jsdelivr.net": true,
-    "https://esm.sh": true
-  },
-  "deno.lint": true,
-  "deno.unstable": true,
-  "deno.config": "deno.json",
-  "deno.codeLens.run": true,
-  "deno.codeLens.test": true,
   "deno.importMap": ".netlify/edge-functions-import-map.json"
 }
