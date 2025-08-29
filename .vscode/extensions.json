@@ -1,17 +1,17 @@
 {
-  "recommendations": [
-    "denoland.vscode-deno"
-  ]
-}
-{
-    // Workspace recommended extensions. These will be suggested when someone opens
-    // the repo in VS Code. Keep this list focused and minimal for clear onboarding.
     "recommendations": [
-        "google.gemini-cli-vscode-ide-companion",
-        // Helpful developer tooling often used in this repo
-        "eamodio.gitlens",
+        // Core development tools
         "esbenp.prettier-vscode",
-        "ritwickdey.liveserver"
-    ],
-    // Optional: a description field is allowed in JSONC for humans — VS Code ignores it.
+        "bradlc.vscode-tailwindcss",
+        
+        // Git utilities
+        "eamodio.gitlens",
+        
+        // TypeScript and React
+        "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-json",
+        
+        // Testing
+        "vitest.explorer"
+    ]
 }
