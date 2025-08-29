@@ -168,7 +168,7 @@ const Settings = () => {
                     <div className="space-y-2">
                       <Label htmlFor="language" className="text-white/90">{t('settings.appearance.language', 'Language')}</Label>
                       <div className="flex items-center gap-4">
-                        <LanguageSwitcher variant="default" className="flex-1" />
+                        <LanguageSwitcher variant="inline" className="flex-1" />
                         <span className="text-sm text-white/70">
                           {t('settings.appearance.language.description', 'Choose your preferred language')}
                         </span>
