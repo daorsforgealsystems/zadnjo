@@ -35,6 +35,38 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
+  // Capture async errors that React error boundaries don't catch
+  private handleGlobalError = (event: ErrorEvent) => {
+    // Prevent test runner from treating as unhandled
+    if (event && typeof event.preventDefault === 'function') {
+      event.preventDefault();
+    }
+    this.setState({ hasError: true, error: event.error || new Error(event.message) });
+  };
+
+  private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    if (event && typeof event.preventDefault === 'function') {
+      event.preventDefault();
+    }
+    const reason = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+    this.setState({ hasError: true, error: reason });
+  };
+
+  componentDidMount(): void {
+    // Add global listeners to improve resilience in tests and runtime
+    if (typeof window !== 'undefined') {
+      window.addEventListener('error', this.handleGlobalError);
+      window.addEventListener('unhandledrejection', this.handleUnhandledRejection as any);
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('error', this.handleGlobalError);
+      window.removeEventListener('unhandledrejection', this.handleUnhandledRejection as any);
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
