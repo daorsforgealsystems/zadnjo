@@ -18,6 +18,16 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return { success: false };
   }
 
+  // Allow disabling SW for synthetic tests or debugging
+  const params = new URLSearchParams(window.location.search);
+  const userAgent = navigator.userAgent || '';
+  const isHeadless = /HeadlessChrome|Playwright|Puppeteer/i.test(userAgent);
+  const disabledByParam = params.get('no-sw') === '1';
+  if (isHeadless || disabledByParam) {
+    console.info('Service worker registration skipped (headless or ?no-sw=1).');
+    return { success: false };
+  }
+
   try {
     // Wait for the page to load before registering
     if (document.readyState === 'loading') {
@@ -27,7 +37,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     }
 
     console.log('Registering service worker...');
-    
+
     const registration = await navigator.serviceWorker.register('/sw.js', {
       scope: '/',
       updateViaCache: 'none' // Always check for updates
@@ -41,20 +51,29 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // New content is available, notify user
-            console.log('New content available! Refreshing to activate update.');
-            
-            // Attempt a seamless update: skip waiting and reload when activated
+            // New content is available, notify user and attempt a safe update
+            console.log('New content available! Activating update.');
+
+            // Ensure we don't get into a reload loop
+            const alreadyReloaded = sessionStorage.getItem('sw-updated-reloaded') === '1';
+
+            // Ask SW to skip waiting so it takes control on next nav
             registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
-            // Give the SW a brief moment to take control, then reload
-            setTimeout(() => {
-              window.location.reload();
-            }, 400);
-            
-            // Also emit an event in case the app wants to handle it differently
+
+            // Dispatch an event for the app to optionally handle a toast/UX
             window.dispatchEvent(new CustomEvent('sw-update-available', {
               detail: { registration }
             }));
+
+            if (!alreadyReloaded) {
+              sessionStorage.setItem('sw-updated-reloaded', '1');
+              // Give the SW a brief moment to activate, then reload once
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
+            } else {
+              console.info('Update applied without forced reload due to prior refresh.');
+            }
           }
         });
       }

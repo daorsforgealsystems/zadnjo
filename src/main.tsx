@@ -93,41 +93,38 @@ try {
   throw error;
 }
 
-// Lightweight startup probe: check essential DB tables once and log a single helpful warning if missing.
-(async () => {
-  try {
-    const checkTables = ['orders', 'delivery_routes', 'anomalies'];
-    const missing: string[] = [];
+// Lightweight startup probe: gate behind an opt-in flag to avoid slowing down cold starts/tests.
+if (import.meta.env.VITE_STARTUP_DB_PROBE === 'true') {
+  (async () => {
+    try {
+      const checkTables = ['orders', 'delivery_routes', 'anomalies'];
+      const missing: string[] = [];
 
-    // We'll probe by attempting a single minimal select on each table.
-    await Promise.all(checkTables.map(async (t) => {
-      try {
-        const res = await supabase.from(t).select('id').limit(1);
-        // Supabase client returns { data, error }
-        // Some SDK versions return the tuple, handle both shapes
-        if ((res as any).error) {
-          const err = (res as any).error;
-          const parsed = isSupabaseTableMissingError(err);
+      await Promise.all(checkTables.map(async (t) => {
+        try {
+          const res = await supabase.from(t).select('id').limit(1);
+          if ((res as any).error) {
+            const err = (res as any).error;
+            const parsed = isSupabaseTableMissingError(err);
+            if (parsed) missing.push(t);
+          }
+        } catch (e) {
+          const parsed = isSupabaseTableMissingError(e);
           if (parsed) missing.push(t);
         }
-      } catch (e) {
-        // If a network/404 occurs, check message
-        const parsed = isSupabaseTableMissingError(e);
-        if (parsed) missing.push(t);
-      }
-    }));
+      }));
 
-    if (missing.length > 0) {
-      const hints = missing.map(t => `${t}: ${MIGRATION_HINTS[t] || 'Run SQL migrations in database/ folder'}`).join('\n');
-      debug('Database missing tables detected at startup', 'warn', { missing, hints });
-      // Show a single console warning to avoid noisy repeated errors from components
-      console.warn('DAORS: Missing DB tables detected:', missing.join(', '));
-      console.warn('Apply migrations (in repo `database/`) to fix:', '\n' + hints);
+      if (missing.length > 0) {
+        const hints = missing.map(t => `${t}: ${MIGRATION_HINTS[t] || 'Run SQL migrations in database/ folder'}`).join('\n');
+        debug('Database missing tables detected at startup', 'warn', { missing, hints });
+        console.warn('DAORS: Missing DB tables detected:', missing.join(', '));
+        console.warn('Apply migrations (in repo `database/`) to fix:', '\n' + hints);
+      }
+    } catch (err) {
+      debug('Startup DB probe failed (non-fatal)', 'info', err);
     }
-  } catch (err) {
-    debug('Startup DB probe failed (non-fatal)', 'info', err);
-  }
-})();
+  })();
+}
 
 if (container) {
   try {
