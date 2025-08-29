@@ -1,6 +1,9 @@
-import type { HTMLAttributes, FC, ReactNode } from 'react'
+import React, { forwardRef } from "react"
+import type { HTMLAttributes, FC, ReactNode } from "react"
+import { cn } from "@/lib/utils"
 
-type UiCardProps = HTMLAttributes<HTMLDivElement> & {
+// Original UiCard component
+export type UiCardProps = HTMLAttributes<HTMLDivElement> & {
   accent?: boolean
   children?: ReactNode
 }
@@ -16,12 +19,7 @@ export const UiCard: FC<UiCardProps> = ({ className = '', children, accent = fal
   )
 }
 
-export default UiCard
-/* eslint-disable jsx-a11y/heading-has-content */
-import React, { forwardRef } from "react"
-
-import { cn } from "@/lib/utils"
-
+// Shadcn/ui Card components
 const Card = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -97,3 +95,4 @@ const CardFooter = forwardRef<
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export default UiCard
