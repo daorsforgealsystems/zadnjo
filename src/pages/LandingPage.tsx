@@ -28,23 +28,23 @@ const LandingPage = () => {
   const features = [
     {
       icon: Truck,
-      title: t('landing.features.tracking.title', 'Real-time Tracking'),
-      description: t('landing.features.tracking.description', 'Monitor your shipments in real-time with our advanced GPS tracking system.')
+      title: t('landing.features.tracking.title', { defaultValue: 'Real-time Tracking' }),
+      description: t('landing.features.tracking.description', { defaultValue: 'Monitor your shipments in real-time with our advanced GPS tracking system.' })
     },
     {
       icon: Globe,
-      title: t('landing.features.coverage.title', 'Global Coverage'),
-      description: t('landing.features.coverage.description', 'Seamless logistics across borders with our extensive international network.')
+      title: t('landing.features.coverage.title', { defaultValue: 'Global Coverage' }),
+      description: t('landing.features.coverage.description', { defaultValue: 'Seamless logistics across borders with our extensive international network.' })
     },
     {
       icon: Shield,
-      title: t('landing.features.security.title', 'Secure Handling'),
-      description: t('landing.features.security.description', 'Military-grade security protocols to ensure your cargo arrives safely.')
+      title: t('landing.features.security.title', { defaultValue: 'Secure Handling' }),
+      description: t('landing.features.security.description', { defaultValue: 'Military-grade security protocols to ensure your cargo arrives safely.' })
     },
     {
       icon: Zap,
-      title: t('landing.features.speed.title', 'Fast Delivery'),
-      description: t('landing.features.speed.description', 'Optimized routes and efficient processes for the fastest delivery times.')
+      title: t('landing.features.speed.title', { defaultValue: 'Fast Delivery' }),
+      description: t('landing.features.speed.description', { defaultValue: 'Optimized routes and efficient processes for the fastest delivery times.' })
     }
   ];
 
@@ -90,13 +90,13 @@ const LandingPage = () => {
             className="max-w-4xl mx-auto"
           >
             <motion.h1 
-              aria-label={t('landing.hero.title', 'Revolutionizing Logistics with AI')}
+              aria-label={t('landing.hero.title', { defaultValue: 'Revolutionizing Logistics with AI' })}
               className="text-4xl md:text-7xl font-bold mb-6 gradient-text shadow-xxl"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              {t('landing.hero.title', 'Revolutionizing Logistics with AI')}
+              {t('landing.hero.title', { defaultValue: 'Revolutionizing Logistics with AI' })}
             </motion.h1>
             
             <motion.p 
@@ -105,7 +105,7 @@ const LandingPage = () => {
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              {t('landing.hero.subtitle', 'Intelligent supply chain solutions that predict, optimize, and automate your logistics operations.')}
+              {t('landing.hero.subtitle', { defaultValue: 'Intelligent supply chain solutions that predict, optimize, and automate your logistics operations.' })}
             </motion.p>
             
             <motion.div
@@ -117,10 +117,10 @@ const LandingPage = () => {
               {/* Use Link with button styling instead of Button asChild to avoid unexpected DOM nesting/styling issues */}
               <Link
                 to="/signup"
-                aria-label={t('landing.cta.getStarted','Get Started') }
+                aria-label={t('landing.cta.getStarted', { defaultValue: 'Get Started' })}
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-primary-foreground hover:bg-primary/90 h-11 group text-xl px-10 py-3 bg-gradient-primary hover:from-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full cta-hover-scale"
               >
-                {t('landing.cta.getStarted', 'Get Started')}
+                {t('landing.cta.getStarted', { defaultValue: 'Get Started' })}
                 <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
               </Link>
 
@@ -128,7 +128,7 @@ const LandingPage = () => {
                 to="/login"
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-input hover:text-accent-foreground h-11 text-xl px-10 py-3 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full cta-hover-scale"
               >
-                {t('landing.cta.login', 'Login')}
+                {t('landing.cta.login', { defaultValue: 'Login' })}
               </Link>
             </motion.div>
           </motion.div>
@@ -141,10 +141,10 @@ const LandingPage = () => {
             animate={isVisible ? "visible" : {}}
           >
             {[
-              { value: "99.9%", label: t('landing.stats.onTime', 'On-Time Delivery') },
-              { value: "24/7", label: t('landing.stats.tracking', 'Tracking') },
-              { value: "150+", label: t('landing.stats.countries', 'Countries') },
-              { value: "1M+", label: t('landing.stats.shipments', 'Shipments') }
+              { value: "99.9%", label: t('landing.stats.onTime', { defaultValue: 'On-Time Delivery' }) },
+              { value: "24/7", label: t('landing.stats.tracking', { defaultValue: 'Tracking' }) },
+              { value: "150+", label: t('landing.stats.countries', { defaultValue: 'Countries' }) },
+              { value: "1M+", label: t('landing.stats.shipments', { defaultValue: 'Shipments' }) }
             ].map((stat, index) => (
               <motion.div 
                 key={index}
@@ -172,9 +172,9 @@ const LandingPage = () => {
               transition={{ duration: 0.8 }}
               className="text-center mb-16"
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('landing.features.title', 'Powerful Features')}</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('landing.features.title', { defaultValue: 'Powerful Features' })}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                {t('landing.features.subtitle', 'Our platform offers cutting-edge solutions for modern logistics challenges')}
+                {t('landing.features.subtitle', { defaultValue: 'Our platform offers cutting-edge solutions for modern logistics challenges' })}
               </p>
             </motion.div>
             
@@ -216,22 +216,22 @@ const LandingPage = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">{t('landing.cta.title', 'Ready to Transform Your Logistics?')}</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">{t('landing.cta.title', { defaultValue: 'Ready to Transform Your Logistics?' })}</h2>
               <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-                {t('landing.cta.subtitle', 'Join thousands of businesses that trust our platform for their supply chain needs')}
+                {t('landing.cta.subtitle', { defaultValue: 'Join thousands of businesses that trust our platform for their supply chain needs' })}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild size="lg" className="group text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
                   <Link to="/signup">
-                    {t('landing.cta.startTrial', 'Start Free Trial')}
+                    {t('landing.cta.startTrial', { defaultValue: 'Start Free Trial' })}
                     <CheckCircle className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 
                 <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 border-2">
                   <Link to="/contact">
-                    {t('landing.cta.contactSales', 'Contact Sales')}
+                    {t('landing.cta.contactSales', { defaultValue: 'Contact Sales' })}
                   </Link>
                 </Button>
               </div>
