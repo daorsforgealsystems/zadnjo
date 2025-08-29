@@ -149,8 +149,6 @@ export default defineConfig({
       "@radix-ui/react-popover",
       "@radix-ui/react-alert-dialog",
       "@radix-ui/react-avatar",
-      "@radix-ui/react-button",
-      "@radix-ui/react-card",
       "@radix-ui/react-label"
     ],
     force: true,
