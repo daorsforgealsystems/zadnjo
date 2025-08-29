@@ -54,121 +54,117 @@ const LoadingScreen = ({ timeout = 15000, useEnhanced = true }: LoadingScreenPro
     };
   }, [timeout, loadingTime]);
 
-  // If timed out, show retry option
-  if (isTimedOut) {
-    if (useEnhanced) {
-      const timeoutError = createErrorInfo.timeout(
-        'The application is taking longer than expected to load. This might be due to network issues or service unavailability.'
-      );
-      timeoutError.timestamp = new Date();
-
-      return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <EnhancedError
-            error={timeoutError}
-            onRetry={() => window.location.reload()}
-            onGoHome={() => window.location.href = '/'}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md p-6 bg-background rounded-md">
-          <div className="relative">
-            <Truck className="h-12 w-12 text-destructive mx-auto" />
-          </div>
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">Loading Timeout</h2>
-            <p className="text-sm text-muted-foreground">
-              The application is taking longer than expected to load. This might be due to network issues or service unavailability.
-            </p>
-          </div>
-          <div className="flex flex-col space-y-2">
-            <button 
-              onClick={() => window.location.reload()} 
-              className="flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span>Refresh Page</span>
-            </button>
-            <button 
-              onClick={() => {
-                localStorage.clear();
-                window.location.reload();
-              }} 
-              className="px-4 py-2 bg-muted text-muted-foreground rounded-md hover:bg-muted/90 transition-colors"
-            >
-              Clear Cache & Reload
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            If the problem persists, please check your network connection or contact support.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Normal loading screen
-  if (useEnhanced) {
-    const stages = [
-      'Initializing application...',
-      'Loading resources...',
-      'Connecting to services...',
-      'Preparing dashboard...',
-      'Almost there...'
-    ];
-
-    const currentStepIndex = Math.min(
-      Math.floor((loadingTime / timeout) * stages.length),
-      stages.length - 1
-    );
-
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <FullPageLoading
-          title="DAORS Flow Motion"
-          subtitle="Preparing your logistics platform..."
-          progress={(loadingTime / timeout) * 100}
-          steps={stages}
-          currentStep={currentStepIndex}
-        />
-      </div>
-    );
-  }
-
+  // Always wrap all branches in a top-level div with the expected classes
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center space-y-4 max-w-md p-6 bg-background rounded-md">
-        <div className="relative">
-          <Truck className="h-12 w-12 text-primary mx-auto animate-bounce" />
-          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+      {/* Timed out branch */}
+      {isTimedOut ? (
+        useEnhanced ? (
+          (() => {
+            const timeoutError = createErrorInfo.timeout(
+              'The application is taking longer than expected to load. This might be due to network issues or service unavailability.'
+            );
+            timeoutError.timestamp = new Date();
+            return (
+              <div className="w-full p-4">
+                <EnhancedError
+                  error={timeoutError}
+                  onRetry={() => window.location.reload()}
+                  onGoHome={() => window.location.href = '/'}
+                />
+              </div>
+            );
+          })()
+        ) : (
+          <div className="text-center space-y-6 max-w-md p-6 bg-background rounded-md">
+            <div className="relative">
+              <Truck className="h-12 w-12 text-destructive mx-auto" />
             </div>
+            <div className="space-y-3">
+              <h2 className="text-xl font-semibold text-foreground">Loading Timeout</h2>
+              <p className="text-sm text-muted-foreground">
+                The application is taking longer than expected to load. This might be due to network issues or service unavailability.
+              </p>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <button 
+                onClick={() => window.location.reload()} 
+                className="flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span>Refresh Page</span>
+              </button>
+              <button 
+                onClick={() => {
+                  localStorage.clear();
+                  window.location.reload();
+                }} 
+                className="px-4 py-2 bg-muted text-muted-foreground rounded-md hover:bg-muted/90 transition-colors"
+              >
+                Clear Cache & Reload
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              If the problem persists, please check your network connection or contact support.
+            </p>
           </div>
-        </div>
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-foreground">DAORS Flow Motion</h2>
-          <p className="text-sm text-muted-foreground">{loadingStage}</p>
-        </div>
-        <div className="w-48 h-1 bg-muted rounded-full mx-auto overflow-hidden">
-          <div 
-            className="h-full bg-primary rounded-full" 
-            style={{ 
-              width: `${Math.min(100, (loadingTime / timeout) * 100)}%`,
-              transition: 'width 1s linear'
-            }}
-          ></div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {Math.floor(loadingTime / 1000)}s elapsed
-        </p>
-      </div>
+        )
+      ) : (
+        // Normal loading screen
+        useEnhanced ? (
+          (() => {
+            const stages = [
+              'Initializing application...',
+              'Loading resources...',
+              'Connecting to services...',
+              'Preparing dashboard...',
+              'Almost there...'
+            ];
+            const currentStepIndex = Math.min(
+              Math.floor((loadingTime / timeout) * stages.length),
+              stages.length - 1
+            );
+            return (
+              <FullPageLoading
+                title="DAORS Flow Motion"
+                subtitle="Preparing your logistics platform..."
+                progress={(loadingTime / timeout) * 100}
+                steps={stages}
+                currentStep={currentStepIndex}
+              />
+            );
+          })()
+        ) : (
+          <div className="text-center space-y-4 max-w-md p-6 bg-background rounded-md">
+            <div className="relative">
+              <Truck className="h-12 w-12 text-primary mx-auto animate-bounce" />
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-foreground">DAORS Flow Motion</h2>
+              <p className="text-sm text-muted-foreground">{loadingStage}</p>
+            </div>
+            <div className="w-48 h-1 bg-muted rounded-full mx-auto overflow-hidden">
+              <div 
+                className="h-full bg-primary rounded-full" 
+                style={{ 
+                  width: `${Math.min(100, (loadingTime / timeout) * 100)}%`,
+                  transition: 'width 1s linear'
+                }}
+              ></div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {Math.floor(loadingTime / 1000)}s elapsed
+            </p>
+          </div>
+        )
+      )}
     </div>
   );
 };
