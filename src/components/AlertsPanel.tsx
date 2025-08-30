@@ -13,9 +13,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 
-import { getAnomalies } from "@/lib/api";
 import { Anomaly } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
 
 interface Alert {
   id: string;

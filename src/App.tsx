@@ -77,7 +77,6 @@ const DashboardLayout = lazyWithErrorHandling<any>(() =>
 );
 const LandingPage = lazyWithErrorHandling(() => import('./pages/LandingPage'));
 const LoginPage = lazyWithErrorHandling(() => import('./pages/Login'));
-const SignupPage = lazyWithErrorHandling(() => import('./pages/Signup'));
 
 // New Dashboard Pages
 const MainDashboard = lazyWithErrorHandling(() => import('./pages/dashboard/MainDashboard'));
