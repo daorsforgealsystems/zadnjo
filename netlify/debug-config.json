@@ -1,0 +1,34 @@
+{
+  "debug": {
+    "enabled": true,
+    "level": "verbose",
+    "output": "both",
+    "timing": true,
+    "memory": true,
+    "bundleAnalysis": true
+  },
+  "performance": {
+    "trackPhases": true,
+    "measureMemory": true,
+    "logResources": true,
+    "generateReport": true
+  },
+  "build": {
+    "nodeVersion": "20",
+    "memoryLimit": "4096",
+    "parallelProcessing": true,
+    "cacheOptimization": true
+  },
+  "logging": {
+    "console": true,
+    "file": "build-debug.log",
+    "format": "json",
+    "includeTimestamps": true
+  },
+  "analysis": {
+    "bundleSizes": true,
+    "chunkAnalysis": true,
+    "dependencyTree": true,
+    "performanceMetrics": true
+  }
+}

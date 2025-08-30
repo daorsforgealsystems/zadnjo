@@ -4,6 +4,10 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NETLIFY_DEBUG = "true"
+  BUILD_TIMING = "true"
+  VITE_DEBUG_BUILD = "true"
+  NODE_OPTIONS = "--max-old-space-size=4096"
 
 # Redirect rules for SPA
 [[redirects]]
