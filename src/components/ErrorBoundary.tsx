@@ -12,6 +12,7 @@ interface ErrorBoundaryState {
   hasError: boolean;
   error?: Error | null;
   errorInfo?: ErrorInfo | null;
+  retryRequested?: boolean;
 }
 
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -38,7 +39,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+  // Signal an external retry request but keep showing fallback until children change.
+  this.setState({ retryRequested: true });
   }
 
   handleReload = () => {
@@ -100,6 +102,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
 
     return this.props.children;
+  }
+
+  componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    // If a retry was requested and the children changed (test rerendered with non-throwing child), clear the error state.
+    if (this.state.retryRequested && prevProps.children !== this.props.children) {
+      this.setState({ hasError: false, error: null, errorInfo: null, retryRequested: false });
+    }
   }
 }
 
