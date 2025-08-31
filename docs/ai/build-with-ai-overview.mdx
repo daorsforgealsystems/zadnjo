@@ -1,0 +1,59 @@
+---
+title: Build with AI on Netlify
+description: Learn how to build with AI on Netlify using tool context, code agents, agentic workflows, and MCP servers. Understand when to use Netlify’s llms.txt and the official context file for accurate results.
+---
+
+## Overview
+
+Netlify supports multiple ways to build with AI across existing codebases, greenfield projects, and agentic workflows. You can:
+- Use editor or IDE AI tools grounded with reliable context.
+- Employ code agents to propose or apply changes.
+- Orchestrate agentic workflows that automate repetitive tasks.
+- Integrate with Model Context Protocol (MCP) servers to expose platform capabilities to agents.
+
+This page explains when to use AI tools with context versus when to build AI tools and agents that integrate with Netlify.
+
+## Two approaches
+
+### Use AI tools with context
+
+Ground your AI assistant with authoritative Netlify sources so results are accurate and secure:
+- Reference Netlify docs as web context. Many tools detect the LLMs manifest automatically when the docs domain is included:
+  - https://docs.netlify.com/llms.txt
+- Add Netlify’s official development context file to your project or AI tool:
+  - https://docs.netlify.com/ai-context/netlify-development.mdc
+
+Add provider-specific context files when your AI assistant supports local rule files (for example, place rules under `.windsurf/rules` or `.cursor/rules`). This lets the assistant follow Netlify-specific guidance directly in your workspace.
+
+### Build AI tools and agents that integrate with Netlify
+
+When you need agents to create projects, manage configuration, or deploy, integrate with Netlify’s platform interfaces. Agentic workflows and MCP servers can operationalize actions such as creating environment variables, managing forms, or triggering deploys. The Netlify MCP Server enables agents to use Netlify capabilities programmatically from compatible MCP clients.
+
+## Opinionated best practices
+
+- Ground with official sources first:
+  - Use the LLMs manifest at https://docs.netlify.com/llms.txt
+  - Include the Netlify development context file at https://docs.netlify.com/ai-context/netlify-development.mdc
+- Keep context current. Refresh the context file when guidance updates to improve answer quality.
+- Prototype in small, auditable steps. Start with limited-scope tasks and iterate.
+- For code agents, prefer structured, least-privilege operations. Avoid sharing or embedding secrets in prompts or code.
+
+## When to add provider-specific context files
+
+Add provider-specific context files when your tool supports local rules, so the assistant can read platform guidance without relying solely on web access. Common locations include:
+- `.windsurf/rules/`
+- `.cursor/rules/`
+
+Place the Netlify development context file in the appropriate rules directory for your AI tool.
+
+## Reference Netlify docs as web context
+
+Some assistants automatically detect llms.txt when `docs.netlify.com` is provided as context. Include:
+- https://docs.netlify.com/llms.txt
+
+This helps tools find official guidance and stay up to date.
+
+## Next steps
+
+- Use the LLMs manifest at https://docs.netlify.com/llms.txt
+- Add the official Netlify development context file at https://docs.netlify.com/ai-context/netlify-development.mdc
