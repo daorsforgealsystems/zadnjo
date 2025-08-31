@@ -79,7 +79,10 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
 
   // Clear search
   const clearSearch = useCallback(() => {
-    setSearchQuery('');
+  // Debug
+  // eslint-disable-next-line no-console
+  console.debug('[useNavigation] clearSearch called');
+  setSearchQuery('');
     setSearchResults([]);
     setIsSearching(false);
   }, []);
@@ -98,7 +101,10 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
 
   // Handle search
   const performSearch = useCallback((query: string) => {
-    setSearchQuery(query);
+  // Debug
+  // eslint-disable-next-line no-console
+  console.debug('[useNavigation] performSearch', query);
+  setSearchQuery(query);
     setIsSearching(true);
 
     if (!query.trim()) {
