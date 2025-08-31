@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "automerge": true
+    },
+    {
+      "matchManagers": ["npm"],
+      "rangeStrategy": "update-lockfile"
+    },
+    {
+      "matchManagers": ["pip"],
+      "rangeStrategy": "bump"
+    }
+  ],
+  "ignoreDeps": ["typescript"],
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "platform": "github",
+  "repositories": ["your-org/your-repo"]
+}
