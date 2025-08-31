@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+// Ensure i18n is initialized before any component (useTranslation) runs
+import './i18n';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 /// <reference types="@sentry/react/types" />
