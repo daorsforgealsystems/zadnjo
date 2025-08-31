@@ -1,59 +1,61 @@
 ## Quick repo snapshot
 
-- Big picture: frontend is a Vite + React + TypeScript app in `src/`; backend microservices live in `logi-core/` (per-service folders under `logi-core/services/`) with an API gateway at `logi-core/apps/api-gateway`; Postgres schema + migrations live in `database/` and `logi-core/db/`.
+- Big picture: frontend is a Vite + React + TypeScript single-page app in `src/` (dev port 5173). Backend is a set of microservices under `logi-core/` (per-service folders in `logi-core/services/`) with an API gateway at `logi-core/apps/api-gateway`. Postgres schema and SQL migrations live in `database/` and `logi-core/db/`.
 
-## Must-know developer commands
+## Must-know developer commands & infra
 
-- Install (root): `npm install` — backend services under `logi-core/` often need their own `npm install`.
+- Root install: `npm install` (note: backend services under `logi-core/` often require a separate `npm install` inside their folders).
 - Frontend dev: `npm run dev` (Vite, default port 5173).
-- Typecheck: `npm run type-check` (there is a VS Code task `run:type-check`).
-- Tests: `npm test` (Vitest). See `vitest.config.ts` and `vitest.setup.ts` for global test wiring.
-- Docker infra: `docker-compose -f docker-compose.infrastructure.yml up -d` or run `logi-core/start-infrastructure.ps1` on Windows.
+- Typecheck: `npm run type-check` (there's a VS Code task `run:type-check`).
+- Tests: `npm test` (Vitest). Global test wiring is in `vitest.setup.ts`.
+- Start local infra: `docker compose -f logi-core/docker-compose.infrastructure.yml up -d` (compose file defines RabbitMQ, Redis, Consul, Jaeger, Postgres, Prometheus, Grafana). Validate compose with `docker compose -f logi-core/docker-compose.infrastructure.yml config`.
 
-## Architecture notes for code edits
+## Architecture notes that matter for code changes
 
-- Frontend ↔ Backend: frontend calls typed client wrappers in `src/lib/api/*`; when changing an endpoint, update the client and affected hooks in `src/hooks/`.
-- Data flow: prefer thin API wrappers in `src/lib/api` and put transforms in hooks/components (examples: `src/lib/api/orders.ts` and `src/hooks/useOrders.ts`).
-- DB changes: add SQL migrations in `database/` and mirror relevant artifacts in `logi-core/db/schema.sql`.
+- Frontend ↔ Backend: frontend uses thin, typed API client wrappers in `src/lib/api/*`. When you change an API shape, update the client, its DTOs in `src/lib/api/types.ts`, and any hooks under `src/hooks/` that consume it (example: `src/lib/api/orders.ts` + `src/hooks/useOrders.ts`).
+- State & async: project uses React Query patterns (`useQuery` / `useMutation`) in `src/hooks/` for server state.
+- DB migrations: add SQL to `database/migrations/` and keep `logi-core/db/schema.sql` / `database/schema.sql` in sync. Look at `database/migrations/00*_*.sql` for examples.
+
+## Services & integration points (essential)
+
+- Inter-service comms: RabbitMQ (AMQP), Redis (cache), and Consul (service discovery) are defined in `logi-core/docker-compose.infrastructure.yml` — check there when editing services that rely on messaging or discovery.
+- Tracing & monitoring: Jaeger and Prometheus + Grafana are included; instrumentation in services follows OpenTelemetry conventions (search for `otel` or `jaeger` in `logi-core/services`).
+- API gateway: `logi-core/apps/api-gateway` enforces expected JSON shapes and routing; changing backend contract requires updates here and in `src/lib/api/`.
 
 ## Project-specific conventions (do these exactly)
 
-- Keep API clients thin and typed. Shared DTOs live near clients (e.g., `src/lib/api/types.ts`).
-- Use React Query (`useQuery`/`useMutation`) patterns in `src/hooks/` for async state.
-- Colocate component tests and use `vitest.setup.ts` for global mocks.
-- Tailwind tokens live in `tailwind.config.ts` — change there, not deep in components.
+- Keep API clients thin and typed; colocate DTOs with client wrappers (`src/lib/api/types.ts`).
+- Prefer transforms in hooks/components (not in thin clients).
+- Colocate component tests with components; use `vitest.setup.ts` for global mocks and `__tests__` directories for unit tests.
+- Tailwind tokens and design tokens are centralized in `tailwind.config.ts` — change there, not inside components.
 
-## Common integration points & gotchas
+## Small-PR contract for automated agents
 
-- `logi-core/*` services may require separate `npm install` and independent Docker runs — root install does not always cover them.
-- The API gateway expects specific JSON shapes; inspect `logi-core/apps/api-gateway` before changing front-end clients.
-- Use `.env.example` as the template for env vars; do not commit secrets.
-
-## Small-PR contract (required for automated agents)
-
-1. Keep the change minimal and type-checked.
-2. Add or update 1 focused Vitest test (happy path + one edge case when applicable).
-3. Run `npm run type-check` and `npm test`; ensure both pass before proposing the change.
-4. If changing API or DB shapes, update `src/lib/api/`, `src/hooks/`, and add SQL in `database/` — mention these in the PR description.
+1. Make minimal, type-checked changes.
+2. Add or update one focused Vitest test (happy path + one edge case when applicable).
+3. Run `npm run type-check` and `npm test`; both should pass before proposing changes.
+4. If changing API or DB shapes: update `src/lib/api/`, `src/hooks/`, and add SQL migration(s) to `database/migrations/` — list these in the PR description.
 
 ## Files to inspect first (fast path)
 
 - Frontend entry: `src/main.tsx`, `index.html`, `vite.config.ts`.
-- API patterns: `src/lib/api/`, `src/hooks/`, `src/context/`.
+- API patterns & DTOs: `src/lib/api/`, `src/lib/api/types.ts`, `src/hooks/`.
 - Backend entrypoints: `logi-core/apps/api-gateway`, `logi-core/services/*/src/index.ts`.
-- DB: `database/schema.sql`, `database/sample-data.sql`, `logi-core/db/schema.sql`.
+- Infra: `logi-core/docker-compose.infrastructure.yml`, `logi-core/db/`.
+- DB: `database/migrations/`, `database/schema.sql`, `database/sample-data.sql`.
 - Tests & tooling: `vitest.config.ts`, `vitest.setup.ts`, `tsconfig.json`.
 
-## Minimal examples (copyable patterns)
+## Copyable patterns / examples
 
-- Thin API wrapper: `src/lib/api/orders.ts` exports typed fetch functions returning JSON DTOs consumed by `src/hooks/useOrders.ts` via `useQuery`.
-- Service layout: `logi-core/services/inventory-service/` contains `package.json`, `src/index.ts`, `controllers/`, and a `Dockerfile`.
+- Thin client + hook: `src/lib/api/orders.ts` (typed fetch) → `src/hooks/useOrders.ts` (`useQuery`). Update both when changing endpoint shapes.
+- Service layout example: `logi-core/services/inventory-service/` contains `package.json`, `src/index.ts`, `controllers/`, and a `Dockerfile` — follow this layout for new services.
 
-## Agent operational notes
+## Operational notes for AI agents
 
 - When asked for your name, reply exactly: "GitHub Copilot".
-- Prefer small changes and automated verification (type-check + tests). Document any cross-cutting changes in the PR body.
+- Prefer incremental, small changes. Run type-check and tests locally before opening changes.
+- Use `.env.example` as the env template; never commit secrets.
 
 ---
 
-Please review these instructions and tell me any missing workflows, CI details, or internal conventions to include; I will iterate the file.
+If anything important is missing (CI specifics, private registries, or service env conventions), tell me which area to inspect and I will expand this file.
