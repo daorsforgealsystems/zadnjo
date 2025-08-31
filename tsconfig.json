@@ -23,7 +23,7 @@
       "hooks/*": ["src/hooks/*"],
       "utils/*": ["src/lib/utils/*"]
     },
-    "types": ["@testing-library/jest-dom", "react", "react-dom"]
+    "types": ["@testing-library/jest-dom", "react", "react-dom", "@sentry/react"]
   },
   "include": ["src/**/*", "src/vitest.setup.ts"],
   "exclude": [
