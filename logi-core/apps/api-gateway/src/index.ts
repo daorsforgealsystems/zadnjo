@@ -4,12 +4,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import CircuitBreaker from 'opossum';
 import compression from 'compression';
 import winston from 'winston';
 import { validationResult, body } from 'express-validator';
+import { authMiddleware, requireRole } from './middleware/auth.middleware';
 
 dotenv.config();
 
@@ -51,8 +51,8 @@ app.use(morgan('combined', {
 }));
 
 // Rate limiting with environment configuration
-const limiter = rateLimit({ 
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'), 
+const limiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'),
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
   message: { error: 'Too many requests, please try again later' },
   standardHeaders: true,
@@ -64,77 +64,21 @@ app.use(limiter);
 const validateRequest = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    logger.warn('Request validation failed', { 
-      path: req.path, 
+    logger.warn('Request validation failed', {
+      path: req.path,
       errors: errors.array(),
-      ip: req.ip 
+      ip: req.ip
     });
-    return res.status(400).json({ 
-      error: 'Validation failed', 
-      details: errors.array() 
+    return res.status(400).json({
+      error: 'Validation failed',
+      details: errors.array()
     });
   }
   next();
 };
 
-// Enhanced RBAC middleware
-const checkRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
-    if (!user) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-    
-    const userRoles = user.roles || [];
-    const hasPermission = roles.some(role => userRoles.includes(role));
-    
-    if (!hasPermission) {
-      logger.warn('Access denied - insufficient permissions', {
-        userId: user.sub || user.id,
-        requiredRoles: roles,
-        userRoles: userRoles,
-        path: req.path
-      });
-      return res.status(403).json({ error: 'Insufficient permissions' });
-    }
-    
-    next();
-  };
-};
-
-// Enhanced JWT auth middleware with better logging
-app.use((req: Request, res: Response, next: NextFunction) => {
-  if (req.path.startsWith('/public') || req.path === '/health' || req.path === '/readyz' || req.path === '/discovery') {
-    return next();
-  }
-  
-  const auth = req.headers.authorization;
-  if (!auth) {
-    logger.warn('Missing authorization header', { path: req.path, ip: req.ip });
-    return res.status(401).json({ error: 'Missing Authorization header' });
-  }
-  
-  const token = auth.replace('Bearer ', '');
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as any;
-    (req as any).user = decoded;
-    
-    logger.debug('User authenticated', { 
-      userId: decoded.sub || decoded.id,
-      roles: decoded.roles,
-      path: req.path 
-    });
-    
-    return next();
-  } catch (error) {
-    logger.warn('Invalid token', { 
-      path: req.path, 
-      ip: req.ip,
-      error: (error as Error).message 
-    });
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-});
+// Authentication middleware
+app.use(authMiddleware);
 
 app.get('/health', (_req: Request, res: Response) => {
   logger.info('Health check requested');
@@ -287,13 +231,13 @@ app.post('/api/v1/admin/users',
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   body('roles').isArray().withMessage('Roles must be an array'),
   validateRequest,
-  checkRole(['admin', 'super-admin']),
+  requireRole(['ADMIN']),
   withIdentity(targets.user, 'user')
 );
 
 // Example of manager-level routes
 app.get('/api/v1/reports/*',
-  checkRole(['manager', 'admin', 'super-admin']),
+  requireRole(['MANAGER', 'ADMIN']),
   withIdentity(targets.orders, 'orders')
 );
 
