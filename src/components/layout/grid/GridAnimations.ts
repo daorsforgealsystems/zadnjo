@@ -203,7 +203,9 @@ export const animateGridReveal = (
     translateY: [20, 0],
     scale: [0.9, 1],
     duration: config.duration,
-    delay: delayFunction,
+  // anime.stagger can return a function with three args (el, i, l).
+  // Cast to any so TypeScript accepts it for the library's overloaded delay type.
+  delay: delayFunction as any,
     easing: config.easing,
     complete: () => {
       elements.forEach(el => {

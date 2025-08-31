@@ -195,7 +195,7 @@ export const animateNewsletterSuccess = (
 export const animateBackToTop = (
   element: HTMLElement,
   isVisible: boolean,
-  config: FooterAnimationConfig = footerAnimationPresets.backToTop
+  _config: FooterAnimationConfig = footerAnimationPresets.backToTop
 ) => {
   if (isVisible) {
     element.style.display = 'block';
@@ -313,7 +313,7 @@ export const animateCopyrightText = (
   return anime({
     duration: config.duration,
     easing: config.easing,
-    update: (anim: anime.AnimeInstance) => {
+    update: (anim: any) => {
       const progress = anim.progress / 100;
       const charsToShow = Math.floor(progress * text.length);
       

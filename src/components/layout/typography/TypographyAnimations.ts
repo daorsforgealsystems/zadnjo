@@ -134,7 +134,7 @@ export const animateGradientText = (
     direction: 'alternate',
     loop: true,
     autoplay: config.autoplay ?? true,
-    update: (anim: anime.AnimeInstance) => {
+    update: (anim: any) => {
       const progress = anim.progress / 100;
       const xPos = progress * 400;
       const yPos = Math.sin(progress * Math.PI * 2) * 100 + 100;
