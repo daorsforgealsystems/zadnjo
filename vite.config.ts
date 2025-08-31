@@ -4,7 +4,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import svgr from "vite-plugin-svgr";
-import { ViteImageOptimizer as _ViteImageOptimizer } from "vite-plugin-image-optimizer";
 
 import path from "path";
 
@@ -156,6 +155,12 @@ export default defineConfig({
   define: {
     global: 'globalThis',
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  },
+  // Force dev JSX transform to ensure jsxDEV is available for devtools like LocatorJS
+  esbuild: {
+    jsx: 'automatic',
+    jsxImportSource: 'react',
+    jsxDev: true,
   },
   build: {
     commonjsOptions: {

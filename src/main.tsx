@@ -18,6 +18,13 @@ if (process.env.REACT_APP_SENTRY_DSN) {
   });
 }
 
+// Dev-only: ensure no Service Worker from a prior production build controls the dev server
+// This prevents devtools/extensions (e.g., LocatorJS) from detecting a "production" bundle.
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then((regs) => regs.forEach((r) => r.unregister()))
+    .catch(() => { /* ignore */ });
+}
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
