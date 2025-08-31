@@ -82,7 +82,7 @@ services:
       - "6832:6832/udp"  # UDP agent
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
-      COLLECTOR_ZIPKIN_HOST_PORT: :9411
+      COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/"]
       interval: 30s
