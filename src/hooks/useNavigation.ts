@@ -79,9 +79,6 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
 
   // Clear search
   const clearSearch = useCallback(() => {
-  // Debug
-  // eslint-disable-next-line no-console
-  console.debug('[useNavigation] clearSearch called');
   setSearchQuery('');
     setSearchResults([]);
     setIsSearching(false);
@@ -101,9 +98,6 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
 
   // Handle search
   const performSearch = useCallback((query: string) => {
-  // Debug
-  // eslint-disable-next-line no-console
-  console.debug('[useNavigation] performSearch', query);
   setSearchQuery(query);
     setIsSearching(true);
 

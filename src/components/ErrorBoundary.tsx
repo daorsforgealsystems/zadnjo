@@ -26,9 +26,6 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     // Make sure tests that spy on console.error see this call
     // and keep structured logging for production
   console.error('ErrorBoundary caught an error:', error, errorInfo);
-  // Debug log for test investigation
-  // eslint-disable-next-line no-console
-  console.debug('[ErrorBoundary debug] error captured:', error?.message, errorInfo?.componentStack);
     logger.error('UI Rendering Error', {
       error: error.message,
       stack: error.stack,

@@ -1,45 +1,5 @@
-import React, { FC } from 'react'
-
-type ErrorInfo = {
-  title?: string
-  message?: string
-  stack?: string
-  timestamp?: string | null
-}
-
-export const createErrorInfo = {
-  unknown: (message: string = 'An unexpected error occurred', stack?: string) => ({
-    title: 'Unknown Error',
-    message,
-    stack,
-    timestamp: null,
-  }),
-  timeout: (message: string) => ({
-    title: 'Loading Timeout',
-    message,
-    stack: undefined,
-    timestamp: new Date(),
-  }),
-}
-
-export const EnhancedError: FC<{
-  error: ErrorInfo
-  onRetry?: () => void
-  onGoHome?: () => void
-  onContactSupport?: () => void
-}> = ({ error, onRetry, onGoHome, onContactSupport }) => {
-  return (
-    <div data-testid="enhanced-error">
-      <div data-testid="enhanced-error-title">{error.title}</div>
-      <div data-testid="enhanced-error-message">{error.message}</div>
-      <button data-testid="enhanced-retry-button" onClick={onRetry}>Retry</button>
-      <button data-testid="enhanced-home-button" onClick={onGoHome}>Go Home</button>
-      <button data-testid="enhanced-support-button" onClick={onContactSupport}>Contact Support</button>
-    </div>
-  )
-}
-
-export default EnhancedError
+import React, { useState } from 'react';
+import { createErrorInfo, ErrorInfo as UiErrorInfo, ErrorType } from './error-info';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -61,27 +21,8 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 
-export type ErrorType = 
-  | 'network' 
-  | 'server' 
-  | 'timeout' 
-  | 'permission' 
-  | 'validation' 
-  | 'unknown'
-  | 'maintenance';
-
-export interface ErrorInfo {
-  type: ErrorType;
-  title: string;
-  message: string;
-  code?: string;
-  timestamp?: Date;
-  stack?: string;
-  suggestions?: string[];
-  canRetry?: boolean;
-  canGoHome?: boolean;
-  supportContact?: string;
-}
+export type ErrorType = ErrorType; // re-export for compatibility
+export interface ErrorInfo extends UiErrorInfo {}
 
 interface EnhancedErrorProps {
   error: ErrorInfo;
