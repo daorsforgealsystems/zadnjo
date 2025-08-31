@@ -1,7 +1,8 @@
 import { Truck, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { FullPageLoading } from '@/components/ui/loading-states';
-import { EnhancedError, createErrorInfo } from '@/components/ui/enhanced-error';
+import { EnhancedError } from '@/components/ui/enhanced-error';
+import { createErrorInfo } from '@/components/ui/error-info';
 
 interface LoadingScreenProps {
   timeout?: number; // Timeout in milliseconds
