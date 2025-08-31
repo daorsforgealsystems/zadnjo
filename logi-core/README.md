@@ -385,6 +385,66 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Redis team for high-performance caching
 - PostgreSQL community for robust database features
 
+## Supabase and External Services Setup
+
+### Local Development
+1. Install Supabase CLI:
+   ```bash
+   npm install -g supabase
+   ```
+2. Start local Supabase stack:
+   ```bash
+   supabase start
+   ```
+3. Apply database schema:
+   ```bash
+   supabase db reset
+   supabase db push --db-url postgresql://postgres:postgres@localhost:54322/postgres
+   ```
+
+### Environment Variables
+Use the following in your `.env` files:
+```env
+# Supabase
+VITE_SUPABASE_URL=http://localhost:54321
+VITE_SUPABASE_ANON_KEY=your-local-anon-key
+VITE_SUPABASE_SERVICE_KEY=your-local-service-key
+
+# External Services
+MAPBOX_ACCESS_TOKEN=your_mapbox_token
+SENDGRID_API_KEY=your_sendgrid_key
+```
+
+### Migration Workflow
+1. Make schema changes in `database/schema.sql`
+2. Generate migration:
+   ```bash
+   supabase migration new add_feature_name
+   ```
+3. Apply to production:
+   ```bash
+   supabase db push --db-url $PRODUCTION_DB_URL
+   ```
+
+### Testing Integrations
+Use mock services in development:
+```typescript
+// src/lib/mockServices.ts
+export const mockMapService = {
+  getRoute: jest.fn().mockResolvedValue({/*...*/}),
+  // ...
+};
+
+// In tests
+jest.mock('../services/mapService', () => mockMapService);
+```
+
+### Production Considerations
+- Use Supabase project environment variables
+- Rotate keys regularly
+- Monitor usage quotas
+- Set up webhook integrations for real-time updates
+
 ---
 
 **Built with ❤️ for modern logistics platforms**
