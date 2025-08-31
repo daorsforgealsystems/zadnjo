@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { AuthProvider } from '@/context/AuthContext';
-import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Mock implementations for testing
 const mockQueryClient = new QueryClient({
@@ -25,17 +24,15 @@ const customRender = (
 ) => {
   const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
     return (
-      <ErrorBoundary>
-        <BrowserRouter>
-          <QueryClientProvider client={mockQueryClient}>
-            <ThemeProvider defaultTheme="light" storageKey="test-theme">
-              <AuthProvider>
-                {children}
-              </AuthProvider>
-            </ThemeProvider>
-          </QueryClientProvider>
-        </BrowserRouter>
-      </ErrorBoundary>
+      <BrowserRouter>
+        <QueryClientProvider client={mockQueryClient}>
+          <ThemeProvider defaultTheme="light" storageKey="test-theme">
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
     );
   };
 
