@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
-import { UiButton } from './Button'
+import { UiButton } from './button'
 
 describe('Button', () => {
   it('renders and responds to click', () => {

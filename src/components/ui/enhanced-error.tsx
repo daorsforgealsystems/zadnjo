@@ -15,8 +15,8 @@ import {
   Shield,
   HelpCircle
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from './button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
