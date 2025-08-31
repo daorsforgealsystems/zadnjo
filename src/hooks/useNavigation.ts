@@ -201,6 +201,9 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
   // renders and clear search as a fallback.
   const prevPathRef = useRef(location.pathname);
   useEffect(() => {
+    // Debug
+    // eslint-disable-next-line no-console
+    console.debug('[useNavigation] prevPathRef', prevPathRef.current, 'location', location.pathname);
     if (prevPathRef.current !== location.pathname) {
       prevPathRef.current = location.pathname;
       clearSearch();
