@@ -20,7 +20,8 @@ export const predictEta = (route: LiveRoute): { time: string, confidence: number
 
     // A very basic simulation of factors affecting ETA
     const now = new Date();
-    const hour = now.getHours();
+    // Use UTC hours to make behavior deterministic in tests that set system time to UTC
+    const hour = now.getUTCHours();
 
     // Simulate rush hour (7-9 AM and 4-6 PM)
     const isRushHour = (hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 18);
