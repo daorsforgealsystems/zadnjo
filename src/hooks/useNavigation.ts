@@ -187,12 +187,19 @@ export const useNavigation = ({ userRole = [], navigationItems = [] }: UseNaviga
 
   // Auto-clear search results when location changes
   useEffect(() => {
-  // Clear search on any navigation event to ensure UI state resets
-  // Debugging: log pathname change during tests
-  // eslint-disable-next-line no-console
-  console.debug('[useNavigation] location changed to', location.pathname);
-  clearSearch();
+    clearSearch();
   }, [location.pathname, clearSearch]);
+
+  // Some test setups replace the router wrapper via rerender which may not always
+  // trigger the above effect in time. Use a ref to detect pathname changes across
+  // renders and clear search as a fallback.
+  const prevPathRef = useRef(location.pathname);
+  useEffect(() => {
+    if (prevPathRef.current !== location.pathname) {
+      prevPathRef.current = location.pathname;
+      clearSearch();
+    }
+  });
 
   return {
     // Navigation data
