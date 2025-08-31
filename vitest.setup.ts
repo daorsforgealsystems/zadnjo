@@ -1,3 +1,5 @@
+// Ensure i18n is initialized in the test environment before any component uses useTranslation
+import './src/i18n';
 import { expect, afterEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import * as matchers from '@testing-library/jest-dom/matchers'
