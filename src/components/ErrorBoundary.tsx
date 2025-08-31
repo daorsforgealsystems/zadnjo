@@ -1,155 +1,39 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { EnhancedError, createErrorInfo } from '@/components/ui/enhanced-error';
+import { logger } from '../lib/utils/logger';
 
-interface Props {
+interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
-  useEnhancedError?: boolean;
 }
 
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
-  error?: Error;
-  errorInfo?: ErrorInfo;
 }
 
-class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state = { hasError: false };
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    this.setState({ error, errorInfo });
-  }
-
-  handleReset = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
-  };
-
-  // Capture async errors that React error boundaries don't catch
-  private handleGlobalError = (event: ErrorEvent) => {
-    // Prevent test runner from treating as unhandled
-    if (event && typeof event.preventDefault === 'function') {
-      event.preventDefault();
-    }
-    this.setState({ hasError: true, error: event.error || new Error(event.message) });
-  };
-
-  private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-    if (event && typeof event.preventDefault === 'function') {
-      event.preventDefault();
-    }
-    const reason = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
-    this.setState({ hasError: true, error: reason });
-  };
-
-  componentDidMount(): void {
-    // Add global listeners to improve resilience in tests and runtime
-    if (typeof window !== 'undefined') {
-      window.addEventListener('error', this.handleGlobalError);
-      window.addEventListener('unhandledrejection', this.handleUnhandledRejection as any);
-    }
-  }
-
-  componentWillUnmount(): void {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('error', this.handleGlobalError);
-      window.removeEventListener('unhandledrejection', this.handleUnhandledRejection as any);
-    }
+    logger.error('UI Rendering Error', {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack
+    });
   }
 
   render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
-      // Use enhanced error handling if enabled
-      if (this.props.useEnhancedError) {
-        const errorInfo = createErrorInfo.unknown(
-          this.state.error?.message || 'An unexpected error occurred',
-          this.state.error?.stack
-        );
-        errorInfo.timestamp = new Date();
-
-        return (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <EnhancedError
-              error={errorInfo}
-              onRetry={this.handleReset}
-              onGoHome={() => window.location.href = '/'}
-              onContactSupport={() => {
-                const subject = encodeURIComponent('Error Report');
-                const body = encodeURIComponent(
-                  `Error: ${errorInfo.title}\nMessage: ${errorInfo.message}\nTimestamp: ${errorInfo.timestamp?.toISOString()}`
-                );
-                window.open(`mailto:support@example.com?subject=${subject}&body=${body}`);
-              }}
-            />
-          </div>
-        );
-      }
-
-      // Fallback to original error UI
-      return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-6 w-6 text-destructive" />
-              </div>
-              <CardTitle>Something went wrong</CardTitle>
-              <CardDescription>
-                An unexpected error occurred. Please try refreshing the page.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {import.meta.env.DEV && this.state.error && (
-                <div className="rounded-md bg-muted p-3">
-                  <p className="text-sm font-medium text-destructive mb-2">
-                    Error Details:
-                  </p>
-                  <p className="text-xs text-muted-foreground font-mono">
-                    {this.state.error.message}
-                  </p>
-                  {this.state.errorInfo && (
-                    <details className="mt-2">
-                      <summary className="text-xs cursor-pointer">Stack Trace</summary>
-                      <pre className="text-xs mt-2 whitespace-pre-wrap">
-                        {this.state.errorInfo.componentStack}
-                      </pre>
-                    </details>
-                  )}
-                </div>
-              )}
-              <div className="flex gap-2">
-                <Button onClick={this.handleReset} className="flex-1">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Try Again
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.location.reload()} 
-                  className="flex-1"
-                >
-                  Reload Page
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      return this.props.fallback || (
+        <div className="error-fallback">
+          <h2>Something went wrong</h2>
+          <button onClick={() => window.location.reload()}>Refresh</button>
         </div>
       );
     }
-
     return this.props.children;
   }
 }
