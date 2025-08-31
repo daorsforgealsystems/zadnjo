@@ -10,8 +10,19 @@ import compression from 'compression';
 import winston from 'winston';
 import { validationResult, body } from 'express-validator';
 import { authMiddleware, requireRole } from './middleware/auth.middleware';
+import * as Sentry from '@sentry/node';
 
 dotenv.config();
+
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  tracesSampleRate: 1.0,
+  environment: process.env.NODE_ENV,
+  integrations: [
+    new Sentry.Integrations.Http({ tracing: true }),
+  ],
+});
 
 // Configure structured logging
 const logger = winston.createLogger({
@@ -324,12 +335,19 @@ app.get('/metrics', (_req: Request, res: Response) => {
 
 // Global error handler
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-  logger.error('Unhandled error', {
+  const errorContext = {
     error: error.message,
     stack: error.stack,
     path: req.path,
     method: req.method,
     ip: req.ip
+  };
+  
+  logger.error('Unhandled error', errorContext);
+  
+  // Capture with Sentry
+  Sentry.captureException(error, {
+    extra: errorContext
   });
   
   if (!res.headersSent) {
