@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import CircuitBreaker from 'opossum';
@@ -61,7 +61,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Request validation middleware
-const validateRequest = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const validateRequest = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     logger.warn('Request validation failed', { 
@@ -79,7 +79,7 @@ const validateRequest = (req: express.Request, res: express.Response, next: expr
 
 // Enhanced RBAC middleware
 const checkRole = (roles: string[]) => {
-  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user;
     if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -103,8 +103,8 @@ const checkRole = (roles: string[]) => {
 };
 
 // Enhanced JWT auth middleware with better logging
-app.use((req, res, next) => {
-  if (req.path.startsWith('/public') || req.path === '/health' || req.path === '/readyz') {
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.path.startsWith('/public') || req.path === '/health' || req.path === '/readyz' || req.path === '/discovery') {
     return next();
   }
   
@@ -136,7 +136,7 @@ app.use((req, res, next) => {
   }
 });
 
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   logger.info('Health check requested');
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -199,7 +199,7 @@ Object.entries(targets).forEach(([serviceName, serviceUrl]) => {
 });
 
 // Enhanced proxy routes with identity propagation and circuit breaker
-function withIdentity(target: string, serviceName: string) {
+function withIdentity(target: string, serviceName: string): RequestHandler {
   const proxy = createProxyMiddleware({
     target,
     changeOrigin: true,
@@ -249,7 +249,7 @@ function withIdentity(target: string, serviceName: string) {
   });
 
   // Middleware to check circuit breaker before proxying
-  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     (req as any).startTime = Date.now();
     
     const breaker = circuitBreakers[serviceName];
@@ -272,34 +272,14 @@ function withIdentity(target: string, serviceName: string) {
 
 // Service routes with enhanced proxy and circuit breaker
 app.use('/api/v1/users', withIdentity(targets.user, 'user'));
-
-// Proxy for /preferences/layout/no-session-guest to user service (public endpoint)
-const preferencesProxy = createProxyMiddleware({
-  target: targets.user,
-  changeOrigin: true,
-  pathRewrite: {
-    '^/preferences/layout/no-session-guest': '/preferences/layout/no-session-guest',
-  },
-  on: {
-    error: (err: Error, req: any, res: any) => {
-      logger.error('Proxy error for preferences endpoint', {
-        error: err.message,
-        path: req.url
-      });
-      if (!res.headersSent) {
-        res.status(503).json({ error: 'Service temporarily unavailable' });
-      }
-    }
-  }
-});
-
-app.use('/preferences/layout/no-session-guest', preferencesProxy);
-
 app.use('/api/v1/inventory', withIdentity(targets.inventory, 'inventory'));
 app.use('/api/v1/orders', withIdentity(targets.orders, 'orders'));
 app.use('/api/v1/routes', withIdentity(targets.routing, 'routing'));
 app.use('/api/v1/tracking', withIdentity(targets.geo, 'geo'));
 app.use('/api/v1/notifications', withIdentity(targets.notify, 'notify'));
+
+// Proxy for /preferences/layout/no-session-guest to user service (public endpoint)
+app.use('/preferences/layout/no-session-guest', withIdentity(targets.user, 'user'));
 
 // Example of protected admin routes with validation
 app.post('/api/v1/admin/users',
@@ -318,7 +298,7 @@ app.get('/api/v1/reports/*',
 );
 
 // Enhanced readiness probe with circuit breaker integration
-app.get('/readyz', async (_req, res) => {
+app.get('/readyz', async (_req: Request, res: Response) => {
   try {
     const results: Record<string, any> = {};
     const overallHealthy = true;
@@ -381,7 +361,7 @@ app.get('/readyz', async (_req, res) => {
 });
 
 // Add metrics endpoint for monitoring
-app.get('/metrics', (_req, res) => {
+app.get('/metrics', (_req: Request, res: Response) => {
   const metrics = {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
@@ -399,7 +379,7 @@ app.get('/metrics', (_req, res) => {
 });
 
 // Global error handler
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error', {
     error: error.message,
     stack: error.stack,

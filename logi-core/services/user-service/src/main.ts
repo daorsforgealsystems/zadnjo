@@ -3,16 +3,18 @@ import { NestFactory } from '@nestjs/core';
 import { Module, Controller, Get } from '@nestjs/common';
 import { PreferencesController } from './controllers/preferences.controller';
 import { NavigationController } from './controllers/navigation.controller';
+import { AuthController } from './controllers/auth.controller';
 import { PreferencesService } from './services/preferences.service';
 import { NavigationService } from './services/navigation.service';
+import { AuthService } from './services/auth.service';
 
 @Controller('users')
 class UsersController {
   @Get('me')
   me() {
-    return { 
-      id: 'dev', 
-      roles: ['ADMIN'], 
+    return {
+      id: 'dev',
+      roles: ['ADMIN'],
       email: 'dev@example.com',
       name: 'Development User',
       avatar: null,
@@ -51,16 +53,18 @@ class HealthController {
   }
 }
 
-@Module({ 
+@Module({
   controllers: [
-    UsersController, 
+    UsersController,
     HealthController,
     PreferencesController,
-    NavigationController
+    NavigationController,
+    AuthController
   ],
   providers: [
     PreferencesService,
-    NavigationService
+    NavigationService,
+    AuthService
   ]
 })
 class AppModule {}
@@ -68,8 +72,8 @@ class AppModule {}
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? ['https://yourdomain.com'] 
+    origin: process.env.NODE_ENV === 'production'
+      ? ['https://yourdomain.com']
       : ['http://localhost:3000', 'http://localhost:5173'],
     credentials: true,
   });
@@ -87,6 +91,8 @@ async function bootstrap() {
   console.log(`   - GET  /api/users/me`);
   console.log(`   - GET  /api/preferences/layout/:userId`);
   console.log(`   - GET  /api/navigation/menu/:role`);
+  console.log(`   - POST /api/auth/login`);
+  console.log(`   - POST /api/auth/register`);
   console.log(`   - And more...`);
 }
 
