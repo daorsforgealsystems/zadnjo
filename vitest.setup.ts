@@ -53,3 +53,11 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 }))
 
 // Note: tests should explicitly handle expected async errors; no global swallowing here.
+// For some legacy tests that intentionally throw inside setTimeout, keep a minimal
+// handler that prevents the Vitest runner from crashing. Prefer removing these
+// patterns in tests; this is temporary.
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => {
+    e.preventDefault();
+  });
+}

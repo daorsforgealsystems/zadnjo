@@ -104,8 +104,8 @@ export const createErrorInfo = {
   }),
 
   unknown: (message?: string, stack?: string): ErrorInfo => ({
-    type: 'unknown',
-    title: 'Unexpected Error',
+  type: 'unknown',
+  title: 'Unknown Error',
     message: message || 'An unexpected error occurred.',
     stack,
     suggestions: [

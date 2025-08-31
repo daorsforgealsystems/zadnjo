@@ -25,13 +25,11 @@ describe('LoadingScreen', () => {
   });
 
   it('applies correct CSS classes for styling', () => {
-    const { container } = render(<LoadingScreen />);
-    
-    // Check if the main container has the expected classes
-    const mainContainer = container.firstChild as HTMLElement;
-    expect(mainContainer).toHaveClass('min-h-screen');
-    expect(mainContainer).toHaveClass('flex');
-    expect(mainContainer).toHaveClass('items-center');
-    expect(mainContainer).toHaveClass('justify-center');
+  const { container } = render(<LoadingScreen />);
+
+  // Query for the top-level layout wrapper by its utility class.
+  const mainContainer = container.querySelector('.min-h-screen') as HTMLElement | null;
+  expect(mainContainer).not.toBeNull();
+  expect(mainContainer).toHaveClass('flex', 'items-center', 'justify-center');
   });
 });
