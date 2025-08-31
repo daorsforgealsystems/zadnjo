@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { logger } from '../lib/utils/logger';
-import { EnhancedError, createErrorInfo } from '@/components/ui/enhanced-error';
+import { EnhancedError } from '@/components/ui/enhanced-error';
+import { createErrorInfo } from '@/components/ui/error-info';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
