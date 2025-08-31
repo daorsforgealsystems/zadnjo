@@ -6,6 +6,9 @@
     "apps/*",
     "services/*"
   ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "echo Use per-package build scripts",
     "dev": "echo Start packages individually"
