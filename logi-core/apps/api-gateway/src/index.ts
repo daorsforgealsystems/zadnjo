@@ -3,26 +3,20 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import dotenv from 'dotenv';
 import CircuitBreaker from 'opossum';
 import compression from 'compression';
 import winston from 'winston';
 import { validationResult, body } from 'express-validator';
 import { authMiddleware, requireRole } from './middleware/auth.middleware';
-import * as Sentry from '@sentry/node';
+/* Sentry disabled for local run */
+// import * as Sentry from '@sentry/node';
 
 dotenv.config();
 
 // Initialize Sentry
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  tracesSampleRate: 1.0,
-  environment: process.env.NODE_ENV,
-  integrations: [
-    new Sentry.Integrations.Http({ tracing: true }),
-  ],
-});
+/* Sentry initialization skipped for local run */
 
 // Configure structured logging
 const logger = winston.createLogger({
@@ -154,7 +148,7 @@ Object.entries(targets).forEach(([serviceName, serviceUrl]) => {
 });
 
 // Enhanced proxy routes with identity propagation and circuit breaker
-function withIdentity(target: string, serviceName: string): RequestHandler {
+function withIdentity(target: string, serviceName: string): any {
   const proxy = createProxyMiddleware({
     target,
     changeOrigin: true,
@@ -345,10 +339,8 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   
   logger.error('Unhandled error', errorContext);
   
-  // Capture with Sentry
-  Sentry.captureException(error, {
-    extra: errorContext
-  });
+  // Capture with Sentry is disabled for local run
+  // Sentry.captureException(error, { extra: errorContext });
   
   if (!res.headersSent) {
     res.status(500).json({
