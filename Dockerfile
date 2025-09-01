@@ -1,5 +1,6 @@
 # Frontend Dockerfile for React/Vite app
 FROM node:20-alpine AS build
+ARG VITE_BUILD_MODE=docker
 
 # Set working directory
 WORKDIR /app
@@ -14,7 +15,8 @@ RUN npm ci
 COPY . .
 
 # Build the application
-RUN npm run build
+# Use Vite mode so the frontend picks up .env.<mode> files (we'll pass docker via build args)
+RUN npm run build -- --mode $VITE_BUILD_MODE
 
 # Production stage
 FROM nginx:alpine
