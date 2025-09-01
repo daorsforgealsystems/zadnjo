@@ -27,7 +27,9 @@ export default defineConfig({
     //   svg: { multipass: true },
     // }),
 
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+    }),
 
   // Progressive Web App support
   VitePWA({
