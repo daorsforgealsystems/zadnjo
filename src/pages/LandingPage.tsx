@@ -20,6 +20,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 const LandingPage = () => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   
   useEffect(() => {
     setIsVisible(true);
@@ -71,7 +72,7 @@ const LandingPage = () => {
 
   return (
     <div className="relative min-h-screen">
-  <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" overlayOpacity={0.32} />
+  <MediaBackground mediaSrc="/hero-logistics.jpg" type="image" overlayOpacity={0.48} />
       <ParticleBackground />
       
       {/* Bring main content above background/particles */}
@@ -80,17 +81,42 @@ const LandingPage = () => {
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 px-3 py-2 rounded-md bg-background/80">Skip to main content</a>
 
         {/* Simple header / nav */}
-        <header className="w-full flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-          <Link to="/" className="text-lg font-bold tracking-tight">Logi<span className="text-primary">Core</span></Link>
-          <nav className="hidden sm:flex gap-4 items-center">
-            <Link to="/login" className="text-sm px-3 py-2 rounded-md hover:bg-background/20">{t('nav.login', { defaultValue: 'Login' })}</Link>
-            <Link to="/signup" className="text-sm px-3 py-2 rounded-md bg-gradient-primary text-white">{t('nav.signup', { defaultValue: 'Get started' })}</Link>
-          </nav>
-          <LanguageSwitcher variant="floating" />
+        <header className="w-full flex items-center justify-between px-4 sm:px-6 py-3 max-w-7xl mx-auto">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="text-lg font-bold tracking-tight">Logi<span className="text-primary">Core</span></Link>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <nav className="hidden sm:flex gap-4 items-center">
+              <Link to="/login" className="text-sm px-3 py-2 rounded-md hover:bg-background/20">{t('nav.login', { defaultValue: 'Login' })}</Link>
+              <Link to="/signup" className="text-sm px-3 py-2 rounded-md bg-gradient-primary text-white">{t('nav.signup', { defaultValue: 'Get started' })}</Link>
+            </nav>
+
+            <button
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="sm:hidden p-2 rounded-md hover:bg-background/20"
+            >
+              <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {mobileOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M3 12h18M3 6h18M3 18h18" />}
+              </svg>
+            </button>
+
+            <LanguageSwitcher variant="floating" />
+          </div>
+
+          {/* Mobile dropdown */}
+          {mobileOpen && (
+            <div className="sm:hidden absolute right-4 top-16 z-40 w-48 bg-background/90 backdrop-blur-md rounded-md shadow-lg py-2">
+              <Link to="/login" className="block px-4 py-2 text-sm hover:bg-background/20">{t('nav.login', { defaultValue: 'Login' })}</Link>
+              <Link to="/signup" className="block px-4 py-2 text-sm hover:bg-background/20">{t('nav.signup', { defaultValue: 'Get started' })}</Link>
+            </div>
+          )}
         </header>
-        
-  {/* Main Content - This will grow to fill available space */}
-  <main id="main-content" className="flex-1">
+
+        {/* Main Content - This will grow to fill available space */}
+        <main id="main-content" className="flex-1">
           {/* Hero Section */}
           <section className="min-h-screen flex flex-col justify-center items-center px-4 py-12 text-center hero-section">
           <motion.div
