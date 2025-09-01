@@ -1,6 +1,6 @@
 {
   "deno.path": "C:\\Users\\User\\AppData\\Local\\deno\\bin\\deno.exe",
-  "deno.enable": false,
+  "deno.enable": true,
   "deno.enablePaths": [
     "netlify/edge-functions"
   ],
@@ -21,5 +21,6 @@
     }
   },
   "codacy.cli.cliVersion": "codacy-cli-v2",
-  "extension.prophet.sitecontext.selectedSiteID": ""
+  "extension.prophet.sitecontext.selectedSiteID": "",
+  "deno.unstable": true
 }

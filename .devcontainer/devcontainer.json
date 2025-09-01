@@ -9,6 +9,13 @@
 		"ghcr.io/flexwie/devcontainer-features/op:1": {},
 		"ghcr.io/wxw-matt/devcontainer-features/command_runner:0": {},
 		"ghcr.io/dotnet/aspire-devcontainer-feature/dotnetaspire:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"denoland.vscode-deno"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
