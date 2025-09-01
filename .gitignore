@@ -65,3 +65,7 @@ test-*.js
 *.mov
 *.avi
 *.mkv
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
