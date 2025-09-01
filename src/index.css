@@ -123,8 +123,8 @@ All colors MUST be HSL for consistency and theming.
 
   body {
     background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-weight: 500; /* equivalent to Tailwind's font-medium */
+  color: hsl(var(--foreground));
+  font-weight: 400; /* reduce to normal weight for better readability */
   margin: 0; /* explicitly remove default browser margin to avoid visible page gutters */
   overflow-x: hidden;
   }
@@ -304,6 +304,44 @@ All colors MUST be HSL for consistency and theming.
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--primary-dark));
+  }
+}
+
+/* Accessibility helpers */
+@layer utilities {
+  .skip-link {
+    position: absolute;
+    left: -999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    z-index: 1000;
+    background: transparent;
+    color: inherit;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: transform 160ms ease, left 160ms ease;
+  }
+
+  .skip-link:focus,
+  .skip-link:active {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    background: hsl(var(--background) / 0.85);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+    transform: translateY(0);
+    outline: 2px solid hsl(var(--ring));
+  }
+
+  /* Visible focus ring for keyboard users */
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    border-radius: 6px;
   }
 }
 

@@ -143,7 +143,10 @@ const AppContent = () => {
   debug('Rendering main application content', 'info');
 
   return (
-    <div className="flex flex-col min-h-screen" id="main-content" role="main">
+    <>
+      {/* Keyboard-accessible skip link for screen reader / keyboard users */}
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <div className="flex flex-col min-h-screen" id="main-content" role="main">
       <AnimatePresence mode="wait" initial={false}>
         <Suspense fallback={<LoadingScreen />}>
           <ErrorBoundary>
@@ -396,6 +399,7 @@ const AppContent = () => {
         </ErrorBoundary>
       )}
     </div>
+    </>
   );
 };
 
