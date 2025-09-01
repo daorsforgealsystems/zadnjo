@@ -76,11 +76,21 @@ const LandingPage = () => {
       
       {/* Bring main content above background/particles */}
       <div className="relative z-20 min-h-screen flex flex-col">
-        {/* Language Selector */}
-        <LanguageSwitcher variant="floating" />
+        {/* Skip link for keyboard users */}
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 px-3 py-2 rounded-md bg-background/80">Skip to main content</a>
+
+        {/* Simple header / nav */}
+        <header className="w-full flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+          <Link to="/" className="text-lg font-bold tracking-tight">Logi<span className="text-primary">Core</span></Link>
+          <nav className="hidden sm:flex gap-4 items-center">
+            <Link to="/login" className="text-sm px-3 py-2 rounded-md hover:bg-background/20">{t('nav.login', { defaultValue: 'Login' })}</Link>
+            <Link to="/signup" className="text-sm px-3 py-2 rounded-md bg-gradient-primary text-white">{t('nav.signup', { defaultValue: 'Get started' })}</Link>
+          </nav>
+          <LanguageSwitcher variant="floating" />
+        </header>
         
-        {/* Main Content - This will grow to fill available space */}
-        <main className="flex-1">
+  {/* Main Content - This will grow to fill available space */}
+  <main id="main-content" className="flex-1">
           {/* Hero Section */}
           <section className="min-h-screen flex flex-col justify-center items-center px-4 py-12 text-center hero-section">
           <motion.div
@@ -91,7 +101,7 @@ const LandingPage = () => {
           >
             <motion.h1 
               aria-label={t('landing.hero.title', { defaultValue: 'Revolutionizing Logistics with AI' })}
-              className="text-4xl md:text-7xl font-bold mb-6 gradient-text hero-text shadow-xxl"
+              className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-4 gradient-text hero-text leading-tight"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -100,7 +110,7 @@ const LandingPage = () => {
             </motion.h1>
             
             <motion.p 
-              className="text-xl md:text-3xl text-foreground/95 mb-12 max-w-3xl mx-auto font-light hero-text"
+              className="text-base md:text-xl text-foreground/95 mb-8 max-w-3xl mx-auto font-light hero-text"
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -114,14 +124,14 @@ const LandingPage = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              <Button asChild size="lg" className="group text-xl px-10 py-6 bg-gradient-primary hover:shadow-lg-strong transition-all duration-300 rounded-full cta-hover-scale">
+              <Button asChild size="lg" className="group text-lg sm:text-xl px-8 sm:px-10 py-4 sm:py-6 bg-gradient-primary hover:shadow-lg-strong transition-all duration-300 rounded-full cta-hover-scale">
                 <Link to="/signup" aria-label={t('landing.cta.getStarted', { defaultValue: 'Get Started' })}>
                   {t('landing.cta.getStarted', { defaultValue: 'Get Started' })}
                   <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" size="lg" className="text-xl px-10 py-6 border-2 backdrop-blur-sm bg-background/30 hover:bg-background/50 rounded-full cta-hover-scale">
+              <Button asChild variant="outline" size="lg" className="text-lg sm:text-xl px-8 sm:px-10 py-4 sm:py-6 border-2 backdrop-blur-sm bg-background/40 hover:bg-background/60 rounded-full cta-hover-scale">
                 <Link to="/login">
                   {t('landing.cta.login', { defaultValue: 'Login' })}
                 </Link>
@@ -131,10 +141,12 @@ const LandingPage = () => {
           
           {/* Animated Stats */}
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-32 max-w-5xl w-full mx-auto"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 md:mt-28 max-w-5xl w-full mx-auto"
             variants={containerVariants}
             initial="hidden"
             animate={isVisible ? "visible" : {}}
+            aria-live="polite"
+            aria-atomic="true"
           >
             {[
               { value: "99.9%", label: t('landing.stats.onTime', { defaultValue: 'On-Time Delivery' }) },
@@ -147,10 +159,10 @@ const LandingPage = () => {
                 variants={itemVariants}
                 className="text-center"
               >
-                <Card className="bg-background/40 backdrop-blur-md border-border/50 hover:shadow-xl transition-all duration-300 shadow-lg">
+        <Card className="bg-background/40 backdrop-blur-md border-border/50 hover:shadow-xl transition-all duration-300 shadow-lg">
                   <CardContent className="p-6">
-                    <div className="text-4xl font-bold text-primary mb-2">{stat.value}</div>
-                    <div className="text-foreground/80">{stat.label}</div>
+          <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">{stat.value}</div>
+          <div className="text-foreground/80">{stat.label}</div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -168,7 +180,7 @@ const LandingPage = () => {
               transition={{ duration: 0.8 }}
               className="text-center mb-16"
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('landing.features.title', { defaultValue: 'Powerful Features' })}</h2>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">{t('landing.features.title', { defaultValue: 'Powerful Features' })}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 {t('landing.features.subtitle', { defaultValue: 'Our platform offers cutting-edge solutions for modern logistics challenges' })}
               </p>
@@ -190,8 +202,9 @@ const LandingPage = () => {
                 >
                   <Card className="h-full feature-card">
                     <CardContent className="p-6 flex flex-col items-center text-center">
-                      <div className="bg-primary/10 p-3 rounded-full mb-4">
-                        <feature.icon className="h-8 w-8 text-primary" />
+                      <div className="bg-primary/10 p-3 rounded-full mb-4" aria-hidden="true">
+                        <feature.icon className="h-8 w-8 text-primary" aria-hidden="true" />
+                        <span className="sr-only">{feature.title}</span>
                       </div>
                       <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                       <p className="text-muted-foreground">{feature.description}</p>
