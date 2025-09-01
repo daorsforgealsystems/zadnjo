@@ -13,7 +13,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"denoland.vscode-deno"
+				"denoland.vscode-deno",
+				"Dart-Code.dart-code"
 			]
 		}
 	}
