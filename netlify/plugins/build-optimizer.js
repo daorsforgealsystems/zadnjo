@@ -84,7 +84,7 @@ export default {
       console.log(`📄 Build manifest created at ${manifestPath}`);
 
       // Create a health check page only if enabled
-      if (inputs.healthCheck !== false) {
+      if (getInput(inputs, 'healthCheck', 'health-check', true) !== false) {
         const healthCheckContent = `
 <!DOCTYPE html>
 <html>
@@ -125,7 +125,7 @@ export default {
     
     try {
       // Trigger cache warming only if enabled
-      if (inputs.cacheWarm !== false) {
+      if (getInput(inputs, 'cacheWarm', 'cache-warm', true) !== false) {
         // Trigger cache warming
         const deployUrl = process.env.DEPLOY_URL;
         if (deployUrl) {
