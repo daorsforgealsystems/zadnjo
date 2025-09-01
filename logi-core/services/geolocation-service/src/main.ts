@@ -13,7 +13,7 @@ import {
   createRedisCheck,
   getMetrics,
   getPrometheusMetrics
-} from '../../shared/monitoring';
+} from './lib/monitoring';
 
 // Type definitions
 interface Position {

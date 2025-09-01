@@ -41,7 +41,7 @@ const calculateP95ResponseTime = (responseTimes: number[]): number => {
 
 // Middleware for request timing and metrics collection
 export const metricsMiddleware = (serviceName: string) => {
-  return (req: Request, res: Response, next: Function) => {
+  return (req: any, res: any, next: any) => {
     const metrics = initializeMetrics(serviceName);
     const startTime = performance.now();
     
@@ -50,7 +50,7 @@ export const metricsMiddleware = (serviceName: string) => {
     
     // Track response status
     const originalSend = res.send;
-    res.send = function(data: unknown) {
+    res.send = function(data: any) {
       const responseTime = performance.now() - startTime;
       metrics.responseTime.push(responseTime);
       
@@ -105,7 +105,7 @@ export const resetMetrics = (serviceName: string) => {
 
 // Health check with metrics
 export const healthCheck = (serviceName: string, checks: Record<string, () => Promise<boolean>> = {}) => {
-  return async (req: Request, res: Response) => {
+  return async (req: any, res: any) => {
     try {
       const metrics = getMetrics(serviceName);
       const healthChecks: Record<string, boolean> = {};
@@ -140,7 +140,7 @@ export const healthCheck = (serviceName: string, checks: Record<string, () => Pr
 };
 
 // Database connection check utility
-export const createDatabaseCheck = (prismaClient: { $queryRaw: (query: TemplateStringsArray) => Promise<unknown> }) => {
+export const createDatabaseCheck = (prismaClient: any) => {
   return async () => {
     try {
       await prismaClient.$queryRaw`SELECT 1`;
@@ -152,7 +152,7 @@ export const createDatabaseCheck = (prismaClient: { $queryRaw: (query: TemplateS
 };
 
 // Redis connection check utility
-export const createRedisCheck = (redisClient: { ping: () => Promise<string> }) => {
+export const createRedisCheck = (redisClient: any) => {
   return async () => {
     try {
       await redisClient.ping();
@@ -164,7 +164,7 @@ export const createRedisCheck = (redisClient: { ping: () => Promise<string> }) =
 };
 
 // Performance monitoring for specific operations
-export const monitorOperation = <T extends unknown[], R>(
+export const monitorOperation = <T extends any[], R>(
   operationName: string,
   fn: (...args: T) => Promise<R>
 ) => {

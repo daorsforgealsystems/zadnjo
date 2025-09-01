@@ -1,4 +1,7 @@
-import { performance } from 'perf_hooks';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getPrometheusMetrics = exports.monitorOperation = exports.createRedisCheck = exports.createDatabaseCheck = exports.healthCheck = exports.resetMetrics = exports.getMetrics = exports.metricsMiddleware = void 0;
+const perf_hooks_1 = require("perf_hooks");
 // Performance metrics storage
 const serviceMetrics = {};
 // Initialize metrics for a service
@@ -29,16 +32,16 @@ const calculateP95ResponseTime = (responseTimes) => {
     return sorted[index];
 };
 // Middleware for request timing and metrics collection
-export const metricsMiddleware = (serviceName) => {
+const metricsMiddleware = (serviceName) => {
     return (req, res, next) => {
         const metrics = initializeMetrics(serviceName);
-        const startTime = performance.now();
+        const startTime = perf_hooks_1.performance.now();
         // Increment request count
         metrics.requestCount++;
         // Track response status
         const originalSend = res.send;
         res.send = function (data) {
-            const responseTime = performance.now() - startTime;
+            const responseTime = perf_hooks_1.performance.now() - startTime;
             metrics.responseTime.push(responseTime);
             // Keep only last 100 response times to prevent memory issues
             if (metrics.responseTime.length > 100) {
@@ -56,8 +59,9 @@ export const metricsMiddleware = (serviceName) => {
         next();
     };
 };
+exports.metricsMiddleware = metricsMiddleware;
 // Get metrics for a service
-export const getMetrics = (serviceName) => {
+const getMetrics = (serviceName) => {
     const metrics = serviceMetrics[serviceName] || initializeMetrics(serviceName);
     return {
         serviceName,
@@ -70,8 +74,9 @@ export const getMetrics = (serviceName) => {
         lastReset: new Date(metrics.lastReset).toISOString(),
     };
 };
+exports.getMetrics = getMetrics;
 // Reset metrics for a service
-export const resetMetrics = (serviceName) => {
+const resetMetrics = (serviceName) => {
     if (serviceMetrics[serviceName]) {
         serviceMetrics[serviceName] = {
             requestCount: 0,
@@ -81,11 +86,12 @@ export const resetMetrics = (serviceName) => {
         };
     }
 };
+exports.resetMetrics = resetMetrics;
 // Health check with metrics
-export const healthCheck = (serviceName, checks = {}) => {
+const healthCheck = (serviceName, checks = {}) => {
     return async (req, res) => {
         try {
-            const metrics = getMetrics(serviceName);
+            const metrics = (0, exports.getMetrics)(serviceName);
             const healthChecks = {};
             // Run all health checks
             for (const [name, checkFn] of Object.entries(checks)) {
@@ -115,8 +121,9 @@ export const healthCheck = (serviceName, checks = {}) => {
         }
     };
 };
+exports.healthCheck = healthCheck;
 // Database connection check utility
-export const createDatabaseCheck = (prismaClient) => {
+const createDatabaseCheck = (prismaClient) => {
     return async () => {
         try {
             await prismaClient.$queryRaw `SELECT 1`;
@@ -127,8 +134,9 @@ export const createDatabaseCheck = (prismaClient) => {
         }
     };
 };
+exports.createDatabaseCheck = createDatabaseCheck;
 // Redis connection check utility
-export const createRedisCheck = (redisClient) => {
+const createRedisCheck = (redisClient) => {
     return async () => {
         try {
             await redisClient.ping();
@@ -139,28 +147,30 @@ export const createRedisCheck = (redisClient) => {
         }
     };
 };
+exports.createRedisCheck = createRedisCheck;
 // Performance monitoring for specific operations
-export const monitorOperation = (operationName, fn) => {
+const monitorOperation = (operationName, fn) => {
     return async (...args) => {
-        const startTime = performance.now();
+        const startTime = perf_hooks_1.performance.now();
         try {
             const result = await fn(...args);
-            const duration = performance.now() - startTime;
+            const duration = perf_hooks_1.performance.now() - startTime;
             // Log successful operation
             console.log(`Operation ${operationName} completed in ${duration.toFixed(2)}ms`);
             return result;
         }
         catch (error) {
-            const duration = performance.now() - startTime;
+            const duration = perf_hooks_1.performance.now() - startTime;
             // Log failed operation
             console.error(`Operation ${operationName} failed after ${duration.toFixed(2)}ms:`, error);
             throw error;
         }
     };
 };
+exports.monitorOperation = monitorOperation;
 // Export metrics collection for Prometheus
-export const getPrometheusMetrics = (serviceName) => {
-    const metrics = getMetrics(serviceName);
+const getPrometheusMetrics = (serviceName) => {
+    const metrics = (0, exports.getMetrics)(serviceName);
     return `
 # HELP http_requests_total Total number of HTTP requests
 # TYPE http_requests_total counter
@@ -183,3 +193,4 @@ http_request_duration_seconds_p95{service="${serviceName}"} ${metrics.p95Respons
 service_uptime_seconds{service="${serviceName}"} ${metrics.uptime / 1000}
 `;
 };
+exports.getPrometheusMetrics = getPrometheusMetrics;
