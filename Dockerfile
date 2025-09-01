@@ -1,5 +1,5 @@
 # Frontend Dockerfile for React/Vite app
-FROM node:20-alpine AS build
+FROM node:20.17.0-alpine AS build
 ARG VITE_BUILD_MODE=docker
 
 # Set working directory
@@ -19,7 +19,7 @@ COPY . .
 RUN npm run build -- --mode $VITE_BUILD_MODE
 
 # Production stage
-FROM nginx:alpine
+FROM nginx:1.27-alpine
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf

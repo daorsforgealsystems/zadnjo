@@ -1,5 +1,5 @@
 # API Gateway Dockerfile
-FROM node:20-alpine AS base
+FROM node:20.17.0-alpine AS base
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci || npm install
@@ -7,7 +7,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build || npx tsc -p tsconfig.json
 
-FROM node:20-alpine
+FROM node:20.17.0-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=base /app/package*.json ./
