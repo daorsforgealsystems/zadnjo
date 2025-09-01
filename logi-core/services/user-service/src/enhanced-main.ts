@@ -8,10 +8,10 @@ import { NavigationService } from './services/navigation.service';
 import winston from 'winston';
 
 // Import shared modules (these would be imported from the shared package in production)
-import { MessageQueue, createMessageQueue, LogisticsEvents } from '../../../shared/message-queue';
-import { ServiceDiscovery, createServiceDiscovery, createServiceConfig } from '../../../shared/service-discovery';
-import { DistributedTracing, initializeTracing } from '../../../shared/distributed-tracing';
-import { CacheService, createCacheService, CacheKeyBuilder } from '../../../shared/caching';
+import { MessageQueue, createMessageQueue, LogisticsEvents } from './lib/message-queue';
+import { ServiceDiscovery, createServiceDiscovery, createServiceConfig } from './lib/service-discovery';
+import { DistributedTracing, initializeTracing } from './lib/distributed-tracing';
+import { CacheService, createCacheService, CacheKeyBuilder } from './lib/caching';
 
 // Configure structured logging
 const logger = winston.createLogger({

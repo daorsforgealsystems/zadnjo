@@ -89,7 +89,7 @@ export class NavigationService {
           acc[route] = { count: 0, totalTime: 0 };
         }
         acc[route].count++;
-        acc[route].totalTime += activity.metadata?.timeSpent || 0;
+        acc[route].totalTime += (activity.metadata?.timeSpent as number) || 0;
         return acc;
       }, {} as Record<string, { count: number; totalTime: number }>);
 
@@ -111,7 +111,7 @@ export class NavigationService {
           acc[query] = { count: 0, results: 0 };
         }
         acc[query].count++;
-        acc[query].results += activity.metadata?.resultCount || 0;
+        acc[query].results += (activity.metadata?.resultCount as number) || 0;
         return acc;
       }, {} as Record<string, { count: number; results: number }>);
 
@@ -121,7 +121,7 @@ export class NavigationService {
       .reduce((acc, activity) => {
         const key = `${activity.target}_${activity.metadata?.interaction || 'click'}`;
         if (!acc[key]) {
-          acc[key] = { componentId: activity.target, action: activity.metadata?.interaction || 'click', count: 0 };
+          acc[key] = { componentId: activity.target, action: (activity.metadata?.interaction as string) || 'click', count: 0 };
         }
         acc[key].count++;
         return acc;
@@ -132,7 +132,7 @@ export class NavigationService {
       .filter(a => a.action === 'page_view' && a.metadata?.timeSpent)
       .reduce((acc, activity) => {
         const page = activity.target;
-        acc[page] = (acc[page] || 0) + activity.metadata.timeSpent;
+        acc[page] = (acc[page] || 0) + (activity.metadata.timeSpent as number);
         return acc;
       }, {} as Record<string, number>);
 

@@ -1,4 +1,4 @@
-import amqp, { Connection, Channel, Message } from 'amqplib';
+import amqp, { Connection, Channel, Message, ChannelModel } from 'amqplib';
 import winston from 'winston';
 
 // Configure logger for message queue
