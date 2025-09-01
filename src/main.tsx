@@ -4,7 +4,6 @@ import './index.css';
 // Ensure i18n is initialized before any component (useTranslation) runs
 import './i18n';
 import App from './App';
-import { registerServiceWorker } from './registerSW';
 import { BrowserRouter } from 'react-router-dom';
 /// <reference types="@sentry/react/types" />
 import * as Sentry from '@sentry/browser';
@@ -39,12 +38,3 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
-
-// Register service worker in production (safe no-op in dev because registerSW guards by env)
-if (!import.meta.env.DEV && 'serviceWorker' in navigator) {
-  registerServiceWorker().catch((err) => {
-    // Non-fatal: log for diagnostics
-    // eslint-disable-next-line no-console
-    console.warn('Service worker registration failed:', err);
-  });
-}

@@ -70,6 +70,8 @@ export default function Avatar({ url, size, onUpload, alt = "User avatar" }: Ava
           alt={alt}
           className="avatar-image rounded-full object-cover"
           style={{ height: size, width: size }}
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <div

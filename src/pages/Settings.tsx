@@ -35,9 +35,13 @@ const Settings = () => {
       {/* Hero background image with dark overlay */}
       <img
         src="/src/assets/hero-logistics.jpg"
-        alt="Background"
+        alt="Logistics background showing vehicles and routes"
         className="absolute inset-0 w-full h-full object-cover object-center scale-105 blur-sm opacity-60 z-0 select-none pointer-events-none"
         draggable={false}
+        loading="lazy"
+        decoding="async"
+        role="img"
+        aria-hidden="true"
       />
       <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-gray-900/80 z-10" />
       <ParticleBackground />

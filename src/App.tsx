@@ -143,7 +143,7 @@ const AppContent = () => {
   debug('Rendering main application content', 'info');
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" id="main-content" role="main">
       <AnimatePresence mode="wait" initial={false}>
         <Suspense fallback={<LoadingScreen />}>
           <ErrorBoundary>

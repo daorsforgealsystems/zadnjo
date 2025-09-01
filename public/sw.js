@@ -1,6 +1,11 @@
-// Basic service worker for offline support and caching strategies
+/* Basic service worker for offline support
+   - Cache-first for static assets
+   - Network-first for API calls
+   - Navigation fallback to /offline.html
+*/
 const CACHE_NAME = 'zadnjo-static-v1';
 const OFFLINE_URL = '/offline.html';
+
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -20,19 +25,14 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-          return Promise.resolve();
-        })
-      )
-    )
+    caches.keys().then((keys) => Promise.all(
+      keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+    ))
   );
   self.clients.claim();
 });
 
-// Simple network-first for API and navigation, cache-first for other static assets
+// Simple routing: network-first for /api, cache-first for others
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -40,50 +40,43 @@ self.addEventListener('fetch', (event) => {
   // Bypass non-GET
   if (request.method !== 'GET') return;
 
-  // API requests: network-first with fallback to cache
-  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/logi-core')) {
+  // Network-first for API routes
+  if (url.pathname.startsWith('/api')) {
     event.respondWith(
-      fetch(request)
-        .then((res) => {
-          const copy = res.clone();
+      fetch(request).then((resp) => {
+        // Update cache for successful responses
+        if (resp && resp.ok) {
+          const copy = resp.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return res;
-        })
-        .catch(() => caches.match(request))
+        }
+        return resp;
+      }).catch(() => caches.match(request))
     );
     return;
   }
 
-  // For navigation or HTML pages: try network then fallback to offline page
-  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
+  // For navigation requests, try network then cache then offline fallback
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((res) => res)
-        .catch(() => caches.match(OFFLINE_URL))
+      fetch(request).then((resp) => resp).catch(() => caches.match(request).then((r) => r || caches.match(OFFLINE_URL)))
     );
     return;
   }
 
-  // Static resources: cache-first
+  // Default: try cache first then network
   event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request).then((res) => {
-      // Put in cache for future
-      if (res && res.status === 200) {
-        const copy = res.clone();
+    caches.match(request).then((cached) => cached || fetch(request).then((resp) => {
+      // Cache images and static assets
+      if (request.destination === 'image' || request.destination === 'script' || request.destination === 'style') {
+        const copy = resp.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
       }
-      return res;
-    }).catch(() => {
-      // If request is an image and fails, return a transparent 1x1 SVG as fallback
-      if (request.destination === 'image') {
-        return new Response('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>', {
-          headers: { 'Content-Type': 'image/svg+xml' }
-        });
-      }
-    }))
+      return resp;
+    }).catch(() => null))
   );
 });
 
+// Simple message handler (skip waiting)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();

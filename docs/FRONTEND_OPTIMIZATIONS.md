@@ -1,76 +1,50 @@
 # Frontend Performance & Accessibility Improvements
 
-This document summarizes the small, safe improvements added to the frontend to improve performance, offline support, and accessibility.
+This document summarizes the recent low-priority (nice-to-have) improvements applied to the frontend to improve performance, accessibility, and offline capabilities.
 
-## Changes Made
+## What I changed
+- Added route-level code-splitting is already present via `React.lazy` and a `lazyWithErrorHandling` wrapper — kept and left as the primary code-splitting mechanism.
+- Added a basic Service Worker at `public/sw.js` with caching strategies (cache-first for static assets, network-first for /api requests, offline fallback for navigation).
+- Registered the service worker from `src/main.tsx` using `src/registerSW.ts` (registration is a no-op in dev).
+- Optimized hero background loading via `loading="lazy"` in `src/components/MediaBackground.tsx` (already present).
+- Added an accessible "Skip to content" link in `index.html` and marked the main app container with `id="main-content"` and `role="main"` in `src/App.tsx`.
 
-- Code-splitting: The app already uses route-level lazy loading via `React.lazy` and a helper `lazyWithErrorHandling`. No large change required; the existing approach was kept and small fixes were added to ensure lazy imports have robust error boundaries.
+## How to run locally
 
-- Image optimizations: The `MediaBackground` component uses `loading="lazy"` and `decoding="async"`. Several other images in the app already include descriptive `alt` attributes. The hero background is lazy-loaded.
-
-- Service Worker: A basic `public/sw.js` service worker was added to cache core assets and provide an offline HTML fallback (`/offline.html`). The registration is invoked from `src/main.tsx` (production only). The service worker uses a network-first strategy for API requests and cache-first for static assets.
-
-- Accessibility: A keyboard-accessible "Skip to content" link was added to `index.html`. The hero background includes an `alt`. Where appropriate, components should include ARIA labels and roles; a next step is scanning UI components for missing semantics.
-
-- Documentation: This doc contains setup notes and a troubleshooting section.
-
-## How it works
-
-- The service worker caches the core assets during `install`. On `fetch`, API calls are attempted over network first, with cached fallback. Static assets are served from cache first for faster repeat loads.
-
-- The `skip` link is visible when focused (keyboard navigation) and points to `#main-content`. For components to fully benefit, ensure main page containers include `id="main-content"` and `role="main"`.
-
-## Setup & Local Development
-
-1. Install dependencies:
+Start the dev server (service worker is skipped in dev):
 
 ```bash
 npm install
-```
-
-2. Run the development server:
-
-```bash
 npm run dev
 ```
 
-Notes:
-- The service worker registration is disabled in development. To test service worker behavior locally, build and preview a production build:
+Build for production and preview (service worker will be registered):
 
 ```bash
 npm run build
 npm run preview
 ```
 
-- Confirm `public/sw.js` is served from the site's root in production. Netlify/other hosts may require configuration to ensure `sw.js` is deployed at the site root.
+Notes:
+- The service worker is intentionally conservative and will skip registration in development and headless test environments. You can force-skip it in production by adding `?no-sw=1` to the URL.
 
-## API Documentation
+## API documentation (frontend-facing)
 
-This repository ships frontend code only. The app talks to backend services under `/api` and other service prefixes. Recommendations:
-
-- Document backend endpoints in `docs/API.md` (existing) with expected request/response shapes.
-- Use an API mock server (e.g., MSW) for frontend development when backend services are unavailable.
+- The frontend expects backend APIs under `/api/*`. The service worker treats requests whose path starts with `/api` as network-first (live preferred, fallback to cache).
+- Health checks: the app expects backend services to be available and may time out on initial loading if services are down. See `src/components/LoadingScreen.tsx` for timeout behavior and retry patterns.
 
 ## Troubleshooting
 
-- If the app shows stale content after deployment, unregister the service worker in the browser devtools (Application > Service Workers) and hard-refresh. The service worker attempts to update and reload once per new install.
-
-- If images fail to load offline, ensure they are included in `ASSETS_TO_CACHE` in `public/sw.js` or are available via a CDN that permits caching.
-
-- If service worker fails to register in production, check server logs and ensure `sw.js` is reachable at `https://<your-site>/sw.js` and that `Content-Type` is `application/javascript`.
+- Service worker not updating: open DevTools > Application > Service Workers and check the status. You can unregister the worker there, or use `?no-sw=1` to skip registration.
+- Assets not loading offline: confirm `public/sw.js` includes the asset path and rebuild the app. The SW caches `/', '/index.html', '/offline.html', '/favicon.ico', '/pwa-192x192.png', '/pwa-512x512.png', '/hero-logistics.jpg'` by default.
+- Dev server still showing old content: Clear site data and disable SW in DevTools, then reload.
+- Missing backend services / health check failures: verify the backend containers/services are running (see `docker-compose.yml` and `logi-core/docker-compose.yml`) and that API hostnames match the frontend's expected origins.
 
 ## Next steps (recommended)
 
-- Audit ARIA labels and missing roles across interactive components.
-- Add automated lighthouse checks to CI for accessibility and performance budgets.
-- Convert large, non-critical bundles to dynamic imports and add prefetch hints for next likely routes.
-- Add tests for service worker messaging and update flows.
+- Add more granular chunking with route-based prefetching for high-traffic flows.
+- Implement image srcset and modern formats (WebP/AVIF) for hero and product images with responsive selection.
+- Expand the service worker strategy to use Workbox for robust strategies and analytics about updates.
+- Add automated tests verifying SW registration and offline fallbacks.
 
----
-
-Requirements coverage summary:
-- Code splitting: existing lazy imports used (Done)
-- Lazy image loading: `MediaBackground` uses `loading="lazy"` (Done)
-- Service worker: `public/sw.js` added and registered (Done)
-- ARIA/Keyboard: skip link added; further component ARIA improvements recommended (Partially Done)
-- Docs: this file added with setup and troubleshooting (Done)
+If you'd like, I can open a follow-up PR to implement image srcset generation and Workbox integration.
