@@ -288,17 +288,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     # Only run the job when the dev DB connection secret is provided
-    if: secrets.DEV_SUPABASE_DB_URL != ''
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check if dev DB secret is set
+        id: check_secret
+        run: |
+          if [ -n "${{ secrets.DEV_SUPABASE_DB_URL }}" ]; then
+            echo "secret_set=true" >> $GITHUB_OUTPUT
+          else
+            echo "secret_set=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Install psql (postgres client)
+        if: steps.check_secret.outputs.secret_set == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: Apply SQL migrations to DEV Supabase DB
+        if: steps.check_secret.outputs.secret_set == 'true'
         env:
           DEV_SUPABASE_DB_URL: ${{ secrets.DEV_SUPABASE_DB_URL }}
         run: |

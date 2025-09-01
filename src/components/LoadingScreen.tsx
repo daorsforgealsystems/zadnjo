@@ -35,25 +35,32 @@ const LoadingScreen = ({ timeout = 15000, useEnhanced = true }: LoadingScreenPro
       setIsTimedOut(true);
     }, timeout);
 
-    // Update loading stage based on time
-    const stageInterval = setInterval(() => {
-      const currentTime = loadingTime;
-      const currentStage = stages.reduce((latest, stage) => {
-        if (stage.time <= currentTime && stage.time > latest.time) {
-          return stage;
-        }
-        return latest;
-      }, stages[0]);
-
-      setLoadingStage(currentStage.message);
-    }, 1000);
-
     return () => {
       clearInterval(interval);
       clearTimeout(timeoutId);
-      clearInterval(stageInterval);
     };
-  }, [timeout, loadingTime]);
+  }, [timeout]);
+
+  // Separate effect for updating loading stage
+  useEffect(() => {
+    const stages = [
+      { time: 0, message: 'Initializing application...' },
+      { time: 2000, message: 'Loading resources...' },
+      { time: 4000, message: 'Connecting to services...' },
+      { time: 6000, message: 'Preparing dashboard...' },
+      { time: 8000, message: 'Almost there...' },
+      { time: 10000, message: 'Taking longer than expected...' },
+    ];
+
+    const currentStage = stages.reduce((latest, stage) => {
+      if (stage.time <= loadingTime && stage.time > latest.time) {
+        return stage;
+      }
+      return latest;
+    }, stages[0]);
+
+    setLoadingStage(currentStage.message);
+  }, [loadingTime]);
 
   // Always wrap all branches in a top-level div with the expected classes
   return (
