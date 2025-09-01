@@ -46,7 +46,7 @@ All colors MUST be HSL for consistency and theming.
 
     /* Muted content system */
     --muted: 220 20% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted-foreground: 215 15% 75%;
 
     /* Accent system */
     --accent: 189 75% 55%;
@@ -112,6 +112,8 @@ All colors MUST be HSL for consistency and theming.
     --primary-foreground: 210 40% 98%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
+    --muted: 220 13% 91%;
+    --muted-foreground: 220 9% 46%;
   }
 }
 
