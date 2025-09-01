@@ -70,7 +70,6 @@ export class ServiceDiscovery {
       host: this.config.consulHost,
       port: this.config.consulPort,
       secure: false,
-      promisify: true
     });
 
     logger.info('Service Discovery initialized', {

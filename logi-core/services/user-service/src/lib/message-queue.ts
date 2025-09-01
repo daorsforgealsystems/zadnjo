@@ -1,4 +1,4 @@
-import amqp, { Connection, Channel, Message, ChannelModel } from 'amqplib';
+import amqp, { Connection, Channel, Message } from 'amqplib';
 import winston from 'winston';
 
 // Configure logger for message queue
@@ -70,7 +70,7 @@ export class MessageQueue {
       logger.info('Connecting to RabbitMQ', { url: this.config.url });
       
       this.connection = await amqp.connect(this.config.url);
-      this.channel = await this.connection.createChannel();
+      this.channel = await this.connection.createChannel() as Channel;
 
       // Handle connection events
       this.connection.on('error', (error) => {
