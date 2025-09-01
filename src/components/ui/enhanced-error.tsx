@@ -142,7 +142,7 @@ export const EnhancedError: React.FC<EnhancedErrorProps> = ({
               transition={{ delay: 0.4 }}
               className="space-y-3"
             >
-              <h4 className="font-medium text-sm text-muted-foreground">
+              <h4 className="font-medium text-sm text-foreground">
                 What you can try:
               </h4>
               <ul className="space-y-2">
@@ -152,7 +152,7 @@ export const EnhancedError: React.FC<EnhancedErrorProps> = ({
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 + index * 0.1 }}
-                    className="flex items-start gap-2 text-sm"
+                    className="flex items-start gap-2 text-sm text-foreground"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
                     <span>{suggestion}</span>

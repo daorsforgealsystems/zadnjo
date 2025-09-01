@@ -70,7 +70,7 @@ export const InlineLoading: React.FC<{ text?: string; size?: 'sm' | 'md' | 'lg';
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <LoadingSpinner size={size} variant={variant} />
-      <span className="text-muted-foreground">{text}</span>
+      <span className="text-foreground">{text}</span>
     </div>
   );
 };
@@ -99,7 +99,7 @@ export const FullPageLoading: React.FC<{
 
         {typeof progress === 'number' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="space-y-2">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm text-foreground">
               <span>Progress</span>
               <span>{Math.round(progress)}%</span>
             </div>
@@ -112,9 +112,9 @@ export const FullPageLoading: React.FC<{
         {steps && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="space-y-3">
             {steps.map((step, index) => (
-              <div key={index} className={cn('flex items-center gap-3 text-sm', index < currentStep && 'text-green-600', index === currentStep && 'text-primary', index > currentStep && 'text-muted-foreground')}>
-                {index < currentStep ? <CheckCircle className="w-4 h-4" /> : index === currentStep ? <LoadingSpinner size="sm" /> : <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30" />}
-                <span>{step}</span>
+              <div key={index} className={cn('flex items-center gap-3 text-sm', index < currentStep && 'text-green-500', index === currentStep && 'text-primary', index > currentStep && 'text-muted-foreground')}>
+                {index < currentStep ? <CheckCircle className="w-4 h-4 text-green-500" /> : index === currentStep ? <LoadingSpinner size="sm" /> : <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30" />}
+                <span className={cn(index < currentStep && 'text-green-500', index === currentStep && 'text-foreground', index > currentStep && 'text-muted-foreground')}>{step}</span>
               </div>
             ))}
           </motion.div>
