@@ -34,7 +34,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "-a", "redis123", "PING"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -47,8 +47,9 @@ services:
     container_name: logi-consul
     hostname: consul
     ports:
-      - "8500:8500"    # HTTP API
-      - "8600:8600"    # DNS
+      - "8500:8500"        # HTTP API
+      - "8600:8600/tcp"    # DNS (TCP)
+      - "8600:8600/udp"    # DNS (UDP)
     environment:
       CONSUL_BIND_INTERFACE: eth0
     command: >
@@ -75,11 +76,14 @@ services:
     container_name: logi-jaeger
     hostname: jaeger
     ports:
-      - "16686:16686"  # Jaeger UI
-      - "14268:14268"  # HTTP collector
-      - "14250:14250"  # gRPC collector
-      - "6831:6831/udp"  # UDP agent
-      - "6832:6832/udp"  # UDP agent
+      - "16686:16686"      # Jaeger UI
+      - "14268:14268"      # Legacy HTTP collector
+      - "14250:14250"      # Legacy gRPC collector
+      - "4317:4317"        # OTLP gRPC
+      - "4318:4318"        # OTLP HTTP
+      - "9411:9411"        # Zipkin
+      - "6831:6831/udp"    # UDP agent
+      - "6832:6832/udp"    # UDP agent
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
       COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
