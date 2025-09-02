@@ -50,8 +50,8 @@ export interface ConsumeOptions {
 }
 
 export class MessageQueue {
-  private connection: Connection | null = null;
-  private channel: Channel | null = null;
+  private connection: any = null;
+  private channel: any = null;
   private config: MessageQueueConfig;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
