@@ -1,58 +1,18 @@
 [build]
   command = "npm run build:netlify"
   publish = "dist"
+  functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
 
 [build.environment]
   NODE_VERSION = "20"
-  NETLIFY_DEBUG = "true"
-  BUILD_TIMING = "true"
-  NODE_OPTIONS = "--max-old-space-size=4096"
+  NPM_VERSION = "10"
 
-# Redirect rules for SPA
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# API proxy configuration - redirect API calls to backend
 [[redirects]]
   from = "/api/*"
-  to = "https://api.daorsflow.com/api/:splat"
-  status = 200
-  force = true
-  headers = {Cache-Control = "no-cache"}
-
-# Health check redirect
-[[redirects]]
-  from = "/health"
-  to = "https://api.daorsflow.com/health"
+  to = "https://api.flowmotion.com/:splat"
   status = 200
 
-# Netlify Functions for lightweight operations
-[[redirects]]
-  from = "/api/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-# Edge functions for geolocation-based routing
-# Note: Netlify edge function routing is configured via [[edge_functions]] or netlify.toml "edge_functions" block, not redirects.
-# If using edge functions, configure them below and remove this redirect if unnecessary.
-
-# Monitoring dashboard
-[[redirects]]
-  from = "/monitoring"
-  to = "/.netlify/functions/monitoring-dashboard"
-  status = 200
-
-# Admin routes (protected)
-[[redirects]]
-  from = "/admin/*"
-  to = "/index.html"
-  status = 200
-  [redirects.conditions]
-    Role = ["admin", "super-admin"]
-
-# Headers for security and caching
 [[headers]]
   for = "/*"
   [headers.values]
@@ -60,73 +20,8 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://api.daorsflow.com https://aysikssfvptxeclfymlk.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https://api.daorsflow.com https://aysikssfvptxeclfymlk.supabase.co wss://aysikssfvptxeclfymlk.supabase.co; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.netlify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.flowmotion.com wss://*.supabase.co"
 
-[[headers]]
-  for = "*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "*.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "*.png"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "*.svg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Function configuration
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-# Edge functions configuration
 [[edge_functions]]
   function = "geo-router"
-  path = "/api/geo/edge/*"
-
-# Environment-specific redirects
-[context.production]
-  environment = { VITE_API_BASE_URL = "https://api.daorsflow.com", VITE_SUPABASE_URL = "https://aysikssfvptxeclfymlk.supabase.co", VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2lrc3NmdnB0eGVjbGZ5bWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0ODUwODcsImV4cCI6MjA3MDA2MTA4N30.MlhXvs_XZgSJxltCwMxn50FP0hZgOZDR8Jtl4SEDkOI" }
-
-[context.deploy-preview]
-  environment = { VITE_API_BASE_URL = "https://staging-api.daorsflow.com" }
-
-[context.branch-deploy]
-  environment = { VITE_API_BASE_URL = "https://dev-api.daorsflow.com" }
-
-# Build plugins
-[[plugins]]
-  package = "./netlify/plugins/build-optimizer.js"
-
-# Performance and optimization settings
-[build.processing]
-  skip_processing = false
-
-[build.processing.css]
-  bundle = true
-  minify = true
-
-[build.processing.js]
-  bundle = true
-  minify = true
-
-[build.processing.html]
-  pretty_urls = true
-
-[build.processing.images]
-  compress = true
+  path = "/api/*"
