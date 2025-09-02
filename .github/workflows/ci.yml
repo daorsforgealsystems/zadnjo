@@ -344,6 +344,10 @@ jobs:
 
       - name: Build and push Docker images
         run: |
+          # Build and push Frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-frontend:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-frontend:latest
+
           # Build and push API Gateway
           docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-api-gateway:latest ./logi-core/apps/api-gateway
           docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-api-gateway:latest
@@ -352,7 +356,7 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-user-service:latest ./logi-core/services/user-service
           docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-user-service:latest
 
-          # Build and push other services as needed
+          # Build and push Order Service
           docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-order-service:latest ./logi-core/services/order-service
           docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-order-service:latest
 
@@ -378,8 +382,10 @@ jobs:
           host: ${{ secrets.PRODUCTION_HOST }}
           username: ${{ secrets.PRODUCTION_USER }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          envs: DOCKER_USERNAME
           script: |
             cd /opt/flow-motion
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             echo "Pulling latest images..."
             docker-compose -f docker-compose.prod.yml pull
             echo "Starting services with zero-downtime deployment..."

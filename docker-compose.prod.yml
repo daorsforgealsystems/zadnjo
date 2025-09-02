@@ -3,9 +3,7 @@ version: '3.8'
 services:
   # Frontend
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_USERNAME}/flow-motion-frontend:latest
     ports:
       - "3000:80"
     depends_on:
@@ -205,8 +203,7 @@ services:
         max-file: "3"
 
   geolocation-service:
-    build:
-      context: ./logi-core/services/geolocation-service
+    image: ${DOCKER_USERNAME}/flow-motion-geolocation-service:latest
     environment:
       - PORT=4005
       - NODE_ENV=production
@@ -238,8 +235,7 @@ services:
         max-file: "3"
 
   notification-service:
-    build:
-      context: ./logi-core/services/notification-service
+    image: ${DOCKER_USERNAME}/flow-motion-notification-service:latest
     environment:
       - PORT=4006
       - NODE_ENV=production
