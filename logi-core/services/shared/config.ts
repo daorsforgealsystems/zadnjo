@@ -432,49 +432,35 @@ export const ApiGatewayConfigSchema: ConfigSchema = {
 };
 
 export const DatabaseConfigSchema: ConfigSchema = {
-  db_host: {
+  database_url: {
     type: 'string',
     required: true,
-    default: 'localhost',
-    description: 'Database host'
-  },
-  db_port: {
-    type: 'number',
-    default: 5432,
-    description: 'Database port'
-  },
-  db_name: {
-    type: 'string',
-    required: true,
-    default: 'logistics',
-    description: 'Database name'
-  },
-  db_user: {
-    type: 'string',
-    required: true,
-    default: 'postgres',
-    description: 'Database user'
-  },
-  db_password: {
-    type: 'string',
-    required: true,
+    default: 'postgresql://postgres:[password]@db.your-project-id.supabase.co:5432/postgres',
     sensitive: true,
-    description: 'Database password'
-  },
-  db_pool_max: {
-    type: 'number',
-    default: 20,
-    description: 'Maximum database connections in pool'
-  },
-  db_pool_min: {
-    type: 'number',
-    default: 5,
-    description: 'Minimum database connections in pool'
+    description: 'Supabase database connection URL'
   },
   db_ssl: {
     type: 'boolean',
-    default: false,
+    default: true,
     description: 'Enable SSL for database connections'
+  },
+  supabase_url: {
+    type: 'string',
+    required: true,
+    default: 'https://your-project-id.supabase.co',
+    description: 'Supabase project URL'
+  },
+  supabase_anon_key: {
+    type: 'string',
+    required: true,
+    sensitive: true,
+    description: 'Supabase anonymous key'
+  },
+  supabase_service_role_key: {
+    type: 'string',
+    required: true,
+    sensitive: true,
+    description: 'Supabase service role key'
   }
 };
 

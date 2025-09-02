@@ -26,6 +26,7 @@ services:
       context: ./services/user-service
     environment:
       - PORT=4001
+      - DATABASE_URL=${SUPABASE_DB_URL}
 
   inventory-service:
     image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
@@ -34,6 +35,7 @@ services:
       - ./services/inventory-service:/app
     environment:
       - PORT=8000
+      - DATABASE_URL=${SUPABASE_DB_URL}
     command: uvicorn main:app --host 0.0.0.0 --port 8000
 
   order-service:
@@ -41,6 +43,7 @@ services:
       context: ./services/order-service
     environment:
       - PORT=4003
+      - DATABASE_URL=${SUPABASE_DB_URL}
 
   routing-service:
     build:
@@ -53,6 +56,7 @@ services:
       context: ./services/geolocation-service
     environment:
       - PORT=4005
+      - DATABASE_URL=${SUPABASE_DB_URL}
 
   notification-service:
     build:

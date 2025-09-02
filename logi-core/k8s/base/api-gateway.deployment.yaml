@@ -29,3 +29,7 @@ spec:
               value: http://user-service:4001
             - name: INVENTORY_SERVICE_URL
               value: http://inventory-service:8000
+            - name: SUPABASE_URL
+              value: "https://your-project-id.supabase.co"
+            - name: SUPABASE_ANON_KEY
+              value: "your-supabase-anon-key-here"

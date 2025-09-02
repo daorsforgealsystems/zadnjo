@@ -95,28 +95,6 @@ services:
     networks:
       - logi-network
 
-  # Database - PostgreSQL
-  postgres:
-    image: postgres:15-alpine
-    container_name: logi-postgres
-    hostname: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: logistics
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d logistics"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    networks:
-      - logi-network
 
   # Monitoring - Prometheus (Optional)
   prometheus:
@@ -173,8 +151,6 @@ volumes:
   redis_data:
     driver: local
   consul_data:
-    driver: local
-  postgres_data:
     driver: local
   prometheus_data:
     driver: local

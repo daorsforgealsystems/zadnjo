@@ -117,7 +117,7 @@ services:
       - PORT=4005
       - NODE_ENV=production
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/logistics?schema=public
+      - DATABASE_URL=${SUPABASE_DB_URL}
     ports:
       - "4005:4005"
     healthcheck:
@@ -146,25 +146,6 @@ services:
     networks:
       - logi-network
 
-  # Database (PostgreSQL)
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=logistics
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres123
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d logistics"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    networks:
-      - logi-network
 
   # Cache
   redis:

@@ -84,7 +84,7 @@ services:
     environment:
       - PORT=4001
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/logistics?schema=public
+      - DATABASE_URL=${SUPABASE_DB_URL}
     ports:
       - "4001:4001"
     networks:
@@ -114,7 +114,7 @@ services:
     image: ${DOCKER_USERNAME}/flow-motion-inventory-service:latest
     environment:
       - PORT=8000
-      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/logistics?schema=public
+      - DATABASE_URL=${SUPABASE_DB_URL}
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
     ports:
       - "8000:8000"
@@ -146,7 +146,7 @@ services:
     environment:
       - PORT=4003
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/logistics?schema=public
+      - DATABASE_URL=${SUPABASE_DB_URL}
     ports:
       - "4003:4003"
     networks:
@@ -208,7 +208,7 @@ services:
       - PORT=4005
       - NODE_ENV=production
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/logistics?schema=public
+      - DATABASE_URL=${SUPABASE_DB_URL}
     ports:
       - "4005:4005"
     networks:
@@ -264,39 +264,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Database (PostgreSQL)
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=logistics
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres123
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    networks:
-      - logi-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d logistics"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.50'
-          memory: 512M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   # Cache
   redis:
@@ -327,7 +294,6 @@ services:
         max-file: "3"
 
 volumes:
-  postgres_data:
 
 networks:
   logi-network:
