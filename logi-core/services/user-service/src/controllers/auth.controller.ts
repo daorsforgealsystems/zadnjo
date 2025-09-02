@@ -103,10 +103,11 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const refreshToken = req.cookies?.refreshToken;
-    
-    if (refreshToken) {
-      await this.authService.logout(refreshToken);
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
+
+    if (token) {
+      await this.authService.logout(token);
       res.clearCookie('refreshToken');
     }
 
@@ -177,22 +178,32 @@ export class AuthController {
     };
   }
 
-  // OAuth endpoints (if needed)
+  // OAuth endpoints using Supabase
   @Get('google')
-  async googleAuth() {
-    // Redirect to Google OAuth
-    return {
-      success: true,
-      redirectUrl: '/oauth/google'
-    };
+  async googleAuth(@Res() res: Response) {
+    try {
+      const result = await this.authService.initiateOAuth('google');
+
+      if (result.url) {
+        return res.redirect(result.url);
+      }
+
+      return res.status(400).json({
+        success: false,
+        error: 'No OAuth URL provided'
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        success: false,
+        error: error.message || 'OAuth initialization failed'
+      });
+    }
   }
 
   @Get('google/callback')
-  async googleAuthCallback(@Req() req: Request) {
-    // Handle Google OAuth callback
-    return {
-      success: true,
-      message: 'Google OAuth callback handled'
-    };
+  async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+    // This endpoint is handled by Supabase directly
+    // The frontend should handle the callback via Supabase client
+    return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/callback`);
   }
 }

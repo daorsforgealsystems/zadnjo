@@ -12,6 +12,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
     "axios": "^1.11.0",
     "compression": "^1.8.1",
     "consul": "^2.0.1",
@@ -22,7 +23,6 @@
     "express-validator": "^7.2.1",
     "helmet": "^7.2.0",
     "http-proxy-middleware": "^3.0.5",
-    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
     "opossum": "^9.0.0",
     "prom-client": "^15.1.0",
@@ -34,7 +34,6 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.23",
     "@types/http-proxy-middleware": "^0.19.3",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^20.19.10",
     "@types/opossum": "^8.1.9",

@@ -1,6 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { createClient } from '@supabase/supabase-js';
 import winston from 'winston';
+
+// Initialize Supabase client for JWT validation
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+  throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY environment variables are required');
+}
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
 
 // Configure logger for auth middleware
 const logger = winston.createLogger({
@@ -31,7 +47,7 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   // Skip authentication for public routes
   if (req.path.startsWith('/public') || 
       req.path === '/health' || 
@@ -70,35 +86,43 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as any;
-    
+    // Verify the JWT token using Supabase's built-in validation
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      throw new Error(error?.message || 'Invalid Supabase token');
+    }
+
+    // Extract user roles from user metadata or use default
+    const roles = user.user_metadata?.roles || ['USER'];
+
     // Attach user info to request
     (req as AuthenticatedRequest).user = {
-      id: decoded.sub,
-      email: decoded.email,
-      roles: decoded.roles,
-      iat: decoded.iat,
-      exp: decoded.exp
+      id: user.id,
+      email: user.email || '',
+      roles: roles,
+      iat: user.created_at ? Math.floor(new Date(user.created_at).getTime() / 1000) : undefined,
+      exp: user.last_sign_in_at ? Math.floor(new Date(user.last_sign_in_at).getTime() / 1000 + 3600) : undefined
     };
 
-    logger.debug('User authenticated successfully', {
-      userId: decoded.sub,
-      email: decoded.email,
-      roles: decoded.roles,
+    logger.debug('User authenticated successfully with Supabase', {
+      userId: user.id,
+      email: user.email,
+      roles: roles,
       path: req.path,
       method: req.method
     });
 
     next();
   } catch (error) {
-    logger.warn('Invalid token', { 
-      path: req.path, 
+    logger.warn('Invalid Supabase token', {
+      path: req.path,
       ip: req.ip,
       method: req.method,
       error: (error as Error).message
     });
-    
-    return res.status(401).json({ 
+
+    return res.status(401).json({
       error: 'Invalid token',
       code: 'INVALID_TOKEN'
     });

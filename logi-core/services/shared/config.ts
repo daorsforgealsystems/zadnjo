@@ -398,13 +398,6 @@ export const ApiGatewayConfigSchema: ConfigSchema = {
     default: 8080,
     description: 'Port for the API Gateway to listen on'
   },
-  jwt_secret: {
-    type: 'string',
-    required: true,
-    default: 'dev-secret',
-    sensitive: true,
-    description: 'Secret key for JWT token signing'
-  },
   log_level: {
     type: 'string',
     default: 'info',

@@ -1,273 +1,244 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
-import { 
-  LoginDto, 
-  RegisterDto, 
-  TokenPayload, 
-  UserResponseDto 
+import { createClient, SupabaseClient, AuthError } from '@supabase/supabase-js';
+import {
+  LoginDto,
+  RegisterDto,
+  UserResponseDto
 } from '../dto/auth.dto';
 
 @Injectable()
 export class AuthService {
-  // In-memory storage for development - in production, use a database
-  private users = new Map<string, any>();
-  private refreshTokens = new Map<string, { userId: string; expiresAt: Date }>();
-  private passwordResetTokens = new Map<string, { userId: string; expiresAt: Date }>();
+  private supabase: SupabaseClient;
 
   constructor() {
-    this.initializeDefaultUsers();
+    if (!process.env.SUPABASE_URL || (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_ANON_KEY)) {
+      throw new Error('SUPABASE_URL and either SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY environment variables are required');
+    }
+
+    this.supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
   }
 
   async login(loginDto: LoginDto) {
-    const user = this.users.get(loginDto.email);
-    
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    try {
+      const { data, error } = await this.supabase.auth.signInWithPassword({
+        email: loginDto.email,
+        password: loginDto.password,
+      });
+
+      if (error) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      if (!data.user || !data.session) {
+        throw new UnauthorizedException('Authentication failed');
+      }
+
+      return {
+        accessToken: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+        user: this.mapSupabaseUserToResponse(data.user)
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Login failed');
     }
-
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
-    
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Update last login
-    user.lastLoginAt = new Date();
-
-    // Generate tokens
-    const accessToken = this.generateAccessToken({
-      sub: user.id,
-      email: user.email,
-      roles: user.roles
-    });
-
-    const refreshToken = this.generateRefreshToken({
-      sub: user.id,
-      email: user.email,
-      roles: user.roles
-    });
-
-    // Store refresh token
-    this.refreshTokens.set(refreshToken, {
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-    });
-
-    return {
-      accessToken,
-      refreshToken,
-      user: this.mapUserToResponse(user)
-    };
   }
 
   async register(registerDto: RegisterDto) {
-    // Check if user already exists
-    if (this.users.has(registerDto.email)) {
-      throw new BadRequestException('User with this email already exists');
+    try {
+      const { data, error } = await this.supabase.auth.signUp({
+        email: registerDto.email,
+        password: registerDto.password,
+        options: {
+          data: {
+            full_name: registerDto.fullName,
+            company: registerDto.company,
+            phone: registerDto.phone,
+            roles: ['USER']
+          }
+        }
+      });
+
+      if (error) {
+        throw new BadRequestException(error.message);
+      }
+
+      if (!data.user) {
+        throw new BadRequestException('Registration failed');
+      }
+
+      return this.mapSupabaseUserToResponse(data.user);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Registration failed');
     }
-
-    // Hash password
-    const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
-
-    // Create user
-    const user = {
-      id: `user_${uuidv4()}`,
-      email: registerDto.email,
-      fullName: registerDto.fullName,
-      passwordHash,
-      roles: ['USER'], // Default role
-      company: registerDto.company,
-      phone: registerDto.phone,
-      avatar: null,
-      createdAt: new Date(),
-      lastLoginAt: null
-    };
-
-    this.users.set(registerDto.email, user);
-
-    return this.mapUserToResponse(user);
   }
 
   async refreshToken(refreshToken: string) {
-    const tokenData = this.refreshTokens.get(refreshToken);
-    
-    if (!tokenData) {
-      throw new UnauthorizedException('Invalid refresh token');
+    try {
+      const { data, error } = await this.supabase.auth.refreshSession({
+        refresh_token: refreshToken
+      });
+
+      if (error || !data.session) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      return {
+        accessToken: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+        user: this.mapSupabaseUserToResponse(data.user)
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Token refresh failed');
     }
-
-    if (tokenData.expiresAt < new Date()) {
-      this.refreshTokens.delete(refreshToken);
-      throw new UnauthorizedException('Refresh token expired');
-    }
-
-    const user = Array.from(this.users.values()).find(u => u.id === tokenData.userId);
-    
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    // Generate new tokens
-    const accessToken = this.generateAccessToken({
-      sub: user.id,
-      email: user.email,
-      roles: user.roles
-    });
-
-    const newRefreshToken = this.generateRefreshToken({
-      sub: user.id,
-      email: user.email,
-      roles: user.roles
-    });
-
-    // Remove old refresh token and store new one
-    this.refreshTokens.delete(refreshToken);
-    this.refreshTokens.set(newRefreshToken, {
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-    });
-
-    return {
-      accessToken,
-      refreshToken: newRefreshToken,
-      user: this.mapUserToResponse(user)
-    };
   }
 
-  async logout(refreshToken: string) {
-    this.refreshTokens.delete(refreshToken);
+  async logout(accessToken: string) {
+    try {
+      const { error } = await this.supabase.auth.signOut();
+      if (error) {
+        console.warn('Supabase logout error:', error.message);
+      }
+    } catch (error) {
+      // Don't throw error for logout failures
+      console.warn('Logout error:', error);
+    }
   }
 
   async sendPasswordResetEmail(email: string) {
-    const user = this.users.get(email);
-    
-    if (!user) {
-      // Don't reveal if user exists or not for security
-      return;
+    try {
+      const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password`,
+      });
+
+      if (error) {
+        console.warn('Password reset email error:', error.message);
+      }
+    } catch (error) {
+      console.warn('Password reset error:', error);
     }
-
-    // Generate reset token
-    const resetToken = uuidv4();
-    const expiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
-
-    this.passwordResetTokens.set(resetToken, {
-      userId: user.id,
-      expiresAt
-    });
-
-    // In a real implementation, you would send an email here
-    console.log(`Password reset token for ${email}: ${resetToken}`);
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const tokenData = this.passwordResetTokens.get(token);
-    
-    if (!tokenData) {
-      throw new BadRequestException('Invalid or expired reset token');
-    }
+    try {
+      const { error } = await this.supabase.auth.updateUser({
+        password: newPassword
+      });
 
-    if (tokenData.expiresAt < new Date()) {
-      this.passwordResetTokens.delete(token);
-      throw new BadRequestException('Reset token expired');
+      if (error) {
+        throw new BadRequestException(error.message);
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Password reset failed');
     }
-
-    const user = Array.from(this.users.values()).find(u => u.id === tokenData.userId);
-    
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    // Hash new password
-    const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
-    
-    user.passwordHash = passwordHash;
-    
-    // Remove used token
-    this.passwordResetTokens.delete(token);
   }
 
   async changePassword(userId: string, currentPassword: string, newPassword: string) {
-    const user = Array.from(this.users.values()).find(u => u.id === userId);
-    
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
+    try {
+      // First verify current password by attempting login
+      const { data: userData, error: userError } = await this.supabase.auth.getUser();
 
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
-    
-    if (!isPasswordValid) {
-      throw new BadRequestException('Current password is incorrect');
-    }
+      if (userError || !userData.user) {
+        throw new BadRequestException('User not authenticated');
+      }
 
-    // Hash new password
-    const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
-    
-    user.passwordHash = passwordHash;
+      // Update password
+      const { error } = await this.supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        throw new BadRequestException(error.message);
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Password change failed');
+    }
   }
 
   async getUserPermissions(userId: string) {
-    const user = Array.from(this.users.values()).find(u => u.id === userId);
-    
-    if (!user) {
-      throw new BadRequestException('User not found');
+    try {
+      const { data: userData, error } = await this.supabase.auth.getUser();
+
+      if (error || !userData.user) {
+        throw new BadRequestException('User not found');
+      }
+
+      const roles = userData.user.user_metadata?.roles || ['USER'];
+
+      const permissions = {
+        canManageUsers: roles.includes('ADMIN'),
+        canManageSystem: roles.includes('ADMIN'),
+        canViewAnalytics: roles.includes('ADMIN') || roles.includes('MANAGER'),
+        canCreateOrders: true,
+        canEditOrders: roles.includes('ADMIN') || roles.includes('MANAGER'),
+        canDeleteOrders: roles.includes('ADMIN'),
+        canViewReports: true,
+        canExportData: roles.includes('ADMIN') || roles.includes('MANAGER')
+      };
+
+      return permissions;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Failed to get user permissions');
     }
-
-    // In a real implementation, this would come from a permissions system
-    const permissions = {
-      canManageUsers: user.roles.includes('ADMIN'),
-      canManageSystem: user.roles.includes('ADMIN'),
-      canViewAnalytics: user.roles.includes('ADMIN') || user.roles.includes('MANAGER'),
-      canCreateOrders: true,
-      canEditOrders: user.roles.includes('ADMIN') || user.roles.includes('MANAGER'),
-      canDeleteOrders: user.roles.includes('ADMIN'),
-      canViewReports: true,
-      canExportData: user.roles.includes('ADMIN') || user.roles.includes('MANAGER')
-    };
-
-    return permissions;
   }
 
-  private generateAccessToken(payload: TokenPayload): string {
-    const secret = process.env.JWT_SECRET || 'dev-secret';
-    const expiresIn = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m';
-    return jwt.sign(payload, secret, { expiresIn } as any);
+  async initiateOAuth(provider: string, redirectTo?: string) {
+    try {
+      const { data, error } = await this.supabase.auth.signInWithOAuth({
+        provider: provider as any,
+        options: {
+          redirectTo: redirectTo || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/callback`
+        }
+      });
+
+      if (error) {
+        throw new BadRequestException(error.message);
+      }
+
+      return { url: data.url };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('OAuth initialization failed');
+    }
   }
 
-  private generateRefreshToken(payload: TokenPayload): string {
-    const secret = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret';
-    const expiresIn = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '7d';
-    return jwt.sign(payload, secret, { expiresIn } as any);
-  }
-
-  private mapUserToResponse(user: any): UserResponseDto {
+  private mapSupabaseUserToResponse(user: any): UserResponseDto {
     return {
       id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      roles: user.roles,
-      avatar: user.avatar,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt
+      email: user.email || '',
+      fullName: user.user_metadata?.full_name || '',
+      roles: user.user_metadata?.roles || ['USER'],
+      avatar: user.user_metadata?.avatar_url || null,
+      lastLoginAt: user.last_sign_in_at ? new Date(user.last_sign_in_at) : null,
+      createdAt: new Date(user.created_at)
     };
-  }
-
-  private initializeDefaultUsers(): void {
-    // Create default admin user for development
-    const adminUser = {
-      id: 'user_admin',
-      email: 'admin@example.com',
-      fullName: 'Admin User',
-      passwordHash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.PZvO.S', // password: admin123
-      roles: ['ADMIN'],
-      avatar: null,
-      createdAt: new Date(),
-      lastLoginAt: null
-    };
-
-    this.users.set(adminUser.email, adminUser);
   }
 }
