@@ -48,6 +48,12 @@ services:
       - NODE_ENV=production
     ports:
       - "4001:4001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - logi-network
 
@@ -61,6 +67,12 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - logi-network
 
@@ -72,6 +84,12 @@ services:
       - NODE_ENV=production
     ports:
       - "4003:4003"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - logi-network
 
@@ -83,6 +101,12 @@ services:
       - NODE_ENV=production
     ports:
       - "4004:4004"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - logi-network
 
@@ -96,6 +120,12 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/logistics?schema=public
     ports:
       - "4005:4005"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - logi-network
 
@@ -107,6 +137,12 @@ services:
       - NODE_ENV=production
     ports:
       - "4006:4006"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - logi-network
 

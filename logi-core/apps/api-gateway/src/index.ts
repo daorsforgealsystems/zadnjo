@@ -10,6 +10,7 @@ import compression from 'compression';
 import winston from 'winston';
 import { validationResult, body } from 'express-validator';
 import { authMiddleware, requireRole } from './middleware/auth.middleware';
+import promClient from 'prom-client';
 /* Sentry disabled for local run */
 // import * as Sentry from '@sentry/node';
 
@@ -39,6 +40,44 @@ const logger = winston.createLogger({
   ]
 });
 
+// Configure Prometheus metrics
+const register = new promClient.Registry();
+
+// Add default metrics (CPU, memory, etc.)
+promClient.collectDefaultMetrics({ register });
+
+// Custom metrics
+const httpRequestDuration = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10]
+});
+
+const httpRequestsTotal = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code']
+});
+
+const circuitBreakerState = new promClient.Gauge({
+  name: 'circuit_breaker_state',
+  help: 'Circuit breaker state (0=closed, 1=half-open, 2=open)',
+  labelNames: ['service']
+});
+
+const serviceHealthStatus = new promClient.Gauge({
+  name: 'service_health_status',
+  help: 'Service health status (1=healthy, 0=unhealthy)',
+  labelNames: ['service']
+});
+
+// Register custom metrics
+register.registerMetric(httpRequestDuration);
+register.registerMetric(httpRequestsTotal);
+register.registerMetric(circuitBreakerState);
+register.registerMetric(serviceHealthStatus);
+
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -54,6 +93,29 @@ app.use(morgan('combined', {
     write: (message: string) => logger.info(message.trim())
   }
 }));
+
+// Metrics collection middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
+  const originalSend = res.json;
+
+  res.json = function(data) {
+    const duration = (Date.now() - start) / 1000;
+
+    // Record metrics
+    httpRequestDuration
+      .labels(req.method, req.route?.path || req.path, res.statusCode.toString())
+      .observe(duration);
+
+    httpRequestsTotal
+      .labels(req.method, req.route?.path || req.path, res.statusCode.toString())
+      .inc();
+
+    return originalSend.call(this, data);
+  };
+
+  next();
+});
 
 // Rate limiting with environment configuration
 const limiter = rateLimit({
@@ -127,14 +189,17 @@ Object.entries(targets).forEach(([serviceName, serviceUrl]) => {
   // Circuit breaker event handlers
   breaker.on('open', () => {
     logger.error(`Circuit breaker opened for ${serviceName} service`, { service: serviceName });
+    circuitBreakerState.labels(serviceName).set(2); // 2 = open
   });
 
   breaker.on('halfOpen', () => {
     logger.warn(`Circuit breaker half-open for ${serviceName} service`, { service: serviceName });
+    circuitBreakerState.labels(serviceName).set(1); // 1 = half-open
   });
 
   breaker.on('close', () => {
     logger.info(`Circuit breaker closed for ${serviceName} service`, { service: serviceName });
+    circuitBreakerState.labels(serviceName).set(0); // 0 = closed
   });
 
   breaker.on('failure', (error: Error) => {
@@ -262,6 +327,7 @@ app.get('/readyz', async (_req: Request, res: Response) => {
               healthy: false,
               circuitState: 'open'
             };
+            serviceHealthStatus.labels(serviceName).set(0); // 0 = unhealthy
           } else {
             const healthData = await breaker.fire() as any;
             results[serviceName] = {
@@ -269,6 +335,7 @@ app.get('/readyz', async (_req: Request, res: Response) => {
               healthy: true,
               circuitState: breaker.opened ? 'open' : breaker.halfOpen ? 'half-open' : 'closed'
             };
+            serviceHealthStatus.labels(serviceName).set(1); // 1 = healthy
           }
         } catch (error) {
           results[serviceName] = {
@@ -277,6 +344,7 @@ app.get('/readyz', async (_req: Request, res: Response) => {
             error: (error as Error).message,
             circuitState: breaker.opened ? 'open' : breaker.halfOpen ? 'half-open' : 'closed'
           };
+          serviceHealthStatus.labels(serviceName).set(0); // 0 = unhealthy
         }
       })
     );
@@ -309,22 +377,16 @@ app.get('/readyz', async (_req: Request, res: Response) => {
   }
 });
 
-// Add metrics endpoint for monitoring
-app.get('/metrics', (_req: Request, res: Response) => {
-  const metrics = {
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    circuitBreakers: Object.entries(circuitBreakers).reduce((acc, [name, breaker]) => {
-      acc[name] = {
-        state: breaker.opened ? 'open' : breaker.halfOpen ? 'half-open' : 'closed',
-        stats: breaker.stats
-      };
-      return acc;
-    }, {} as Record<string, any>)
-  };
-  
-  res.json(metrics);
+// Prometheus metrics endpoint
+app.get('/metrics', async (_req: Request, res: Response) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    const metrics = await register.metrics();
+    res.end(metrics);
+  } catch (error) {
+    logger.error('Error generating metrics', { error: (error as Error).message });
+    res.status(500).end();
+  }
 });
 
 // Global error handler
