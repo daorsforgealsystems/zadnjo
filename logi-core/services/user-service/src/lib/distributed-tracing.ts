@@ -1,7 +1,4 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { SemConv } from '@opentelemetry/semantic-conventions';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
@@ -78,11 +75,6 @@ export class DistributedTracing {
             },
           }),
         ],
-        resource: new Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-          [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: this.config.environment,
-        }),
       });
 
       logger.info('Distributed tracing initialized', {

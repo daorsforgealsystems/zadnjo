@@ -54,7 +54,7 @@ export interface ServiceInstance {
 }
 
 export class ServiceDiscovery {
-  private consul: Consul.Consul;
+  private consul: Consul;
   private registeredServices: Set<string> = new Set();
   private config: ServiceDiscoveryConfig;
 

@@ -232,15 +232,15 @@ export class AuthService {
   }
 
   private generateAccessToken(payload: TokenPayload): string {
-    return jwt.sign(payload, process.env.JWT_SECRET || 'dev-secret', {
-      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m'
-    });
+    const secret = process.env.JWT_SECRET || 'dev-secret';
+    const expiresIn = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m';
+    return jwt.sign(payload, secret, { expiresIn } as any);
   }
 
   private generateRefreshToken(payload: TokenPayload): string {
-    return jwt.sign(payload, process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret', {
-      expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '7d'
-    });
+    const secret = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret';
+    const expiresIn = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '7d';
+    return jwt.sign(payload, secret, { expiresIn } as any);
   }
 
   private mapUserToResponse(user: any): UserResponseDto {
