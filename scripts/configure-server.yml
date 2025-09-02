@@ -1,0 +1,557 @@
+---
+# Flow Motion Server Configuration Management Playbook
+# This Ansible playbook configures production servers for Flow Motion deployment
+
+- name: Configure Flow Motion Production Server
+  hosts: flowmotion_servers
+  become: yes
+  gather_facts: yes
+
+  vars:
+    app_name: flowmotion
+    app_dir: /opt/flowmotion
+    app_user: flowmotion
+    app_group: flowmotion
+    node_version: "18"
+    docker_compose_version: "v2.18.1"
+    nginx_version: "1.24.0"
+    postgres_version: "14"
+    redis_version: "7.0"
+
+    # SSL Configuration
+    ssl_enabled: true
+    ssl_cert_path: /etc/ssl/certs/flowmotion.crt
+    ssl_key_path: /etc/ssl/private/flowmotion.key
+    ssl_ca_path: /etc/ssl/certs/ca-bundle.crt
+
+    # Monitoring
+    monitoring_enabled: true
+    prometheus_version: "2.40.0"
+    grafana_version: "9.3.0"
+    node_exporter_version: "1.5.0"
+
+    # Backup
+    backup_enabled: true
+    backup_dir: /opt/flowmotion/backups
+    backup_schedule: "0 2 * * *"
+
+  pre_tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == 'Debian'
+
+    - name: Install essential packages
+      package:
+        name:
+          - curl
+          - wget
+          - git
+          - htop
+          - vim
+          - unzip
+          - software-properties-common
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - lsb-release
+        state: present
+
+  roles:
+    - system_hardening
+    - user_management
+    - docker_setup
+    - nginx_setup
+    - database_setup
+    - monitoring_setup
+    - backup_setup
+    - ssl_setup
+
+  post_tasks:
+    - name: Create application directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+
+    - name: Create log directory
+      file:
+        path: /var/log/flowmotion
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+
+    - name: Configure log rotation
+      template:
+        src: templates/logrotate.j2
+        dest: /etc/logrotate.d/flowmotion
+        mode: '0644'
+
+    - name: Restart services
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      loop:
+        - nginx
+        - docker
+      when: item in ansible_facts.services
+
+    - name: Run final health check
+      command: "{{ app_dir }}/scripts/health-check.sh"
+      args:
+        chdir: "{{ app_dir }}"
+      ignore_errors: yes
+      register: health_check
+
+    - name: Display health check results
+      debug:
+        msg: "{{ health_check.stdout_lines }}"
+      when: health_check.stdout_lines is defined
+
+# System Hardening Role
+- name: System Hardening
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Configure sysctl security parameters
+      sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: yes
+      loop:
+        - { name: 'net.ipv4.ip_forward', value: '0' }
+        - { name: 'net.ipv4.tcp_syncookies', value: '1' }
+        - { name: 'net.ipv4.conf.all.accept_redirects', value: '0' }
+        - { name: 'net.ipv4.conf.default.accept_redirects', value: '0' }
+        - { name: 'net.ipv4.conf.all.rp_filter', value: '1' }
+        - { name: 'net.ipv4.conf.default.rp_filter', value: '1' }
+        - { name: 'net.ipv4.icmp_echo_ignore_broadcasts', value: '1' }
+        - { name: 'net.ipv4.conf.all.log_martians', value: '1' }
+
+    - name: Configure SSH hardening
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#?{{ item.key }}"
+        line: "{{ item.key }} {{ item.value }}"
+        state: present
+      loop:
+        - { key: 'PermitRootLogin', value: 'no' }
+        - { key: 'PasswordAuthentication', value: 'no' }
+        - { key: 'X11Forwarding', value: 'no' }
+        - { key: 'MaxAuthTries', value: '3' }
+        - { key: 'ClientAliveInterval', value: '60' }
+        - { key: 'ClientAliveCountMax', value: '3' }
+      notify: restart_sshd
+
+    - name: Install and configure fail2ban
+      package:
+        name: fail2ban
+        state: present
+
+    - name: Configure fail2ban
+      template:
+        src: templates/jail.local.j2
+        dest: /etc/fail2ban/jail.local
+        mode: '0644'
+      notify: restart_fail2ban
+
+    - name: Configure UFW firewall
+      ufw:
+        rule: "{{ item.rule }}"
+        port: "{{ item.port }}"
+        proto: "{{ item.proto | default('tcp') }}"
+        direction: "{{ item.direction | default('in') }}"
+      loop:
+        - { rule: 'allow', port: '22', direction: 'in' }
+        - { rule: 'allow', port: '80', direction: 'in' }
+        - { rule: 'allow', port: '443', direction: 'in' }
+        - { rule: 'allow', port: '3000', direction: 'in' }
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+
+  handlers:
+    - name: restart_sshd
+      service:
+        name: sshd
+        state: restarted
+
+    - name: restart_fail2ban
+      service:
+        name: fail2ban
+        state: restarted
+
+# User Management Role
+- name: User Management
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Create application user
+      user:
+        name: "{{ app_user }}"
+        group: "{{ app_group }}"
+        system: yes
+        shell: /bin/bash
+        home: "/home/{{ app_user }}"
+        create_home: yes
+        state: present
+
+    - name: Add user to docker group
+      user:
+        name: "{{ app_user }}"
+        groups: docker
+        append: yes
+
+    - name: Create SSH directory for application user
+      file:
+        path: "/home/{{ app_user }}/.ssh"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0700'
+
+    - name: Deploy SSH authorized keys
+      authorized_key:
+        user: "{{ app_user }}"
+        key: "{{ lookup('file', 'files/authorized_keys') }}"
+        state: present
+      when: lookup('file', 'files/authorized_keys', errors='ignore') is not none
+
+# Docker Setup Role
+- name: Docker Setup
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Install Docker dependencies
+      package:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Install Docker Engine
+      package:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Install Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Create Docker daemon configuration
+      template:
+        src: templates/daemon.json.j2
+        dest: /etc/docker/daemon.json
+        mode: '0644'
+      notify: restart_docker
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart_docker
+      service:
+        name: docker
+        state: restarted
+
+# Nginx Setup Role
+- name: Nginx Setup
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Configure Nginx for Flow Motion
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/flowmotion
+        mode: '0644'
+      notify: reload_nginx
+
+    - name: Enable Flow Motion site
+      file:
+        src: /etc/nginx/sites-available/flowmotion
+        dest: /etc/nginx/sites-enabled/flowmotion
+        state: link
+      notify: reload_nginx
+
+    - name: Remove default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: reload_nginx
+
+    - name: Create Nginx cache directory
+      file:
+        path: /var/cache/nginx/flowmotion
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+  handlers:
+    - name: reload_nginx
+      service:
+        name: nginx
+        state: reloaded
+
+# Database Setup Role
+- name: Database Setup
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Install PostgreSQL
+      package:
+        name:
+          - postgresql-{{ postgres_version }}
+          - postgresql-contrib
+        state: present
+
+    - name: Install Redis
+      package:
+        name: redis-server
+        state: present
+
+    - name: Configure PostgreSQL
+      template:
+        src: templates/postgresql.conf.j2
+        dest: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
+        mode: '0644'
+      notify: restart_postgresql
+
+    - name: Configure PostgreSQL pg_hba.conf
+      template:
+        src: templates/pg_hba.conf.j2
+        dest: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
+        mode: '0644'
+      notify: restart_postgresql
+
+    - name: Configure Redis
+      template:
+        src: templates/redis.conf.j2
+        dest: /etc/redis/redis.conf
+        mode: '0644'
+      notify: restart_redis
+
+    - name: Start and enable database services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - postgresql
+        - redis-server
+
+  handlers:
+    - name: restart_postgresql
+      service:
+        name: postgresql
+        state: restarted
+
+    - name: restart_redis
+      service:
+        name: redis-server
+        state: restarted
+
+# Monitoring Setup Role
+- name: Monitoring Setup
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Install Prometheus
+      unarchive:
+        src: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+        dest: /opt
+        remote_src: yes
+        creates: "/opt/prometheus-{{ prometheus_version }}.linux-amd64"
+
+    - name: Create Prometheus symlink
+      file:
+        src: "/opt/prometheus-{{ prometheus_version }}.linux-amd64"
+        dest: /opt/prometheus
+        state: link
+
+    - name: Install Node Exporter
+      unarchive:
+        src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        dest: /opt
+        remote_src: yes
+        creates: "/opt/node_exporter-{{ node_exporter_version }}.linux-amd64"
+
+    - name: Create Node Exporter symlink
+      file:
+        src: "/opt/node_exporter-{{ node_exporter_version }}.linux-amd64"
+        dest: /opt/node_exporter
+        state: link
+
+    - name: Install Grafana
+      apt_key:
+        url: https://packages.grafana.com/gpg.key
+        state: present
+
+    - name: Add Grafana repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://packages.grafana.com/oss/deb stable main"
+        state: present
+        filename: grafana
+
+    - name: Install Grafana
+      package:
+        name: grafana
+        state: present
+
+    - name: Configure Prometheus
+      template:
+        src: templates/prometheus.yml.j2
+        dest: /opt/prometheus/prometheus.yml
+        mode: '0644'
+
+    - name: Create systemd service for Prometheus
+      template:
+        src: templates/prometheus.service.j2
+        dest: /etc/systemd/system/prometheus.service
+        mode: '0644'
+      notify: reload_systemd
+
+    - name: Create systemd service for Node Exporter
+      template:
+        src: templates/node-exporter.service.j2
+        dest: /etc/systemd/system/node-exporter.service
+        mode: '0644'
+      notify: reload_systemd
+
+    - name: Start monitoring services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - prometheus
+        - node-exporter
+        - grafana-server
+
+  handlers:
+    - name: reload_systemd
+      command: systemctl daemon-reload
+
+# Backup Setup Role
+- name: Backup Setup
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Install backup tools
+      package:
+        name:
+          - postgresql-client
+          - redis-tools
+          - awscli
+        state: present
+
+    - name: Create backup directory
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+
+    - name: Create backup scripts
+      template:
+        src: "templates/{{ item }}.j2"
+        dest: "{{ backup_dir }}/{{ item }}"
+        mode: '0755'
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+      loop:
+        - backup-database.sh
+        - backup-files.sh
+
+    - name: Configure backup cron jobs
+      cron:
+        name: "{{ item.name }}"
+        minute: "{{ item.minute }}"
+        hour: "{{ item.hour }}"
+        job: "{{ item.job }}"
+        user: "{{ app_user }}"
+        state: present
+      loop:
+        - { name: 'database_backup', minute: '0', hour: '2', job: '{{ backup_dir }}/backup-database.sh' }
+        - { name: 'file_backup', minute: '0', hour: '3', job: '{{ backup_dir }}/backup-files.sh' }
+
+# SSL Setup Role
+- name: SSL Setup
+  hosts: flowmotion_servers
+  become: yes
+
+  tasks:
+    - name: Install Certbot
+      package:
+        name:
+          - certbot
+          - python3-certbot-nginx
+        state: present
+
+    - name: Create SSL certificate directory
+      file:
+        path: /etc/ssl/certs/flowmotion
+        state: directory
+        mode: '0755'
+
+    - name: Create SSL private key directory
+      file:
+        path: /etc/ssl/private/flowmotion
+        state: directory
+        mode: '0700'
+
+    - name: Obtain SSL certificate (if domain is provided)
+      command: certbot certonly --standalone -d {{ domain_name }} --non-interactive --agree-tos --email {{ ssl_email }}
+      when: domain_name is defined and ssl_email is defined
+      ignore_errors: yes
+
+    - name: Configure SSL certificate renewal
+      cron:
+        name: 'ssl_certificate_renewal'
+        minute: '0'
+        hour: '12'
+        job: 'certbot renew --quiet && systemctl reload nginx'
+        state: present
+      when: domain_name is defined
