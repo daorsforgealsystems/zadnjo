@@ -1,1373 +1,662 @@
-# Comprehensive Guide to Deploying Modern Web Applications
+# Comprehensive Deployment Guide for Flow Motion
+
+This guide provides a complete overview of the Flow Motion logistics platform deployment system, integrating all components for triggering, monitoring, validation, and automation of deployments across development, staging, and production environments.
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Prerequisites](#prerequisites)
-3. [Environment Setup](#environment-setup)
-4. [Configuration Management](#configuration-management)
-5. [Security Best Practices](#security-best-practices)
-6. [Deployment Scenarios](#deployment-scenarios)
-   - [Netlify + Docker Hybrid Setup](#netlify--docker-hybrid-setup)
-   - [AWS ECS/EKS](#aws-ecseks)
-   - [Heroku with Docker](#heroku-with-docker)
-   - [Google Cloud Platform](#google-cloud-platform)
-   - [Azure Container Instances](#azure-container-instances)
-7. [CI/CD Pipeline Configuration](#cicd-pipeline-configuration)
-8. [Troubleshooting and Common Errors](#troubleshooting-and-common-errors)
-9. [Scalability Optimizations](#scalability-optimizations)
-10. [Monitoring and Maintenance](#monitoring-and-maintenance)
-11. [Deployment Checklist](#deployment-checklist)
+1. [System Overview](#system-overview)
+2. [Architecture Components](#architecture-components)
+3. [Deployment Strategies](#deployment-strategies)
+4. [Quick Start Guide](#quick-start-guide)
+5. [Component Integration](#component-integration)
+6. [Best Practices](#best-practices)
+7. [Troubleshooting](#troubleshooting)
+8. [Reference Materials](#reference-materials)
 
-## Introduction
+## System Overview
 
-This comprehensive guide covers the deployment of modern web applications using a hybrid architecture combining Netlify for static frontend hosting and serverless functions with Docker for containerized backend services. The guide is based on the Flow Motion logistics platform architecture and provides detailed instructions for multiple cloud platforms.
+### Deployment Ecosystem
 
-### Architecture Overview
+The Flow Motion deployment system consists of four interconnected components:
 
-- **Frontend**: React/Vite application deployed on Netlify
-- **Backend**: Microservices architecture with API Gateway
-- **Database**: PostgreSQL with Redis caching
-- **Deployment**: Hybrid Netlify + Docker containers
-- **CI/CD**: GitHub Actions with Netlify integration
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   TRIGGERING    │    │   MONITORING    │    │  VALIDATION     │    │  AUTOMATION     │
+│                 │    │                 │    │                 │    │                 │
+│ • Manual        │    │ • Real-time     │    │ • Smoke Tests   │    │ • One-click     │
+│ • Automated     │    │ • Log Analysis │    │ • Performance   │    │ • Multi-env     │
+│ • Scheduled     │    │ • Failure       │    │ • Security      │    │ • Pipelines     │
+│ • Branch-based  │    │ • Rollback      │    │ • Integration   │    │ • History       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │                       │
+         └───────────────────────┼───────────────────────┼───────────────────────┘
+                                 │
+                    ┌────────────────────┐
+                    │   ORCHESTRATION    │
+                    │                    │
+                    │ • CI/CD Pipeline   │
+                    │ • Status Reports   │
+                    │ • Notifications    │
+                    │ • Audit Trail      │
+                    └────────────────────┘
+```
 
-## Prerequisites
+### Key Features
 
-### System Requirements
+- **Comprehensive Coverage**: From initial trigger to post-deployment validation
+- **Multi-Environment Support**: Development, staging, and production environments
+- **Automated Workflows**: Reduce manual intervention and human error
+- **Real-time Monitoring**: Continuous health checking and alerting
+- **Rollback Capabilities**: Automated recovery from deployment failures
+- **Audit Trail**: Complete deployment history and traceability
+- **Integration Ready**: Works with existing CI/CD pipelines and tools
 
-- **Node.js**: 20.17.0 or higher
-- **Docker**: 24.0+ with Docker Compose
-- **Git**: 2.30+
-- **NPM/Yarn**: Latest stable versions
+## Architecture Components
 
-### Cloud Platform Accounts
+### 1. Deployment Triggering System
 
-- **Netlify**: For frontend and serverless functions
-- **AWS/Heroku/GCP/Azure**: For container orchestration
-- **GitHub**: For source control and CI/CD
+**Location**: `docs/DEPLOYMENT_TRIGGERING_GUIDE.md`
 
-### Development Tools
+**Components**:
+- Manual deployment procedures
+- Automated scheduling (GitHub Actions, cron)
+- Branch-based deployment strategies
+- Approval workflow management
+- Emergency deployment procedures
 
+**Key Scripts**:
 ```bash
-# Install Node.js and npm
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+# Manual deployment
+./scripts/deployment-automation/one-click-deploy.sh production full
 
-# Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-
-# Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-# Install Netlify CLI
-npm install -g netlify-cli
+# Scheduled deployment (via cron)
+0 2 * * * ./scripts/deployment-automation/one-click-deploy.sh staging full
 ```
 
-### Network and Security
+### 2. Deployment Monitoring System
 
-- Domain name with DNS management
-- SSL certificates (Let's Encrypt or platform-provided)
-- Firewall configuration
-- VPN access for secure deployments
+**Location**: `scripts/deployment-monitoring/`
 
-## Environment Setup
+**Components**:
+- `monitor-deployment.sh`: Real-time deployment status monitoring
+- `aggregate-logs.sh`: Log aggregation and analysis
+- `track-progress.sh`: Deployment progress tracking
+- `detect-failures.sh`: Failure detection and alerting
+- `trigger-rollback.sh`: Automated rollback triggering
 
-### Local Development Environment
+**Key Features**:
+- Continuous health monitoring
+- Automated failure detection
+- Log aggregation across services
+- Real-time alerting via webhooks
+- Automated rollback capabilities
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/your-org/flow-motion.git
-cd flow-motion
+### 3. Post-Deployment Validation System
+
+**Location**: `docs/POST_DEPLOYMENT_VALIDATION.md`, `scripts/validation/`
+
+**Components**:
+- `smoke-tests.sh`: Basic functionality verification
+- `performance-tests.sh`: Performance validation
+- `security-scan.sh`: Security vulnerability scanning
+- `integration-tests.sh`: End-to-end workflow validation
+
+**Validation Stages**:
+1. **Smoke Tests** (Immediate): Basic service availability
+2. **Performance Tests** (5-30 min): SLA compliance verification
+3. **Security Scans** (1 hour): Vulnerability assessment
+4. **Integration Tests** (2 hours): End-to-end validation
+5. **UAT** (24 hours): Business logic verification
+
+### 4. Deployment Automation System
+
+**Location**: `scripts/deployment-automation/`
+
+**Components**:
+- `one-click-deploy.sh`: Single-command deployments
+- `multi-env-deploy.sh`: Multi-environment orchestration
+- `pipeline-orchestrator.sh`: Complex pipeline execution
+- `status-reporter.sh`: Report generation and notifications
+- `deployment-history.sh`: History tracking and analytics
+
+**Automation Levels**:
+- **Level 1**: Manual trigger with automated execution
+- **Level 2**: Scheduled automated deployments
+- **Level 3**: Event-driven automated deployments
+- **Level 4**: Self-healing automated systems
+
+## Deployment Strategies
+
+### Environment Progression
+
+```
+Development → Staging → Production
+     ↑           ↑           ↑
+   Feature     Integration  User
+   Testing     Testing     Acceptance
+   Unit Tests  E2E Tests    Business
+   CI/CD       Validation   Validation
 ```
 
-2. **Install dependencies**
-```bash
-npm install
-```
+### Deployment Types
 
-3. **Environment configuration**
-```bash
-cp .env.example .env
-# Edit .env with your local configuration
-```
+#### 1. Full Deployment
+**Scope**: Complete application stack
+**Duration**: 15-45 minutes
+**Validation**: All test suites
+**Rollback**: Full environment rollback
 
-4. **Start local development**
-```bash
-# Start all services with Docker Compose
-docker-compose up -d
+#### 2. Frontend Deployment
+**Scope**: User interface and static assets
+**Duration**: 5-15 minutes
+**Validation**: UI tests, accessibility
+**Rollback**: CDN cache invalidation
 
-# Or start frontend only
-npm run dev
-```
+#### 3. Backend Deployment
+**Scope**: API services and microservices
+**Duration**: 10-30 minutes
+**Validation**: API tests, integration tests
+**Rollback**: Service rollout undo
 
-### Netlify Setup
+#### 4. Database Deployment
+**Scope**: Schema changes and migrations
+**Duration**: 5-20 minutes
+**Validation**: Migration tests, data integrity
+**Rollback**: Migration rollback scripts
 
-1. **Connect repository**
-```bash
-netlify login
-netlify init
-```
+### Branch-Based Deployments
 
-2. **Configure build settings**
-```bash
-# netlify.toml
-[build]
-  command = "npm run build:netlify"
-  publish = "dist"
-  functions = "netlify/functions"
-  edge_functions = "netlify/edge-functions"
-```
+| Branch Pattern | Environment | Trigger | Strategy |
+|----------------|-------------|---------|----------|
+| `main` | Production | Merge | Full deployment |
+| `develop` | Staging | Push | Full deployment |
+| `release/*` | Pre-prod | Push | Full deployment |
+| `feature/*` | Feature | PR | Preview deployment |
+| `hotfix/*` | Hotfix | Push | Emergency deployment |
 
-3. **Environment variables**
-```bash
-netlify env:set VITE_API_BASE_URL "/api"
-netlify env:set VITE_SUPABASE_URL "your_supabase_url"
-netlify env:set VITE_SUPABASE_ANON_KEY "your_anon_key"
-```
+## Quick Start Guide
 
-### Docker Environment
+### Prerequisites
 
-1. **Build images**
-```bash
-# Build all services
-docker-compose build
+1. **System Requirements**
+   ```bash
+   # Required tools
+   - Docker 20.10+
+   - kubectl 1.24+
+   - Node.js 20+
+   - PostgreSQL client
+   - curl, jq, git
+   ```
 
-# Build specific service
-docker build -t flow-motion-api ./logi-core/apps/api-gateway
-```
+2. **Environment Setup**
+   ```bash
+   # Clone repository
+   git clone <repository-url>
+   cd flow-motion
 
-2. **Container networking**
-```bash
-# Create network
-docker network create logi-network
+   # Set up environment variables
+   cp .env.example .env.production
+   # Edit .env.production with production values
 
-# Run containers
-docker-compose up -d
-```
+   # Make scripts executable
+   chmod +x scripts/**/*.sh
+   ```
 
-## Configuration Management
+3. **Configuration**
+   ```bash
+   # Set up webhook URLs for notifications
+   export SLACK_WEBHOOK="https://hooks.slack.com/..."
+   export DEPLOYMENT_WEBHOOK="https://hooks.slack.com/..."
 
-### Netlify Configuration Files
+   # Configure database access
+   export DB_HOST="your-db-host"
+   export DB_USER="your-db-user"
+   export DB_NAME="your-db-name"
+   ```
 
-#### netlify.toml
-```toml
-[build]
-  command = "npm run build:netlify"
-  publish = "dist"
-  functions = "netlify/functions"
-  edge_functions = "netlify/edge-functions"
+### Basic Deployment
 
-[build.environment]
-  NODE_VERSION = "20"
-  NPM_VERSION = "10"
+1. **Simple Staging Deployment**
+   ```bash
+   # Deploy to staging with full validation
+   ./scripts/deployment-automation/one-click-deploy.sh staging full
+   ```
 
-[[redirects]]
-  from = "/api/*"
-  to = "https://api.yourdomain.com/:splat"
-  status = 200
+2. **Production Deployment with Approval**
+   ```bash
+   # Run production pipeline with manual approval
+   ./scripts/deployment-automation/pipeline-orchestrator.sh config/production-pipeline.json production false
+   ```
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+3. **Multi-Environment Deployment**
+   ```bash
+   # Deploy from staging to production
+   ./scripts/deployment-automation/multi-env-deploy.sh staging production full false
+   ```
 
-[[edge_functions]]
-  function = "geo-router"
-  path = "/api/*"
-```
+### Monitoring Setup
 
-#### _redirects
-```
-/api/*  https://api.yourdomain.com/:splat  200
-/*      /index.html   200
-```
+1. **Start Real-time Monitoring**
+   ```bash
+   # Monitor production environment
+   ./scripts/deployment-monitoring/monitor-deployment.sh production deploy_001 30
+   ```
 
-### Docker Configuration
+2. **Set Up Failure Detection**
+   ```bash
+   # Start failure detection with alerting
+   ./scripts/deployment-monitoring/detect-failures.sh production 5 60
+   ```
 
-#### Dockerfile (Frontend)
-```dockerfile
-FROM node:20.17.0-alpine AS build
-ARG VITE_BUILD_MODE=docker
+3. **Configure Automated Reports**
+   ```bash
+   # Add to crontab for daily reports
+   0 6 * * * ./scripts/deployment-automation/status-reporter.sh summary 24h slack
+   ```
 
-WORKDIR /app
+## Component Integration
 
-COPY package*.json ./
-RUN npm ci
+### CI/CD Pipeline Integration
 
-COPY . .
-RUN npm run build -- --mode $VITE_BUILD_MODE
-
-FROM nginx:1.27-alpine
-
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-#### docker-compose.yml
 ```yaml
-version: '3.8'
-
-services:
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - api-gateway
-    environment:
-      - NODE_ENV=production
-    networks:
-      - logi-network
-
-  api-gateway:
-    build:
-      context: ./logi-core/apps/api-gateway
-    environment:
-      - PORT=8080
-      - JWT_SECRET=${JWT_SECRET:-dev-secret}
-      - USER_SERVICE_URL=http://user-service:4001
-    ports:
-      - "8080:8080"
-    depends_on:
-      - user-service
-    networks:
-      - logi-network
-
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=logistics
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres123
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d logistics"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    networks:
-      - logi-network
-
-volumes:
-  postgres_data:
-
-networks:
-  logi-network:
-    driver: bridge
-```
-
-## Security Best Practices
-
-### Netlify Security
-
-1. **Content Security Policy**
-```toml
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.netlify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.yourdomain.com wss://*.supabase.co"
-```
-
-2. **Environment Variables**
-- Never commit secrets to version control
-- Use Netlify's encrypted environment variables
-- Rotate keys regularly
-
-3. **Access Control**
-```toml
-# Restrict access to sensitive functions
-[[edge_functions]]
-  function = "auth-middleware"
-  path = "/api/admin/*"
-```
-
-### Docker Security
-
-1. **Image Security**
-```dockerfile
-# Use specific image versions
-FROM node:20.17.0-alpine
-
-# Run as non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-USER nextjs
-
-# Minimize attack surface
-RUN apk add --no-cache libc6-compat
-```
-
-2. **Container Runtime Security**
-```yaml
-services:
-  api-gateway:
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
-```
-
-3. **Network Security**
-```yaml
-networks:
-  logi-network:
-    driver: bridge
-    internal: true
-```
-
-### API Security
-
-1. **Authentication & Authorization**
-```javascript
-// Middleware for JWT validation
-const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
-  }
-};
-```
-
-2. **Rate Limiting**
-```javascript
-const rateLimit = require('express-rate-limit');
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
-```
-
-## Deployment Scenarios
-
-### Netlify + Docker Hybrid Setup
-
-1. **Frontend Deployment**
-```bash
-# Build and deploy to Netlify
-npm run build:netlify
-netlify deploy --prod --dir=dist
-```
-
-2. **Backend Container Deployment**
-```bash
-# Build and push Docker images
-docker build -t your-registry/flow-motion-api:latest ./logi-core/apps/api-gateway
-docker push your-registry/flow-motion-api:latest
-
-# Deploy containers
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-3. **Integration Configuration**
-```javascript
-// netlify/functions/api-proxy.js
-export async function handler(event, context) {
-  const { path } = event;
-  const apiUrl = process.env.API_BASE_URL;
-
-  try {
-    const response = await fetch(`${apiUrl}${path}`, {
-      method: event.httpMethod,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': event.headers.authorization
-      },
-      body: event.body
-    });
-
-    return {
-      statusCode: response.status,
-      body: await response.text(),
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Internal server error' })
-    };
-  }
-}
-```
-
-### AWS ECS/EKS
-
-1. **ECS Deployment**
-```json
-{
-  "family": "flow-motion-api",
-  "taskRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
-  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
-  "containerDefinitions": [
-    {
-      "name": "api-gateway",
-      "image": "your-registry/flow-motion-api:latest",
-      "essential": true,
-      "portMappings": [
-        {
-          "containerPort": 8080,
-          "protocol": "tcp"
-        }
-      ],
-      "environment": [
-        {
-          "name": "NODE_ENV",
-          "value": "production"
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/flow-motion-api",
-          "awslogs-region": "us-east-1",
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
-    }
-  ]
-}
-```
-
-2. **EKS Deployment**
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: flow-motion-api
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: flow-motion-api
-  template:
-    metadata:
-      labels:
-        app: flow-motion-api
-    spec:
-      containers:
-      - name: api-gateway
-        image: your-registry/flow-motion-api:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: NODE_ENV
-          value: "production"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
-```
-
-### Heroku with Docker
-
-1. **Heroku Setup**
-```bash
-# Login to Heroku
-heroku login
-
-# Create app
-heroku create flow-motion-api
-
-# Set environment variables
-heroku config:set NODE_ENV=production
-heroku config:set JWT_SECRET=your_jwt_secret
-```
-
-2. **Docker Deployment**
-```bash
-# Use Heroku's container registry
-heroku container:login
-
-# Build and push
-heroku container:push web --app flow-motion-api
-
-# Release
-heroku container:release web --app flow-motion-api
-```
-
-3. **Heroku Configuration**
-```yaml
-# heroku.yml
-build:
-  docker:
-    web: Dockerfile
-run:
-  web: npm start
-```
-
-### Google Cloud Platform
-
-1. **Cloud Run Deployment**
-```bash
-# Build and push to GCR
-gcloud builds submit --tag gcr.io/your-project/flow-motion-api
-
-# Deploy to Cloud Run
-gcloud run deploy flow-motion-api \
-  --image gcr.io/your-project/flow-motion-api \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars NODE_ENV=production
-```
-
-2. **GKE Deployment**
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: flow-motion-api
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: flow-motion-api
-  template:
-    metadata:
-      labels:
-        app: flow-motion-api
-    spec:
-      containers:
-      - name: api-gateway
-        image: gcr.io/your-project/flow-motion-api:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: NODE_ENV
-          value: "production"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-```
-
-### Azure Container Instances
-
-1. **ACI Deployment**
-```bash
-# Create resource group
-az group create --name flow-motion-rg --location eastus
-
-# Create container instance
-az container create \
-  --resource-group flow-motion-rg \
-  --name flow-motion-api \
-  --image your-registry/flow-motion-api:latest \
-  --cpu 1 \
-  --memory 1 \
-  --registry-login-server your-registry.azurecr.io \
-  --registry-username your-username \
-  --registry-password your-password \
-  --ip-address public \
-  --ports 8080 \
-  --environment-variables NODE_ENV=production
-```
-
-2. **Azure Container Apps**
-```bash
-# Create container app environment
-az containerapp env create \
-  --name flow-motion-env \
-  --resource-group flow-motion-rg \
-  --location eastus
-
-# Create container app
-az containerapp create \
-  --name flow-motion-api \
-  --resource-group flow-motion-rg \
-  --environment flow-motion-env \
-  --image your-registry/flow-motion-api:latest \
-  --target-port 8080 \
-  --ingress external \
-  --query properties.configuration.ingress.fqdn
-```
-
-## CI/CD Pipeline Configuration
-
-### GitHub Actions + Netlify
-
-1. **GitHub Actions Workflow**
-```yaml
-name: CI/CD Pipeline
+# .github/workflows/complete-deployment.yml
+name: Complete Deployment Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main]
 
 env:
-  NODE_VERSION: 20
+  ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache-key.outputs.key }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Generate cache key
-        id: cache-key
-        run: |
-          echo "key=node-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}" >> $GITHUB_OUTPUT
-
-  lint-and-typecheck:
-    needs: setup
+  quality-gate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ needs.setup.outputs.cache-key }}
-          restore-keys: |
-            node-${{ env.NODE_VERSION }}-
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npm run type-check
-
-  test:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ needs.setup.outputs.cache-key }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm run test -- --run --coverage
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage/coverage-final.json
-
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        build-mode: [development, production]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ needs.setup.outputs.cache-key }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cache Vite build
-        uses: actions/cache@v3
-        with:
-          path: |
-            .vite
-            dist
-          key: vite-${{ runner.os }}-${{ matrix.build-mode }}-${{ hashFiles('vite.config.ts', 'src/**') }}
-
-      - name: Build
-        run: |
-          if [ "${{ matrix.build-mode }}" = "development" ]; then
-            npm run build:dev
-          else
-            npm run build:netlify
-          fi
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-${{ matrix.build-mode }}
-          path: dist/
-          retention-days: 7
+      - uses: actions/checkout@v4
+      - name: Quality Checks
+        run: ./scripts/deployment-automation/pipeline-orchestrator.sh config/quality-pipeline.json ${{ env.ENVIRONMENT }} true
 
   deploy:
-    needs: [lint-and-typecheck, test, build]
+    needs: quality-gate
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    environment: ${{ env.ENVIRONMENT }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Deploy
+        run: ./scripts/deployment-automation/one-click-deploy.sh ${{ env.ENVIRONMENT }} full false
 
-      - name: Download production build
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-production
-          path: dist/
+  validate:
+    needs: deploy
+    runs-on: ubuntu-latest
+    environment: ${{ env.ENVIRONMENT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke Tests
+        run: ./scripts/validation/smoke-tests.sh ${{ env.ENVIRONMENT }}
+      - name: Integration Tests
+        run: ./scripts/validation/integration-tests.sh ${{ env.ENVIRONMENT }}
 
-      - name: Deploy to Netlify
-        uses: netlify/actions/cli@master
-        with:
-          args: deploy --dir=dist --prod
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+  report:
+    needs: [deploy, validate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Report
+        run: ./scripts/deployment-automation/status-reporter.sh summary 1h slack
 ```
 
-2. **Netlify Build Hooks**
-```javascript
-// netlify/functions/build-hook.js
-export async function handler(event, context) {
-  const { body } = event;
+### Automated Health Monitoring
 
-  // Trigger backend deployment
-  const backendDeployUrl = process.env.BACKEND_DEPLOY_HOOK;
-
-  try {
-    await fetch(backendDeployUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        trigger: 'netlify-build',
-        branch: 'main'
-      })
-    });
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Backend deployment triggered' })
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to trigger backend deployment' })
-    };
-  }
-}
-```
-
-## Troubleshooting and Common Errors
-
-### Netlify Deployment Issues
-
-1. **Build Failures**
 ```bash
-# Check build logs
-netlify logs
-
-# Common solutions:
-# - Verify Node.js version in netlify.toml
-# - Check environment variables
-# - Ensure build command is correct
-# - Verify package.json scripts
-```
-
-2. **Function Timeout Errors**
-```javascript
-// Increase function timeout
-export async function handler(event, context) {
-  context.callbackWaitsForEmptyEventLoop = false;
-
-  // Set timeout to 30 seconds
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Function timeout')), 29000)
-  );
-
-  try {
-    const result = await Promise.race([
-      yourFunction(),
-      timeoutPromise
-    ]);
-    return result;
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
-  }
-}
-```
-
-3. **CORS Issues**
-```javascript
-// netlify/functions/cors-proxy.js
-export async function handler(event, context) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
-  };
-
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: ''
-    };
-  }
-
-  // Handle actual request
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({ message: 'Success' })
-  };
-}
-```
-
-### Docker Container Issues
-
-1. **Container Startup Failures**
-```bash
-# Check container logs
-docker logs <container_name>
-
-# Debug container
-docker run -it --entrypoint /bin/sh your-image
-
-# Common issues:
-# - Missing environment variables
-# - Port conflicts
-# - Volume mount permissions
-# - Health check failures
-```
-
-2. **Network Connectivity Problems**
-```bash
-# Test container networking
-docker exec -it <container_name> curl http://localhost:8080/health
-
-# Check network configuration
-docker network inspect logi-network
-
-# Solutions:
-# - Verify service dependencies
-# - Check firewall rules
-# - Validate environment variables
-```
-
-3. **Resource Constraints**
-```yaml
-# Adjust resource limits
-services:
-  api-gateway:
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-```
-
-### Database Connection Issues
-
-1. **PostgreSQL Connection Errors**
-```bash
-# Test database connection
-docker exec -it postgres psql -U postgres -d logistics
-
-# Check connection string
-# DATABASE_URL=postgresql://user:password@host:port/database
-
-# Common fixes:
-# - Verify credentials
-# - Check network connectivity
-# - Validate SSL settings
-# - Ensure database is running
-```
-
-2. **Migration Failures**
-```bash
-# Run migrations manually
-docker-compose exec postgres psql -U logistics -d logistics -f /docker-entrypoint-initdb.d/schema.sql
-
-# Check migration logs
-docker-compose logs postgres
-```
-
-### Performance Issues
-
-1. **Slow API Responses**
-```javascript
-// Add response caching
-const cache = new Map();
-
-const cacheMiddleware = (req, res, next) => {
-  const key = req.originalUrl;
-  const cached = cache.get(key);
-
-  if (cached && Date.now() - cached.timestamp < 300000) { // 5 minutes
-    return res.json(cached.data);
-  }
-
-  res.sendResponse = res.json;
-  res.json = (data) => {
-    cache.set(key, { data, timestamp: Date.now() });
-    res.sendResponse(data);
-  };
-
-  next();
-};
-```
-
-2. **Memory Leaks**
-```javascript
-// Monitor memory usage
-const memUsage = process.memoryUsage();
-console.log(`Memory usage: ${Math.round(memUsage.heapUsed / 1024 / 1024)} MB`);
-
-// Force garbage collection (if --expose-gc flag is set)
-if (global.gc) {
-  global.gc();
-}
-```
-
-## Scalability Optimizations
-
-### Frontend Optimizations
-
-1. **Code Splitting**
-```javascript
-// Dynamic imports for route-based splitting
-const HomePage = lazy(() => import('./pages/HomePage'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-
-// Component-based splitting
-const HeavyComponent = lazy(() => import('./components/HeavyComponent'));
-```
-
-2. **Asset Optimization**
-```javascript
-// Vite configuration for optimization
-export default defineConfig({
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          utils: ['lodash', 'moment']
-        }
-      }
-    },
-    chunkSizeWarningLimit: 1000
-  }
-});
-```
-
-3. **Caching Strategies**
-```toml
-# Netlify caching configuration
-[[headers]]
-  for = "/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Cache-Control = "public, max-age=300"
-```
-
-### Backend Optimizations
-
-1. **Horizontal Scaling**
-```yaml
-# Kubernetes HPA
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: flow-motion-api-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: flow-motion-api
-  minReplicas: 3
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-```
-
-2. **Load Balancing**
-```javascript
-// Express clustering
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
-
-if (cluster.isMaster) {
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
-} else {
-  const app = express();
-  // ... app configuration
-  app.listen(8080);
-}
-```
-
-3. **Database Optimization**
-```sql
--- Create indexes for performance
-CREATE INDEX idx_orders_user_id ON orders(user_id);
-CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
-
--- Query optimization
-EXPLAIN ANALYZE
-SELECT * FROM orders
-WHERE user_id = $1 AND created_at > $2
-ORDER BY created_at DESC
-LIMIT 10;
-```
-
-### Infrastructure Scaling
-
-1. **CDN Configuration**
-```toml
-# Netlify CDN optimization
-[build]
-  command = "npm run build:netlify"
-  publish = "dist"
-
-[[redirects]]
-  from = "/api/*"
-  to = "https://api.yourdomain.com/:splat"
-  status = 200
-  headers = {X-Forwarded-For = "$forwarded_for"}
-```
-
-2. **Container Orchestration**
-```yaml
-# Docker Swarm scaling
-version: '3.8'
-services:
-  api-gateway:
-    image: flow-motion-api:latest
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: on-failure
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-    ports:
-      - "8080:8080"
-```
-
-3. **Microservices Communication**
-```javascript
-// Circuit breaker pattern
-const circuitBreaker = require('opossum');
-
-const options = {
-  timeout: 3000,
-  errorThresholdPercentage: 50,
-  resetTimeout: 30000
-};
-
-const breaker = circuitBreaker(asyncFunction, options);
-
-breaker.fallback(() => 'Service temporarily unavailable');
-```
-
-## Monitoring and Maintenance
-
-### Application Monitoring
-
-1. **Health Checks**
-```javascript
-// Express health endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
-
-app.get('/ready', (req, res) => {
-  // Check database connectivity
-  // Check external service availability
-  res.status(200).json({ status: 'ready' });
-});
-```
-
-2. **Logging**
-```javascript
-// Winston logger configuration
-const winston = require('winston');
-
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
-});
-```
-
-3. **Metrics Collection**
-```javascript
-// Prometheus metrics
-const promClient = require('prom-client');
-const register = new promClient.Registry();
-
-const httpRequestDuration = new promClient.Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'route', 'status_code'],
-  buckets: [0.1, 0.5, 1, 2, 5, 10]
-});
-
-register.registerMetric(httpRequestDuration);
-
-// Middleware to collect metrics
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = (Date.now() - start) / 1000;
-    httpRequestDuration
-      .labels(req.method, req.route?.path || req.path, res.statusCode)
-      .observe(duration);
-  });
-  next();
-});
-```
-
-### Infrastructure Monitoring
-
-1. **Container Monitoring**
-```yaml
-# Docker health checks
-services:
-  api-gateway:
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-```
-
-2. **Resource Monitoring**
-```bash
-# Docker stats
-docker stats
-
-# Container resource usage
-docker system df -v
-
-# Network monitoring
-docker network ls
-docker network inspect logi-network
-```
-
-3. **Log Aggregation**
-```yaml
-# Docker logging drivers
-services:
-  api-gateway:
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-```
-
-### Maintenance Procedures
-
-1. **Backup Strategy**
-```bash
-# Database backup
-docker exec postgres pg_dump -U postgres logistics > backup_$(date +%Y%m%d_%H%M%S).sql
-
-# Automated backup script
 #!/bin/bash
-BACKUP_DIR="/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="$BACKUP_DIR/logistics_$DATE.sql"
+# scripts/setup-monitoring.sh
 
-docker exec postgres pg_dump -U postgres logistics > $BACKUP_FILE
+# Start monitoring services
+echo "Starting deployment monitoring services..."
 
-# Keep only last 7 days
-find $BACKUP_DIR -name "logistics_*.sql" -mtime +7 -delete
+# Real-time monitoring
+./scripts/deployment-monitoring/monitor-deployment.sh production latest 30 &
+echo $! > /var/run/flowmotion/monitor.pid
+
+# Failure detection
+./scripts/deployment-monitoring/detect-failures.sh production 5 60 &
+echo $! > /var/run/flowmotion/failure-detector.pid
+
+# Log aggregation
+./scripts/deployment-monitoring/aggregate-logs.sh production 1h &
+echo $! > /var/run/flowmotion/log-aggregator.pid
+
+echo "Monitoring services started"
 ```
 
-2. **Update Procedures**
+### Rollback Integration
+
 ```bash
-# Rolling updates with Docker Compose
-docker-compose up -d --no-deps api-gateway
+#!/bin/bash
+# scripts/emergency-rollback.sh
 
-# Zero-downtime deployment
-docker-compose up -d --scale api-gateway=2
-docker-compose up -d --scale api-gateway=1
+ENVIRONMENT=$1
+REASON=${2:-"Emergency rollback"}
+
+echo "🚨 Initiating emergency rollback for $ENVIRONMENT"
+echo "Reason: $REASON"
+
+# Record rollback in history
+./scripts/deployment-automation/deployment-history.sh record "rollback_$(date +%Y%m%d_%H%M%S)" "$ENVIRONMENT" "rollback" "running" 0
+
+# Execute rollback
+if ./scripts/deployment-monitoring/trigger-rollback.sh "latest" "$ENVIRONMENT" true immediate; then
+    echo "✅ Rollback completed successfully"
+    ./scripts/deployment-automation/deployment-history.sh update "rollback_$(date +%Y%m%d_%H%M%S)" "status" "completed"
+else
+    echo "❌ Rollback failed"
+    ./scripts/deployment-automation/deployment-history.sh update "rollback_$(date +%Y%m%d_%H%M%S)" "status" "failed"
+fi
 ```
 
-3. **Security Updates**
-```bash
-# Update Docker images
-docker-compose pull
+## Best Practices
 
-# Security scanning
-docker scan your-image
+### 1. Deployment Planning
 
-# Dependency updates
-npm audit fix
-npm update
-```
-
-## Deployment Checklist
-
-### Pre-Deployment
-
-- [ ] Environment variables configured
-- [ ] Secrets properly secured
-- [ ] Database migrations tested
-- [ ] SSL certificates valid
-- [ ] Domain DNS configured
-- [ ] Build process verified
-- [ ] Tests passing
-- [ ] Security scan completed
-- [ ] Performance benchmarks met
-
-### Deployment Steps
-
-- [ ] Code committed and pushed
-- [ ] CI/CD pipeline triggered
-- [ ] Frontend build successful
-- [ ] Backend containers built
-- [ ] Images pushed to registry
-- [ ] Services deployed
-- [ ] Health checks passing
-- [ ] Load balancer configured
-- [ ] DNS updated
-- [ ] SSL certificates applied
-
-### Post-Deployment
-
-- [ ] Application accessible
-- [ ] API endpoints responding
-- [ ] Database connections working
-- [ ] External integrations functional
+#### Pre-Deployment Checklist
+- [ ] Code review completed and approved
+- [ ] Automated tests passing
+- [ ] Security scan completed without critical issues
+- [ ] Database migrations tested in staging
+- [ ] Rollback plan documented and tested
+- [ ] Team notified of deployment window
 - [ ] Monitoring alerts configured
-- [ ] Logs accessible
-- [ ] Performance monitoring active
-- [ ] Backup procedures tested
-- [ ] Rollback plan documented
+- [ ] Backup completed
 
-### Security Verification
+#### Deployment Windows
+- **Staging**: Business hours, flexible timing
+- **Production**: Off-peak hours, planned maintenance windows
+- **Emergency**: Any time, with immediate team notification
 
-- [ ] HTTPS enabled
-- [ ] Security headers applied
-- [ ] CORS properly configured
-- [ ] Authentication working
-- [ ] Authorization enforced
-- [ ] Rate limiting active
-- [ ] Secrets not exposed
-- [ ] Vulnerability scans passed
+### 2. Environment Management
 
-### Performance Validation
+#### Environment Isolation
+- Use separate databases for each environment
+- Implement network segmentation
+- Configure environment-specific secrets
+- Maintain consistent configurations across environments
 
-- [ ] Page load times acceptable
-- [ ] API response times within limits
-- [ ] Database queries optimized
-- [ ] CDN working correctly
-- [ ] Caching functioning
-- [ ] Resource usage monitored
-- [ ] Auto-scaling configured
+#### Configuration Management
+```bash
+# Environment-specific configurations
+config/
+├── development/
+│   ├── app.yaml
+│   ├── database.yaml
+│   └── secrets.yaml
+├── staging/
+│   └── ...
+└── production/
+    └── ...
+```
 
-This comprehensive guide provides everything needed to deploy modern web applications using Netlify and Docker across multiple cloud platforms. Regular updates and security patches should be applied to maintain optimal performance and security.
+### 3. Monitoring and Alerting
+
+#### Alert Configuration
+```yaml
+# config/alerts.yaml
+alerts:
+  deployment_failure:
+    condition: "deployment.status == 'failed'"
+    channels: ["slack", "email", "pagerduty"]
+    severity: "critical"
+
+  performance_degradation:
+    condition: "response_time > 5000"
+    channels: ["slack"]
+    severity: "warning"
+
+  security_vulnerability:
+    condition: "vulnerability.severity in ['critical', 'high']"
+    channels: ["slack", "email", "security-team"]
+    severity: "high"
+```
+
+#### Monitoring Dashboards
+- Real-time deployment status
+- Performance metrics (response times, error rates)
+- Resource utilization (CPU, memory, disk)
+- Service health indicators
+- Deployment history and trends
+
+### 4. Security Considerations
+
+#### Access Control
+- Implement role-based access for deployments
+- Use multi-factor authentication for production
+- Audit all deployment activities
+- Rotate credentials regularly
+
+#### Security Scanning
+- Automated dependency vulnerability scanning
+- Container image security scanning
+- Infrastructure security assessment
+- Regular penetration testing
+
+### 5. Performance Optimization
+
+#### Deployment Performance
+- Optimize Docker image sizes
+- Use multi-stage builds
+- Implement caching strategies
+- Parallelize independent deployment steps
+
+#### Application Performance
+- Monitor response times and error rates
+- Set up performance budgets
+- Implement gradual rollouts for risky changes
+- Use feature flags for controlled releases
+
+### 6. Documentation and Communication
+
+#### Deployment Documentation
+- Maintain up-to-date runbooks
+- Document known issues and workarounds
+- Create troubleshooting guides
+- Update documentation after changes
+
+#### Communication Protocols
+- Notify stakeholders before deployments
+- Provide real-time status updates
+- Send post-deployment summaries
+- Document lessons learned
+
+## Troubleshooting
+
+### Common Deployment Issues
+
+#### 1. Service Startup Failures
+```bash
+# Check pod status
+kubectl get pods -n logi-core
+
+# View pod logs
+kubectl logs -f deployment/api-gateway -n logi-core
+
+# Check service endpoints
+kubectl get endpoints -n logi-core
+```
+
+#### 2. Database Connection Issues
+```bash
+# Test database connectivity
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "SELECT 1;"
+
+# Check database pod status
+kubectl get pods -l app=postgres -n logi-core
+
+# View database logs
+kubectl logs -f deployment/postgres -n logi-core
+```
+
+#### 3. Network Connectivity Problems
+```bash
+# Test service-to-service communication
+kubectl exec -it deployment/api-gateway -n logi-core -- curl http://inventory-service:8000/health
+
+# Check network policies
+kubectl get networkpolicies -n logi-core
+
+# Verify DNS resolution
+kubectl exec -it deployment/api-gateway -n logi-core -- nslookup inventory-service
+```
+
+#### 4. Resource Constraints
+```bash
+# Check resource usage
+kubectl top pods -n logi-core
+
+# View resource limits
+kubectl describe deployment api-gateway -n logi-core
+
+# Check node resources
+kubectl describe nodes
+```
+
+### Automated Diagnostics
+
+```bash
+#!/bin/bash
+# scripts/diagnostics.sh
+
+ENVIRONMENT=${1:-production}
+
+echo "=== Deployment Diagnostics for $ENVIRONMENT ==="
+
+# System information
+echo "System Information:"
+kubectl cluster-info
+kubectl get nodes
+
+# Service status
+echo -e "\nService Status:"
+kubectl get deployments -n logi-core
+kubectl get services -n logi-core
+kubectl get pods -n logi-core
+
+# Recent events
+echo -e "\nRecent Events:"
+kubectl get events -n logi-core --sort-by=.metadata.creationTimestamp | tail -20
+
+# Resource usage
+echo -e "\nResource Usage:"
+kubectl top pods -n logi-core 2>/dev/null || echo "Metrics not available"
+
+# Network connectivity
+echo -e "\nNetwork Status:"
+kubectl get networkpolicies -n logi-core 2>/dev/null || echo "No network policies"
+
+# Generate diagnostic report
+REPORT_FILE="/tmp/diagnostics_${ENVIRONMENT}_$(date +%Y%m%d_%H%M%S).txt"
+cat > "$REPORT_FILE" << EOF
+Deployment Diagnostics Report
+Generated: $(date)
+Environment: $ENVIRONMENT
+
+$(kubectl cluster-info 2>/dev/null)
+$(kubectl get nodes 2>/dev/null)
+$(kubectl get deployments -n logi-core 2>/dev/null)
+$(kubectl get services -n logi-core 2>/dev/null)
+$(kubectl get pods -n logi-core 2>/dev/null)
+EOF
+
+echo "Diagnostic report saved: $REPORT_FILE"
+```
+
+### Emergency Procedures
+
+#### Immediate Actions
+1. **Stop the deployment**: Cancel any running deployments
+2. **Assess the impact**: Determine affected services and users
+3. **Notify stakeholders**: Alert relevant teams and users
+4. **Initiate rollback**: Use automated rollback procedures
+5. **Monitor recovery**: Track system recovery progress
+
+#### Communication Template
+```markdown
+🚨 **Deployment Emergency**
+
+**Issue**: [Brief description]
+**Environment**: [Production/Staging]
+**Impact**: [Affected services/users]
+**Status**: [Investigating/Rollback in progress/Resolved]
+**ETA**: [Expected resolution time]
+**Contact**: [On-call engineer]
+
+**Actions Taken**:
+- [ ] Stopped deployment
+- [ ] Initiated rollback
+- [ ] Notified stakeholders
+- [ ] Monitoring recovery
+
+**Next Steps**:
+- [ ] Root cause analysis
+- [ ] Fix implementation
+- [ ] Testing in staging
+- [ ] Controlled redeployment
+```
+
+## Reference Materials
+
+### Documentation Index
+
+| Document | Purpose | Location |
+|----------|---------|----------|
+| Deployment Guide | General deployment procedures | `docs/DEPLOYMENT.md` |
+| CI/CD Guide | Automated pipeline configuration | `docs/CI-CD.md` |
+| Production Config | Environment configuration | `docs/PRODUCTION_ENVIRONMENT_CONFIG.md` |
+| Triggering Guide | Deployment triggering procedures | `docs/DEPLOYMENT_TRIGGERING_GUIDE.md` |
+| Validation Guide | Post-deployment validation | `docs/POST_DEPLOYMENT_VALIDATION.md` |
+
+### Script Directories
+
+| Directory | Purpose | Key Scripts |
+|-----------|---------|-------------|
+| `scripts/deployment-monitoring/` | Real-time monitoring and alerting | `monitor-deployment.sh`, `detect-failures.sh` |
+| `scripts/validation/` | Post-deployment validation | `smoke-tests.sh`, `performance-tests.sh` |
+| `scripts/deployment-automation/` | Automated deployment execution | `one-click-deploy.sh`, `pipeline-orchestrator.sh` |
+
+### Configuration Files
+
+| File | Purpose | Example |
+|------|---------|---------|
+| `config/pipeline-config.json` | Pipeline definitions | See pipeline documentation |
+| `config/alerts.yaml` | Alert configurations | See monitoring documentation |
+| `.env.*` | Environment variables | See production config |
+
+### External Resources
+
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+- [GitHub Actions](https://docs.github.com/en/actions)
+- [Prometheus Monitoring](https://prometheus.io/docs/)
+- [Grafana Dashboards](https://grafana.com/docs/)
+
+### Support and Contact
+
+#### Internal Support
+- **Deployment Team**: deployment@flowmotion.com
+- **DevOps On-call**: PagerDuty integration
+- **Security Team**: security@flowmotion.com
+
+#### External Resources
+- **Kubernetes Slack**: kubernetes.io/slack
+- **Docker Community**: forums.docker.com
+- **GitHub Community**: github.community
+
+---
+
+**Version**: 1.0
+**Last Updated**: $(date)
+**Authors**: Flow Motion DevOps Team
+**Review Cycle**: Monthly
+
+For questions or contributions, please contact the DevOps team or submit a pull request to the documentation repository.
