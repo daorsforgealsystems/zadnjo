@@ -33,8 +33,7 @@ services:
 
   # Backend Services
   api-gateway:
-    build:
-      context: ./logi-core/apps/api-gateway
+    image: ${DOCKER_USERNAME}/flow-motion-api-gateway:latest
     environment:
       - PORT=8080
       - NODE_ENV=production
@@ -83,8 +82,7 @@ services:
         max-file: "3"
 
   user-service:
-    build:
-      context: ./logi-core/services/user-service
+    image: ${DOCKER_USERNAME}/flow-motion-user-service:latest
     environment:
       - PORT=4001
       - NODE_ENV=production
@@ -115,10 +113,7 @@ services:
         max-file: "3"
 
   inventory-service:
-    image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
-    working_dir: /app
-    volumes:
-      - ./logi-core/services/inventory-service:/app
+    image: ${DOCKER_USERNAME}/flow-motion-inventory-service:latest
     environment:
       - PORT=8000
       - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/logistics?schema=public
@@ -149,8 +144,7 @@ services:
         max-file: "3"
 
   order-service:
-    build:
-      context: ./logi-core/services/order-service
+    image: ${DOCKER_USERNAME}/flow-motion-order-service:latest
     environment:
       - PORT=4003
       - NODE_ENV=production
@@ -181,8 +175,7 @@ services:
         max-file: "3"
 
   routing-service:
-    build:
-      context: ./logi-core/services/routing-service
+    image: ${DOCKER_USERNAME}/flow-motion-routing-service:latest
     environment:
       - PORT=4004
       - NODE_ENV=production

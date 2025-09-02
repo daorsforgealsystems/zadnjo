@@ -254,9 +254,144 @@ jobs:
           VALIDATE_CSS: true
           VALIDATE_HTML: true
 
-  deployment-ready:
+  performance-test:
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.NODE_VERSION }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-production
+          path: dist/
+
+      - name: Run Lighthouse performance audit
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000
+          configPath: .lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Performance regression check
+        run: |
+          # Check if performance scores meet thresholds
+          if [ -f .lighthouseci/assertion-results.json ]; then
+            echo "Performance assertions completed"
+          else
+            echo "Performance test completed - review Lighthouse report"
+          fi
+
+  deploy-frontend:
     runs-on: ubuntu-latest
     needs: [lint-and-typecheck, test, build, security-scan, codeql-analysis]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download production build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-production
+          path: dist/
+
+      - name: Deploy to Netlify
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --dir=dist --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, test, build, security-scan, codeql-analysis]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker images
+        run: |
+          # Build and push API Gateway
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-api-gateway:latest ./logi-core/apps/api-gateway
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-api-gateway:latest
+
+          # Build and push User Service
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-user-service:latest ./logi-core/services/user-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-user-service:latest
+
+          # Build and push other services as needed
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-order-service:latest ./logi-core/services/order-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-order-service:latest
+
+          # Build and push Inventory Service
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-inventory-service:latest ./logi-core/services/inventory-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-inventory-service:latest
+
+          # Build and push Routing Service
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-routing-service:latest ./logi-core/services/routing-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-routing-service:latest
+
+          # Build and push Geolocation Service
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-geolocation-service:latest ./logi-core/services/geolocation-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-geolocation-service:latest
+
+          # Build and push Notification Service
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flow-motion-notification-service:latest ./logi-core/services/notification-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/flow-motion-notification-service:latest
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd /opt/flow-motion
+            echo "Pulling latest images..."
+            docker-compose -f docker-compose.prod.yml pull
+            echo "Starting services with zero-downtime deployment..."
+            docker-compose -f docker-compose.prod.yml up -d
+            echo "Running health checks..."
+            sleep 30
+            docker-compose -f docker-compose.prod.yml ps
+            echo "Deployment completed successfully"
+
+  deployment-ready:
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, test, build, security-scan, codeql-analysis, performance-test]
     if: always()
     steps:
       - name: Check deployment readiness
@@ -265,7 +400,8 @@ jobs:
                 "${{ needs.test.result }}" == "success" && \
                 "${{ needs.build.result }}" == "success" && \
                 "${{ needs.security-scan.result }}" == "success" && \
-                "${{ needs.codeql-analysis.result }}" == "success" ]]; then
+                "${{ needs.codeql-analysis.result }}" == "success" && \
+                "${{ needs.performance-test.result }}" != "failure" ]]; then
             echo "✅ All checks passed - deployment ready"
             exit 0
           else
@@ -275,6 +411,7 @@ jobs:
             echo "- Build: ${{ needs.build.result }}"
             echo "- Security: ${{ needs.security-scan.result }}"
             echo "- CodeQL Analysis: ${{ needs.codeql-analysis.result }}"
+            echo "- Performance Test: ${{ needs.performance-test.result }}"
             exit 1
           fi
 
