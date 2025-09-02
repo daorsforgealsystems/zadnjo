@@ -14,7 +14,8 @@
 		"vscode": {
 			"extensions": [
 				"denoland.vscode-deno",
-				"Dart-Code.dart-code"
+				"Dart-Code.dart-code",
+				"ms-vscode-remote.remote-containers"
 			]
 		}
 	}
