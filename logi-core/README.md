@@ -406,7 +406,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Use the following in your `.env` files:
 ```env
 # Supabase
-VITE_SUPABASE_URL=http://localhost:54321
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-local-anon-key
 VITE_SUPABASE_SERVICE_KEY=your-local-service-key
 

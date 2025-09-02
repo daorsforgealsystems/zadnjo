@@ -1,7 +1,7 @@
 module.exports = {
   config: {
     supabase: {
-      url: 'http://localhost:54321',
+      url: 'https://your-project-id.supabase.co',
       anonKey: 'test-key',
     },
   },
