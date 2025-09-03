@@ -11,8 +11,9 @@ export const config = {
   // Supabase Configuration
   supabase: {
     // Require explicit environment variables; avoid shipping real defaults
-    url: import.meta.env.VITE_SUPABASE_URL as string,
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+    // Support both Vite and Netlify extension variables
+    url: (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_DATABASE_URL) as string,
+    anonKey: (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY) as string,
   },
 
   // Application Settings
@@ -96,15 +97,19 @@ export const getEnvVar = (key: string, defaultValue?: string): string => {
 
 // Validate required environment variables
 export const validateConfig = (): void => {
-  // Accept either NEXT_PUBLIC_* (Next.js) or VITE_* (Vite).
+  // Accept either NEXT_PUBLIC_* (Next.js), VITE_* (Vite), or SUPABASE_* (Netlify extension).
   // Only require that a Supabase URL and an ANON key exist (each may be provided under either prefix).
-  const url = (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) || (import.meta.env.VITE_SUPABASE_URL as string);
-  const anonKey = (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) || (import.meta.env.VITE_SUPABASE_ANON_KEY as string);
+  const url = (import.meta.env.NEXT_PUBLIC_SUPABASE_URL as string) ||
+              (import.meta.env.VITE_SUPABASE_URL as string) ||
+              (import.meta.env.SUPABASE_DATABASE_URL as string);
+  const anonKey = (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) ||
+                  (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
+                  (import.meta.env.SUPABASE_ANON_KEY as string);
   const apiBase = (import.meta.env.VITE_API_BASE_URL as string) || (import.meta.env.NEXT_PUBLIC_API_BASE_URL as string);
 
   const missing: string[] = [];
-  if (!url) missing.push('SUPABASE_URL (NEXT_PUBLIC_* or VITE_*)');
-  if (!anonKey) missing.push('SUPABASE_ANON_KEY (NEXT_PUBLIC_* or VITE_*)');
+  if (!url) missing.push('SUPABASE_URL (NEXT_PUBLIC_*, VITE_*, or SUPABASE_DATABASE_URL)');
+  if (!anonKey) missing.push('SUPABASE_ANON_KEY (NEXT_PUBLIC_*, VITE_*, or SUPABASE_*)');
   if (!apiBase) missing.push('API_BASE_URL (VITE_* or NEXT_PUBLIC_*)');
 
   if (missing.length > 0) {
