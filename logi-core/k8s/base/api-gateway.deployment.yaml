@@ -30,6 +30,6 @@ spec:
             - name: INVENTORY_SERVICE_URL
               value: http://inventory-service:8000
             - name: SUPABASE_URL
-              value: "https://your-project-id.supabase.co"
+              value: "https://axyimsbfdpzdyxgg1mxdfq.supabase.co"
             - name: SUPABASE_ANON_KEY
-              value: "your-supabase-anon-key-here"
+              value: "sb_publishable_AXYimSbFdpZDYXgg1MxDFQ_VIGbwg6H"
