@@ -1,3 +1,18 @@
+// Diagnostic logging for JSX runtime
+console.log('🔍 JSX Runtime Diagnostics:');
+console.log('React available:', typeof React !== 'undefined' ? 'YES' : 'NO');
+console.log('ReactDOM available:', typeof ReactDOM !== 'undefined' ? 'YES' : 'NO');
+console.log('React JSX runtime check:', typeof React !== 'undefined' && React.jsxDEV ? 'jsxDEV available' : 'jsxDEV missing');
+
+// Try to access JSX runtime functions directly
+try {
+  const jsxRuntime = require('react/jsx-runtime');
+  console.log('JSX runtime module available:', jsxRuntime ? 'YES' : 'NO');
+  console.log('jsxDEV function:', typeof jsxRuntime.jsxDEV === 'function' ? 'YES' : 'NO');
+} catch (e) {
+  console.log('JSX runtime module error:', e.message);
+}
+
 import ReactDOM from 'react-dom/client';
 import './index.css';
 // Ensure i18n is initialized before any component (useTranslation) runs
@@ -15,6 +30,20 @@ if (process.env.REACT_APP_SENTRY_DSN) {
     environment: process.env.NODE_ENV,
     beforeSend(event) {
       logger.error('Sentry captured error', { event });
+// Test JSX functionality
+const TestJSX = () => {
+  console.log('🧪 Testing JSX component creation');
+  try {
+    return <div>JSX Test Component</div>;
+  } catch (error) {
+    console.error('❌ JSX creation failed:', error);
+    return null;
+  }
+};
+
+console.log('🧪 Creating test JSX component...');
+const testElement = <TestJSX />;
+console.log('🧪 Test JSX element created:', testElement ? 'SUCCESS' : 'FAILED');
       return event;
     },
   });
