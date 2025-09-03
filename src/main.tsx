@@ -1,19 +1,20 @@
-// Diagnostic logging for JSX runtime
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+// Diagnostic logging for JSX runtime (after imports)
 console.log('🔍 JSX Runtime Diagnostics:');
 console.log('React available:', typeof React !== 'undefined' ? 'YES' : 'NO');
 console.log('ReactDOM available:', typeof ReactDOM !== 'undefined' ? 'YES' : 'NO');
-console.log('React JSX runtime check:', typeof React !== 'undefined' && React.jsxDEV ? 'jsxDEV available' : 'jsxDEV missing');
+console.log('React JSX runtime check:', typeof React !== 'undefined' && (React as any).jsxDEV ? 'jsxDEV available' : 'jsxDEV missing');
 
 // Try to access JSX runtime functions directly
 try {
   const jsxRuntime = require('react/jsx-runtime');
   console.log('JSX runtime module available:', jsxRuntime ? 'YES' : 'NO');
   console.log('jsxDEV function:', typeof jsxRuntime.jsxDEV === 'function' ? 'YES' : 'NO');
-} catch (e) {
+} catch (e: any) {
   console.log('JSX runtime module error:', e.message);
 }
-
-import ReactDOM from 'react-dom/client';
 import './index.css';
 // Ensure i18n is initialized before any component (useTranslation) runs
 import './i18n';
