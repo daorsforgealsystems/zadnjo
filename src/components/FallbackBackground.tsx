@@ -1,11 +1,10 @@
-import React from 'react';
 import '@/styles/fallback-background.css';
 
 interface FallbackBackgroundProps {
   visible: boolean;
 }
 
-const FallbackBackground: React.FC<FallbackBackgroundProps> = ({ visible }) => {
+const FallbackBackground = ({ visible }: FallbackBackgroundProps) => {
   if (!visible) return null;
   
   return (

@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface SimpleMapViewProps {
   coordinates?: { lat: number; lng: number };
   vehicles?: Array<{
