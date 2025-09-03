@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 // Ensure i18n is initialized before any component (useTranslation) runs

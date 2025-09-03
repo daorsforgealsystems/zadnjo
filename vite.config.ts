@@ -162,7 +162,7 @@ export default defineConfig({
   esbuild: {
     jsx: 'automatic',
     jsxImportSource: 'react',
-    jsxDev: true,
+    jsxDev: process.env.NODE_ENV === 'development',
   },
   build: {
     commonjsOptions: {
