@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-09-04T14:45:18.286Z",
+  "context": "production",
+  "summary": {
+    "validations": 2,
+    "passed": 2,
+    "issues": 1,
+    "warnings": 6
+  },
+  "issues": [
+    "Edge function geo-router: file not found at netlify/edge-functions/geo-router.js"
+  ],
+  "warnings": [
+    "VITE_DEBUG_BUILD should be disabled in production",
+    "NETLIFY_DEBUG should be disabled in production",
+    "Redirect 0: external redirect in production - ensure target is trusted",
+    "Header 0: CSP contains unsafe directives",
+    "Missing security header: Strict-Transport-Security",
+    "Missing Strict-Transport-Security header for HTTPS enforcement"
+  ],
+  "config": {
+    "build": {
+      "command": "npm run build:netlify",
+      "publish": "dist",
+      "functions": "netlify/functions",
+      "edge_functions": "netlify/edge-functions",
+      "environment": {
+        "NODE_VERSION": "20",
+        "NPM_VERSION": "10",
+        "NETLIFY_DEBUG": "true",
+        "VITE_DEBUG_BUILD": "true",
+        "BUILD_TIMING": "true",
+        "NODE_OPTIONS": "--max-old-space-size=4096"
+      },
+      "processing": {
+        "skip_processing": false,
+        "verbose": true,
+        "css": {
+          "bundle": true,
+          "minify": true,
+          "source_map": true
+        },
+        "js": {
+          "bundle": true,
+          "minify": true,
+          "source_map": true,
+          "tree_shaking": true
+        },
+        "html": {
+          "pretty_urls": true,
+          "minify": true
+        }
+      }
+    },
+    "redirects": [
+      {
+        "from": "/api/*",
+        "to": "https://api.flowmotion.com/:splat",
+        "status": 200
+      }
+    ],
+    "headers": [
+      {
+        "for": "/*",
+        "values": {
+          "X-Frame-Options": "DENY",
+          "X-XSS-Protection": "1; mode=block",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.netlify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.flowmotion.com wss://*.supabase.co"
+        }
+      }
+    ],
+    "edge_functions": [
+      {
+        "function": "geo-router",
+        "path": "/api/*"
+      }
+    ]
+  }
+}

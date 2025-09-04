@@ -7,6 +7,27 @@
 [build.environment]
   NODE_VERSION = "20"
   NPM_VERSION = "10"
+  BUILD_TIMING = "true"
+  NODE_OPTIONS = "--max-old-space-size=4096"
+
+[build.processing]
+  skip_processing = false
+  verbose = true
+
+[build.processing.css]
+  bundle = true
+  minify = true
+  source_map = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+  source_map = true
+  tree_shaking = true
+
+[build.processing.html]
+  pretty_urls = true
+  minify = true
 
 [[redirects]]
   from = "/api/*"
@@ -14,13 +35,14 @@
   status = 200
 
 [[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.netlify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.flowmotion.com wss://*.supabase.co"
+   for = "/*"
+   [headers.values]
+     X-Frame-Options = "DENY"
+     X-XSS-Protection = "1; mode=block"
+     X-Content-Type-Options = "nosniff"
+     Referrer-Policy = "strict-origin-when-cross-origin"
+     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+     Content-Security-Policy = "default-src 'self'; script-src 'self' https://*.netlify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.flowmotion.com wss://*.supabase.co; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'"
 
 [[edge_functions]]
   function = "geo-router"
