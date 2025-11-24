@@ -1,5 +1,5 @@
 # Frontend Dockerfile for React/Vite app
-FROM node:20.17.0-alpine AS build
+FROM node:25.2.1-alpine AS build
 ARG VITE_BUILD_MODE=docker
 
 # Set working directory
